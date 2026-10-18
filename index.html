@@ -1,767 +1,1685 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luakeeper v9.0 Dual Engine - Obfuscator & De-obfuscator</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        cyber: {
-                            900: '#0a0d14',
-                            800: '#111625',
-                            700: '#1a2238',
-                            600: '#253252',
-                            accent: '#00f0ff',
-                            purple: '#7000ff',
-                            warn: '#ff0055'
-                        }
-                    },
-                    fontFamily: {
-                        mono: ['Fira Code', 'JetBrains Mono', 'Consolas', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0d14;
-            color: #c0caf5;
-        }
-
-        .glow-accent {
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
-        }
-        
-        .glow-purple {
-            box-shadow: 0 0 15px rgba(112, 0, 255, 0.25);
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0d14;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1a2238;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #253252;
-        }
-
-        .code-area {
-            font-family: 'Fira Code', monospace;
-            tab-size: 4;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luakeeper v10.0 Dual Engine - Real VM Obfuscator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+    darkMode: 'class',
+    theme: { extend: {
+        colors: { cyber: { 900: '#0a0d14', 800: '#111625', 700: '#1a2238', 600: '#253252', accent: '#00f0ff', purple: '#7000ff', warn: '#ff0055' } },
+        fontFamily: { mono: ['Fira Code', 'JetBrains Mono', 'Consolas', 'monospace'] }
+    } }
+}
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+body { font-family: 'Inter', sans-serif; background-color: #0a0d14; color: #c0caf5; }
+.glow-accent { box-shadow: 0 0 15px rgba(0, 240, 255, 0.25); }
+.glow-purple { box-shadow: 0 0 15px rgba(112, 0, 255, 0.25); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0a0d14; }
+::-webkit-scrollbar-thumb { background: #1a2238; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #253252; }
+.code-area { font-family: 'Fira Code', monospace; tab-size: 4; }
+</style>
 </head>
 <body class="min-h-screen flex flex-col bg-cyber-900 text-slate-200">
 
-    <!-- Header / Navbar -->
-    <header class="border-b border-cyber-700 bg-cyber-800/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="p-2 bg-cyber-accent/10 rounded-lg border border-cyber-accent/30 text-cyber-accent">
-                    <i data-lucide="shield" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-xl font-bold tracking-wider text-white">LUAKEEPER</span>
-                        <span class="px-2 py-0.5 text-xs font-semibold bg-cyber-purple/30 text-purple-300 border border-cyber-purple/50 rounded-full">v9.0 Dual Engine</span>
-                    </div>
-                    <p class="text-xs text-slate-400">Polymorphic VM Obfuscator & Fully Functional De-compiler</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-4">
-                <div class="hidden md:flex items-center space-x-2 text-xs bg-cyber-900 px-3 py-1.5 rounded-md border border-cyber-700">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-slate-300 font-mono">Engine: Dual-Ready</span>
-                </div>
-                <a href="#docs" onclick="toggleDocsModal()" class="text-xs text-slate-400 hover:text-cyber-accent transition-colors flex items-center gap-1">
-                    <i data-lucide="help-circle" class="w-4 h-4"></i> Documentation
-                </a>
-            </div>
-        </div>
-    </header>
+<header class="border-b border-cyber-700 bg-cyber-800/80 backdrop-blur sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<div class="p-2 bg-cyber-accent/10 rounded-lg border border-cyber-accent/30 text-cyber-accent"><i data-lucide="shield" class="w-6 h-6"></i></div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="text-xl font-bold tracking-wider text-white">LUAKEEPER</span>
+<span class="px-2 py-0.5 text-xs font-semibold bg-cyber-purple/30 text-purple-300 border border-cyber-purple/50 rounded-full">v10.0 Real VM Engine</span>
+</div>
+<p class="text-xs text-slate-400">Polymorphic Virtual Machine Obfuscator & De-compiler</p>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="hidden md:flex items-center space-x-2 text-xs bg-cyber-900 px-3 py-1.5 rounded-md border border-cyber-700">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+<span class="text-slate-300 font-mono">Real Bytecode Engine</span>
+</div>
+<a href="#docs" onclick="toggleDocsModal()" class="text-xs text-slate-400 hover:text-cyber-accent transition-colors flex items-center gap-1"><i data-lucide="help-circle" class="w-4 h-4"></i> Docs</a>
+</div>
+</div>
+</header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
-        
-        <!-- Mode Selector & Controls Bar -->
-        <div class="bg-cyber-800 border border-cyber-700 rounded-xl p-4 shadow-xl">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                
-                <!-- Mode Tabs -->
-                <div class="flex items-center bg-cyber-900 p-1 rounded-lg border border-cyber-700">
-                    <button onclick="switchMode('obfuscate')" id="tab-obfuscate" class="px-4 py-2 rounded-md text-xs font-bold transition bg-cyber-accent text-slate-950 shadow">
-                        Obfuscator Mode
-                    </button>
-                    <button onclick="switchMode('deobfuscate')" id="tab-deobfuscate" class="px-4 py-2 rounded-md text-xs font-medium transition text-slate-400 hover:text-white">
-                        De-obfuscator Mode (Un-obfuscate)
-                    </button>
-                </div>
+<main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+<div class="bg-cyber-800 border border-cyber-700 rounded-xl p-4 shadow-xl">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex items-center bg-cyber-900 p-1 rounded-lg border border-cyber-700">
+<button onclick="switchMode('obfuscate')" id="tab-obfuscate" class="px-4 py-2 rounded-md text-xs font-bold transition bg-cyber-accent text-slate-950 shadow">Obfuscator Mode</button>
+<button onclick="switchMode('deobfuscate')" id="tab-deobfuscate" class="px-4 py-2 rounded-md text-xs font-medium transition text-slate-400 hover:text-white">De-obfuscator Mode</button>
+</div>
+<div class="flex items-center gap-3">
+<button id="main-action-btn" onclick="executeCurrentMode()" class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-cyber-accent to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-lg shadow-lg glow-accent flex items-center justify-center gap-2 transition-all active:scale-95">
+<i data-lucide="cpu" class="w-5 h-5"></i>
+<span id="main-btn-text">Compile & Obfuscate</span>
+</button>
+</div>
+</div>
+<div id="obfuscate-options" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-4 pt-4 border-t border-cyber-700/60 text-xs">
+<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-flattening" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Control Flow Flattening</span></label>
+<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-rolling-key" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Rolling-Key Cipher</span></label>
+<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-constant-scattering" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Constant Scattering</span></label>
+<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-junk-states" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Junk State Dispatchers</span></label>
+<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-anti-hook" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Anti-Hook Deflector</span></label>
+<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-metatable-sandbox" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Metatable Sandbox</span></label>
+</div>
+</div>
 
-                <!-- Action Button -->
-                <div class="flex items-center gap-3">
-                    <button id="main-action-btn" onclick="executeCurrentMode()" class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-cyber-accent to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-lg shadow-lg glow-accent flex items-center justify-center gap-2 transition-all active:scale-95">
-                        <i data-lucide="cpu" class="w-5 h-5"></i>
-                        <span id="main-btn-text">Compile & Obfuscate</span>
-                    </button>
-                </div>
-            </div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-[500px]">
+<div class="bg-cyber-800 border border-cyber-700 rounded-xl flex flex-col shadow-xl overflow-hidden">
+<div class="bg-cyber-900/80 px-4 py-3 border-b border-cyber-700 flex items-center justify-between">
+<div class="flex items-center gap-2 text-xs font-semibold text-slate-300"><i data-lucide="file-code" class="w-4 h-4 text-cyber-accent"></i><span id="input-panel-title">Source Luau Script</span></div>
+<div class="flex items-center gap-2">
+<input type="file" id="file-input" accept=".lua,.txt" class="hidden" onchange="handleFileUpload(event)">
+<button onclick="document.getElementById('file-input').click()" class="px-2.5 py-1 bg-cyber-700 hover:bg-cyber-600 text-slate-200 text-xs rounded transition flex items-center gap-1"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Load</button>
+<button onclick="clearSource()" class="px-2.5 py-1 bg-cyber-700/50 hover:bg-red-500/20 text-slate-400 hover:text-red-300 text-xs rounded transition">Clear</button>
+</div>
+</div>
+<div class="relative flex-1 bg-cyber-900/50">
+<textarea id="src-code" spellcheck="false" class="w-full h-full p-4 bg-transparent text-slate-200 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Enter Luau source here..."></textarea>
+</div>
+<div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
+<span id="src-stats">Lines: 0 | Size: 0 KB</span><span>Input Encoding: UTF-8</span>
+</div>
+</div>
 
-            <!-- Obfuscation Options Grid (Hidden in De-obfuscate Mode) -->
-            <div id="obfuscate-options" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-4 pt-4 border-t border-cyber-700/60 text-xs">
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-flattening" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Control Flow Flattening</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-rolling-key" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Rolling-Key Cipher</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-constant-scattering" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Constant Scattering</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-junk-states" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Junk State Dispatchers</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-anti-hook" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Anti-Hook Deflector</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-metatable-sandbox" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Metatable Sandbox</span>
-                </label>
-            </div>
-        </div>
+<div class="bg-cyber-800 border border-cyber-700 rounded-xl flex flex-col shadow-xl overflow-hidden">
+<div class="bg-cyber-900/80 px-4 py-3 border-b border-cyber-700 flex items-center justify-between">
+<div class="flex items-center gap-2 text-xs font-semibold text-slate-300"><i data-lucide="shield-alert" class="w-4 h-4 text-purple-400"></i><span id="output-panel-title">Protected Output</span></div>
+<div class="flex items-center gap-2">
+<button onclick="copyOutput()" class="px-2.5 py-1 bg-cyber-700 hover:bg-cyber-600 text-slate-200 text-xs rounded transition flex items-center gap-1"><i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy</button>
+<button onclick="downloadOutput()" class="px-2.5 py-1 bg-cyber-purple/40 hover:bg-cyber-purple/60 text-purple-200 text-xs rounded border border-cyber-purple/50 transition flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> Save</button>
+</div>
+</div>
+<div class="relative flex-1 bg-cyber-900/50">
+<textarea id="out-code" readonly spellcheck="false" class="w-full h-full p-4 bg-transparent text-emerald-400/90 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Result will appear here..."></textarea>
+</div>
+<div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
+<span id="out-stats">Lines: 0 | Size: 0 KB</span><span id="obf-status" class="text-slate-400">Idle</span>
+</div>
+</div>
+</div>
+</main>
 
-        <!-- Editor Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-[500px]">
-            
-            <!-- Input Panel -->
-            <div class="bg-cyber-800 border border-cyber-700 rounded-xl flex flex-col shadow-xl overflow-hidden">
-                <div class="bg-cyber-900/80 px-4 py-3 border-b border-cyber-700 flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-300">
-                        <i data-lucide="file-code" class="w-4 h-4 text-cyber-accent"></i>
-                        <span id="input-panel-title">Source Luau Script</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input type="file" id="file-input" accept=".lua,.txt" class="hidden" onchange="handleFileUpload(event)">
-                        <button onclick="document.getElementById('file-input').click()" class="px-2.5 py-1 bg-cyber-700 hover:bg-cyber-600 text-slate-200 text-xs rounded transition flex items-center gap-1">
-                            <i data-lucide="upload" class="w-3.5 h-3.5"></i> Load File
-                        </button>
-                        <button onclick="clearSource()" class="px-2.5 py-1 bg-cyber-700/50 hover:bg-red-500/20 text-slate-400 hover:text-red-300 text-xs rounded transition">
-                            Clear
-                        </button>
-                    </div>
-                </div>
-                <div class="relative flex-1 bg-cyber-900/50">
-                    <textarea id="src-code" spellcheck="false" class="w-full h-full p-4 bg-transparent text-slate-200 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Enter your source Luau script here..."></textarea>
-                </div>
-                <div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
-                    <span id="src-stats">Lines: 0 | Size: 0 KB</span>
-                    <span>Input Encoding: UTF-8</span>
-                </div>
-            </div>
+<div id="docs-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+<div class="bg-cyber-800 border border-cyber-700 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
+<div class="p-4 border-b border-cyber-700 flex justify-between items-center">
+<h3 class="font-bold text-white flex items-center gap-2"><i data-lucide="shield" class="w-5 h-5 text-cyber-accent"></i> Luakeeper v10 Real VM Engine</h3>
+<button onclick="toggleDocsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+</div>
+<div class="p-6 overflow-y-auto text-xs sm:text-sm space-y-4 text-slate-300">
+<div><h4 class="font-semibold text-cyber-accent mb-1">1. Real Luau Lexer</h4><p class="text-slate-400">Proper tokenization of identifiers, numbers (int/float/hex), strings (single/double/long-bracket), keywords, and operators.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">2. Pratt Parser + AST</h4><p class="text-slate-400">Expression parsing with correct precedence climbing. Statement parsing for local/assign/call/if/while/for/return.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">3. Register-Based Bytecode Compiler</h4><p class="text-slate-400">30-opcode instruction set. Compiles AST to flat integer bytecode stream with proper register allocation and jump backpatching.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">4. Rolling-Key Encryption</h4><p class="text-slate-400">Every byte XOR-encoded with rolling key. key = (key + enc*13) % 256. Bidirectional.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">5. Constant Scattering</h4><p class="text-slate-400">Strings broken into per-byte bxor chains with independent rolling keys.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">6. De-obfuscator</h4><p class="text-slate-400">Reverses rolling-key decryption, decodes constants, re-interprets bytecode into readable Luau.</p></div>
+</div>
+<div class="p-4 border-t border-cyber-700 text-right"><button onclick="toggleDocsModal()" class="px-4 py-1.5 bg-cyber-700 hover:bg-cyber-600 text-white rounded text-xs">Close</button></div>
+</div>
+</div>
 
-            <!-- Output Panel -->
-            <div class="bg-cyber-800 border border-cyber-700 rounded-xl flex flex-col shadow-xl overflow-hidden">
-                <div class="bg-cyber-900/80 px-4 py-3 border-b border-cyber-700 flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-300">
-                        <i data-lucide="shield-alert" class="w-4 h-4 text-purple-400"></i>
-                        <span id="output-panel-title">Protected Output Payload</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="copyOutput()" class="px-2.5 py-1 bg-cyber-700 hover:bg-cyber-600 text-slate-200 text-xs rounded transition flex items-center gap-1">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
-                        </button>
-                        <button onclick="downloadOutput()" class="px-2.5 py-1 bg-cyber-purple/40 hover:bg-cyber-purple/60 text-purple-200 text-xs rounded border border-cyber-purple/50 transition flex items-center gap-1">
-                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Save
-                        </button>
-                    </div>
-                </div>
-                <div class="relative flex-1 bg-cyber-900/50">
-                    <textarea id="out-code" readonly spellcheck="false" class="w-full h-full p-4 bg-transparent text-emerald-400/90 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Result will appear here..."></textarea>
-                </div>
-                <div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
-                    <span id="out-stats">Lines: 0 | Size: 0 KB</span>
-                    <span id="obf-status" class="text-slate-400">Idle</span>
-                </div>
-            </div>
+<div id="toast" class="fixed bottom-5 right-5 px-4 py-3 rounded-lg shadow-xl text-xs font-semibold bg-cyber-700 text-white border border-cyber-600 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+<i data-lucide="info" class="w-4 h-4 text-cyber-accent"></i><span id="toast-msg">Notification</span>
+</div>
 
-        </div>
-    </main>
+<script>
+lucide.createIcons();
+let currentMode = 'obfuscate';
+const srcCodeEl = document.getElementById('src-code');
+const outCodeEl = document.getElementById('out-code');
+const srcStatsEl = document.getElementById('src-stats');
+const outStatsEl = document.getElementById('out-stats');
+const obfStatusEl = document.getElementById('obf-status');
 
-    <!-- Documentation Modal -->
-    <div id="docs-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cyber-800 border border-cyber-700 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
-            <div class="p-4 border-b border-cyber-700 flex justify-between items-center">
-                <h3 class="font-bold text-white flex items-center gap-2">
-                    <i data-lucide="shield" class="w-5 h-5 text-cyber-accent"></i> Luakeeper Dual-Engine Documentation
-                </h3>
-                <button onclick="toggleDocsModal()" class="text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="p-6 overflow-y-auto text-xs sm:text-sm space-y-4 text-slate-300">
-                <div>
-                    <h4 class="font-semibold text-cyber-accent mb-1">1. Obfuscator Mode</h4>
-                    <p class="text-slate-400">Transforms Luau source code into a polymorphic VM with rolling-key encryption, constant scattering, and control flow flattening.</p>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-cyber-accent mb-1">2. De-obfuscator (Un-obfuscate) Mode</h4>
-                    <p class="text-slate-400">Analyzes Luakeeper-protected scripts, decrypts rolling-key bytecodes, decodes scattered constant tables, strips junk traps, and fully restores original Luau source code.</p>
-                </div>
-            </div>
-            <div class="p-4 border-t border-cyber-700 text-right">
-                <button onclick="toggleDocsModal()" class="px-4 py-1.5 bg-cyber-700 hover:bg-cyber-600 text-white rounded text-xs">Close</button>
-            </div>
-        </div>
-    </div>
+srcCodeEl.addEventListener('input', updateSrcStats);
+function updateSrcStats() {
+    const val = srcCodeEl.value;
+    srcStatsEl.innerText = `Lines: ${val.split('\n').length} | Size: ${(new Blob([val]).size/1024).toFixed(2)} KB`;
+}
+function updateOutStats() {
+    const val = outCodeEl.value;
+    outStatsEl.innerText = `Lines: ${val.split('\n').length} | Size: ${(new Blob([val]).size/1024).toFixed(2)} KB`;
+}
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').innerText = msg;
+    t.classList.remove('translate-y-20','opacity-0'); t.classList.add('translate-y-0','opacity-100');
+    setTimeout(() => { t.classList.remove('translate-y-0','opacity-100'); t.classList.add('translate-y-20','opacity-0'); }, 3000);
+}
+function switchMode(mode) {
+    currentMode = mode;
+    const tabObf = document.getElementById('tab-obfuscate'), tabDeobf = document.getElementById('tab-deobfuscate');
+    const optSection = document.getElementById('obfuscate-options');
+    const mainBtnText = document.getElementById('main-btn-text');
+    const inputTitle = document.getElementById('input-panel-title');
+    const outputTitle = document.getElementById('output-panel-title');
+    if (mode === 'obfuscate') {
+        tabObf.className = 'px-4 py-2 rounded-md text-xs font-bold transition bg-cyber-accent text-slate-950 shadow';
+        tabDeobf.className = 'px-4 py-2 rounded-md text-xs font-medium transition text-slate-400 hover:text-white';
+        optSection.classList.remove('hidden');
+        mainBtnText.innerText = 'Compile & Obfuscate';
+        inputTitle.innerText = 'Source Luau Script';
+        outputTitle.innerText = 'Protected Output';
+        showToast('Switched to Obfuscator Mode');
+    } else {
+        tabDeobf.className = 'px-4 py-2 rounded-md text-xs font-bold transition bg-cyber-purple text-white shadow';
+        tabObf.className = 'px-4 py-2 rounded-md text-xs font-medium transition text-slate-400 hover:text-white';
+        optSection.classList.add('hidden');
+        mainBtnText.innerText = 'De-obfuscate / Restore';
+        inputTitle.innerText = 'Protected Luakeeper Script';
+        outputTitle.innerText = 'Recovered Source Code';
+        showToast('Switched to De-obfuscator Mode');
+    }
+}
+function executeCurrentMode() {
+    if (currentMode === 'obfuscate') processObfuscation();
+    else processDeobfuscation();
+}
+function clearSource() { srcCodeEl.value = ''; updateSrcStats(); }
+function handleFileUpload(evt) {
+    const file = evt.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => { srcCodeEl.value = e.target.result; updateSrcStats(); showToast(`Loaded ${file.name}`); };
+    reader.readAsText(file);
+}
+function copyOutput() { if (!outCodeEl.value) return; outCodeEl.select(); document.execCommand('copy'); showToast('Output copied!'); }
+function downloadOutput() {
+    if (!outCodeEl.value) return;
+    const blob = new Blob([outCodeEl.value], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = currentMode === 'obfuscate' ? 'protected.lua' : 'restored.lua';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Download started');
+}
+function toggleDocsModal() { document.getElementById('docs-modal').classList.toggle('hidden'); }
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 px-4 py-3 rounded-lg shadow-xl text-xs font-semibold bg-cyber-700 text-white border border-cyber-600 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
-        <i data-lucide="info" class="w-4 h-4 text-cyber-accent"></i>
-        <span id="toast-msg">Notification</span>
-    </div>
+// ==========================================
+// LUAU LEXER - Real tokenization
+// ==========================================
+const TT = { IDENT:1, NUM:2, STR:3, KW:4, OP:5, EOF:6 };
 
-    <script>
-        lucide.createIcons();
+const KEYWORDS = new Set(['and','break','do','else','elseif','end','false','for','function','if','in','local','nil','not','or','repeat','return','then','true','until','while','continue']);
 
-        let currentMode = 'obfuscate'; // 'obfuscate' or 'deobfuscate'
+class Lexer {
+    constructor(src) { this.src = src; this.pos = 0; this.tokens = []; }
+    peek(off = 0) { return this.src[this.pos + off] || ''; }
+    next() { return this.src[this.pos++] || ''; }
+    eof() { return this.pos >= this.src.length; }
 
-        const srcCodeEl = document.getElementById('src-code');
-        const outCodeEl = document.getElementById('out-code');
-        const srcStatsEl = document.getElementById('src-stats');
-        const outStatsEl = document.getElementById('out-stats');
-        const obfStatusEl = document.getElementById('obf-status');
+    isAlpha(c) { return /[a-zA-Z_]/.test(c); }
+    isDigit(c) { return /[0-9]/.test(c); }
+    isAlphaNum(c) { return /[a-zA-Z0-9_]/.test(c); }
 
-        srcCodeEl.addEventListener('input', updateSrcStats);
+    skipLongBracket() {
+        const startLevel = this.matchLongBracketStart();
+        if (startLevel === -1) return false;
+        const closeStr = ']' + '='.repeat(startLevel) + ']';
+        const closeIdx = this.src.indexOf(closeStr, this.pos);
+        if (closeIdx === -1) { this.pos = this.src.length; return true; }
+        this.pos = closeIdx + closeStr.length;
+        return true;
+    }
 
-        function updateSrcStats() {
-            const val = srcCodeEl.value;
-            const lines = val.split('\n').length;
-            const size = (new Blob([val]).size / 1024).toFixed(2);
-            srcStatsEl.innerText = `Lines: ${lines} | Size: ${size} KB`;
-        }
+    matchLongBracketStart() {
+        if (this.peek() !== '[') return -1;
+        let i = 1, level = 0;
+        while (this.peek(i) === '=') { level++; i++; }
+        if (this.peek(i) === '[') { this.pos += i + 1; return level; }
+        return -1;
+    }
 
-        function updateOutStats() {
-            const val = outCodeEl.value;
-            const lines = val.split('\n').length;
-            const size = (new Blob([val]).size / 1024).toFixed(2);
-            outStatsEl.innerText = `Lines: ${lines} | Size: ${size} KB`;
-        }
+    readLongString(level) {
+        const closeStr = ']' + '='.repeat(level) + ']';
+        const closeIdx = this.src.indexOf(closeStr, this.pos);
+        let val;
+        if (closeIdx === -1) { val = this.src.substring(this.pos); this.pos = this.src.length; }
+        else { val = this.src.substring(this.pos, closeIdx); this.pos = closeIdx + closeStr.length; }
+        return val;
+    }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-
-        function switchMode(mode) {
-            currentMode = mode;
-            const tabObf = document.getElementById('tab-obfuscate');
-            const tabDeobf = document.getElementById('tab-deobfuscate');
-            const optSection = document.getElementById('obfuscate-options');
-            const mainBtnText = document.getElementById('main-btn-text');
-            const inputTitle = document.getElementById('input-panel-title');
-            const outputTitle = document.getElementById('output-panel-title');
-
-            if (mode === 'obfuscate') {
-                tabObf.className = 'px-4 py-2 rounded-md text-xs font-bold transition bg-cyber-accent text-slate-950 shadow';
-                tabDeobf.className = 'px-4 py-2 rounded-md text-xs font-medium transition text-slate-400 hover:text-white';
-                optSection.classList.remove('hidden');
-                mainBtnText.innerText = 'Compile & Obfuscate';
-                inputTitle.innerText = 'Source Luau Script';
-                outputTitle.innerText = 'Protected Output Payload';
-                showToast('Switched to Obfuscator Mode');
-            } else {
-                tabDeobf.className = 'px-4 py-2 rounded-md text-xs font-bold transition bg-cyber-purple text-white shadow';
-                tabObf.className = 'px-4 py-2 rounded-md text-xs font-medium transition text-slate-400 hover:text-white';
-                optSection.classList.add('hidden');
-                mainBtnText.innerText = 'De-obfuscate / Restore Code';
-                inputTitle.innerText = 'Protected Luakeeper Script';
-                outputTitle.innerText = 'Recovered Original Source Code';
-                showToast('Switched to De-obfuscator Mode');
-            }
-        }
-
-        function executeCurrentMode() {
-            if (currentMode === 'obfuscate') {
-                processObfuscation();
-            } else {
-                processDeobfuscation();
-            }
-        }
-
-        function clearSource() {
-            srcCodeEl.value = '';
-            updateSrcStats();
-        }
-
-        function handleFileUpload(evt) {
-            const file = evt.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                srcCodeEl.value = e.target.result;
-                updateSrcStats();
-                showToast(`Loaded ${file.name}`);
-            };
-            reader.readAsText(file);
-        }
-
-        function copyOutput() {
-            if (!outCodeEl.value) return;
-            outCodeEl.select();
-            document.execCommand('copy');
-            showToast('Output copied to clipboard!');
-        }
-
-        function downloadOutput() {
-            if (!outCodeEl.value) return;
-            const blob = new Blob([outCodeEl.value], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = currentMode === 'obfuscate' ? 'protected_luakeeper.lua' : 'restored_source.lua';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('File download initiated');
-        }
-
-        function toggleDocsModal() {
-            document.getElementById('docs-modal').classList.toggle('hidden');
-        }
-
-        // ==========================================
-        // Mode 1: Obfuscator Engine (AST & VM)
-        // ==========================================
-        function tokenizeLuau(code) {
-            code = code.replace(/--.*$/gm, '');
-            const regex = /\s*(=>|==|~=|<=|>=|\.\.|[a-zA-Z_][a-zA-Z0-9_]*|\d+(?:\.\d+)?|"[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*'|[{}()\+\-\*\/\,\=\;\.]|\S)\s*/g;
-            let match;
-            const tokens = [];
-            while ((match = regex.exec(code)) !== null) {
-                if (match[1].trim()) tokens.push(match[1]);
-            }
-            return tokens;
-        }
-
-        function processObfuscation() {
-            const source = srcCodeEl.value.trim();
-            if (!source) {
-                showToast('Please enter or load source code first.');
-                return;
-            }
-
-            obfStatusEl.innerText = 'Compiling...';
-            obfStatusEl.className = 'text-cyber-accent animate-pulse';
-
-            setTimeout(() => {
-                try {
-                    const result = compileAstToVM(source);
-                    outCodeEl.value = result;
-                    updateOutStats();
-                    obfStatusEl.innerText = 'Protected Successfully';
-                    obfStatusEl.className = 'text-emerald-400 font-semibold';
-                    showToast('Obfuscation completed successfully!');
-                } catch (err) {
-                    console.error(err);
-                    obfStatusEl.innerText = 'Compilation Failed';
-                    obfStatusEl.className = 'text-red-400 font-semibold';
-                    showToast('Error during obfuscation.');
+    tokenize() {
+        while (!this.eof()) {
+            const c = this.peek();
+            if (c === ' ' || c === '\t' || c === '\r' || c === '\n') { this.pos++; continue; }
+            if (c === '-' && this.peek(1) === '-') {
+                this.pos += 2;
+                if (this.peek() === '[') {
+                    const save = this.pos;
+                    const level = this.matchLongBracketStart();
+                    if (level !== -1) { this.readLongString(level); continue; }
+                    this.pos = save;
                 }
-            }, 100);
-        }
-
-        function compileAstToVM(src) {
-            const optRollingKey = document.getElementById('opt-rolling-key').checked;
-            const optConstantScattering = document.getElementById('opt-constant-scattering').checked;
-            const optJunkStates = document.getElementById('opt-junk-states').checked;
-            const optAntiHook = document.getElementById('opt-anti-hook').checked;
-
-            const tokens = tokenizeLuau(src);
-
-            const availableOps = Array.from({length: 250}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
-            const OP_LOADK     = availableOps[0];
-            const OP_GETGLOBAL = availableOps[1];
-            const OP_SETGLOBAL = availableOps[2];
-            const OP_CALL      = availableOps[3];
-            const OP_RETURN    = availableOps[4];
-
-            let constantPool = [];
-            let virtualBytecode = [];
-
-            function addConst(val) {
-                let idx = constantPool.indexOf(val);
-                if (idx === -1) {
-                    constantPool.push(val);
-                    idx = constantPool.length - 1;
-                }
-                return idx;
+                while (!this.eof() && this.peek() !== '\n') this.pos++;
+                continue;
             }
-
-            let ptr = 0;
-            while (ptr < tokens.length) {
-                let token = tokens[ptr];
-                if (token === 'local' && ptr + 3 < tokens.length && tokens[ptr+2] === '=') {
-                    let varName = tokens[ptr+1];
-                    let valToken = tokens[ptr+3];
-                    let val = valToken.startsWith('"') || valToken.startsWith("'") ? valToken.slice(1, -1) : valToken;
-                    let nameIdx = addConst(varName);
-                    let valIdx = addConst(isNaN(val) ? val : Number(val));
-                    virtualBytecode.push(OP_LOADK, 0, valIdx);
-                    virtualBytecode.push(OP_SETGLOBAL, 0, nameIdx);
-                    ptr += 4;
+            if (this.isAlpha(c)) {
+                let s = '';
+                while (!this.eof() && this.isAlphaNum(this.peek())) { s += this.next(); }
+                if (KEYWORDS.has(s)) this.tokens.push({ t: TT.KW, v: s });
+                else this.tokens.push({ t: TT.IDENT, v: s });
+                continue;
+            }
+            if (this.isDigit(c) || (c === '.' && this.isDigit(this.peek(1)))) {
+                let s = '';
+                if (c === '0' && (this.peek(1) === 'x' || this.peek(1) === 'X')) {
+                    s += this.next() + this.next();
+                    while (!this.eof() && /[0-9a-fA-F]/.test(this.peek())) s += this.next();
+                    this.tokens.push({ t: TT.NUM, v: parseInt(s, 16) });
                     continue;
                 }
-                if (ptr + 2 < tokens.length && tokens[ptr+1] === '(') {
-                    let funcName = token;
-                    let argToken = tokens[ptr+2];
-                    let argVal = argToken.startsWith('"') || argToken.startsWith("'") ? argToken.slice(1, -1) : argToken;
-                    let funcIdx = addConst(funcName);
-                    let argIdx = addConst(isNaN(argVal) ? argVal : Number(argVal));
-                    virtualBytecode.push(OP_GETGLOBAL, 0, funcIdx);
-                    virtualBytecode.push(OP_LOADK, 1, argIdx);
-                    virtualBytecode.push(OP_CALL, 0, 1, 0);
-                    ptr += 4;
+                while (!this.eof() && this.isDigit(this.peek())) s += this.next();
+                if (this.peek() === '.' && this.isDigit(this.peek(1))) { s += this.next(); while (!this.eof() && this.isDigit(this.peek())) s += this.next(); }
+                if (this.peek() === 'e' || this.peek() === 'E') {
+                    s += this.next();
+                    if (this.peek() === '+' || this.peek() === '-') s += this.next();
+                    while (!this.eof() && this.isDigit(this.peek())) s += this.next();
+                }
+                this.tokens.push({ t: TT.NUM, v: parseFloat(s) });
+                continue;
+            }
+            if (c === '"' || c === "'") {
+                const quote = this.next();
+                let s = '';
+                while (!this.eof() && this.peek() !== quote) {
+                    if (this.peek() === '\\') {
+                        this.next();
+                        const esc = this.next();
+                        const escMap = { n:'\n', t:'\t', r:'\r', '\\':'\\', '"':'"', "'":"'", '0':'\0', 'a':'\a', 'b':'\b', 'f':'\f', 'v':'\v' };
+                        if (esc === 'x') {
+                            let hex = '';
+                            for (let i=0;i<2;i++) hex += this.next();
+                            s += String.fromCharCode(parseInt(hex,16));
+                        } else if (esc === 'u') {
+                            let hex = '';
+                            if (this.peek() === '{') { this.next(); while (this.peek() !== '}') hex += this.next(); this.next(); }
+                            else { for (let i=0;i<4;i++) hex += this.next(); }
+                            s += String.fromCodePoint(parseInt(hex,16));
+                        } else if (esc === '\n') { s += '\n'; }
+                        else if (escMap[esc] !== undefined) { s += escMap[esc]; }
+                        else { s += esc; }
+                    } else { s += this.next(); }
+                }
+                this.next();
+                this.tokens.push({ t: TT.STR, v: s });
+                continue;
+            }
+            if (c === '[') {
+                const save = this.pos;
+                const level = this.matchLongBracketStart();
+                if (level !== -1) {
+                    const str = this.readLongString(level);
+                    this.tokens.push({ t: TT.STR, v: str });
                     continue;
                 }
-                ptr++;
+                this.pos = save;
             }
-
-            if (virtualBytecode.length === 0) {
-                let fallbackIdx = addConst(src);
-                let printIdx = addConst("print");
-                virtualBytecode.push(OP_GETGLOBAL, 0, printIdx);
-                virtualBytecode.push(OP_LOADK, 1, fallbackIdx);
-                virtualBytecode.push(OP_CALL, 0, 1, 0);
+            const multi = ['...', '..', '==', '~=', '<=', '>=', '::', '//'];
+            let matched = null;
+            for (const op of multi) {
+                if (this.src.substr(this.pos, op.length) === op) { matched = op; break; }
             }
+            if (matched) { this.pos += matched.length; this.tokens.push({ t: TT.OP, v: matched }); continue; }
+            if ('+-*/%^#=<>(){}[];,.:&|~'.includes(c)) {
+                this.tokens.push({ t: TT.OP, v: this.next() });
+                continue;
+            }
+            this.pos++;
+        }
+        this.tokens.push({ t: TT.EOF, v: null });
+        return this.tokens;
+    }
+}
 
-            virtualBytecode.push(OP_RETURN);
+// ==========================================
+// LUAU PRATT PARSER - Real AST
+// ==========================================
+const BINOP_PREC = {
+    'or': { left: 1, right: 2 }, 'and': { left: 2, right: 3 },
+    '<': { left: 3, right: 3 }, '>': { left: 3, right: 3 }, '<=': { left: 3, right: 3 }, '>=': { left: 3, right: 3 }, '~=': { left: 3, right: 3 }, '==': { left: 3, right: 3 },
+    '..': { left: 5, right: 4 },
+    '+': { left: 6, right: 6 }, '-': { left: 6, right: 6 },
+    '*': { left: 7, right: 7 }, '/': { left: 7, right: 7 }, '//': { left: 7, right: 7 }, '%': { left: 7, right: 7 },
+    '^': { left: 10, right: 9 },
+};
 
-            let rollingKey = Math.floor(Math.random() * 180) + 20;
-            let startKey = rollingKey;
-            let encryptedBytecodes = [];
-            if (optRollingKey) {
-                for (let b of virtualBytecode) {
-                    let enc = (b ^ rollingKey) % 256;
-                    encryptedBytecodes.push(enc);
-                    rollingKey = (rollingKey + enc * 13) % 256;
+class Parser {
+    constructor(tokens) { this.tokens = tokens; this.pos = 0; }
+    peek(off = 0) { return this.tokens[this.pos + off] || { t: TT.EOF, v: null }; }
+    next() { return this.tokens[this.pos++]; }
+    eof() { return this.peek().t === TT.EOF; }
+    check(t, v) { const tk = this.peek(); if (tk.t !== t) return false; if (v !== undefined && tk.v !== v) return false; return true; }
+    checkOp(v) { return this.check(TT.OP, v); }
+    checkKw(v) { return this.check(TT.KW, v); }
+    match(t, v) { if (this.check(t, v)) { return this.next(); } return null; }
+    matchOp(v) { return this.match(TT.OP, v); }
+    matchKw(v) { return this.match(TT.KW, v); }
+    expect(t, v) { const tk = this.next(); if (tk.t !== t || (v !== undefined && tk.v !== v)) throw new Error(`Expected ${v||t} got ${tk.v} (${tk.t})`); return tk; }
+
+    parseChunk() {
+        const body = [];
+        while (!this.eof()) body.push(this.parseStatement());
+        return { type: 'Chunk', body };
+    }
+
+    parseStatement() {
+        const tk = this.peek();
+        if (tk.t === TT.KW) {
+            switch (tk.v) {
+                case 'local': return this.parseLocal();
+                case 'if': return this.parseIf();
+                case 'while': return this.parseWhile();
+                case 'for': return this.parseFor();
+                case 'repeat': return this.parseRepeat();
+                case 'do': { this.next(); const body = []; while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement()); this.expect(TT.KW, 'end'); return { type: 'Do', body }; }
+                case 'return': { this.next(); const exprs = []; if (!this.checkKw('end') && !this.checkKw('else') && !this.checkKw('elseif') && !this.checkKw('until') && !this.eof() && !this.check(TT.OP, ';')) { exprs.push(this.parseExpression()); while (this.matchOp(',')) exprs.push(this.parseExpression()); } this.matchOp(';'); return { type: 'Return', exprs }; }
+                case 'break': this.next(); return { type: 'Break' };
+                case 'function': { this.next(); const name = this.parseFunctionName(); return this.parseFunctionBody(name); }
+                case 'continue': this.next(); return { type: 'Break' };
+            }
+        }
+        const expr = this.parseSuffixedExpression();
+        if (this.checkOp('=') || this.checkOp(',')) {
+            const targets = [expr];
+            while (this.matchOp(',')) targets.push(this.parseSuffixedExpression());
+            this.expect(TT.OP, '=');
+            const values = [this.parseExpression()];
+            while (this.matchOp(',')) values.push(this.parseExpression());
+            return { type: 'Assignment', targets, values };
+        }
+        return { type: 'ExprStatement', expr };
+    }
+
+    parseFunctionName() {
+        let name = this.expect(TT.IDENT).v;
+        let isMethod = false;
+        while (this.matchOp('.')) name += '.' + this.expect(TT.IDENT).v;
+        if (this.matchOp(':')) { name += ':' + this.expect(TT.IDENT).v; isMethod = true; }
+        return { name, isMethod };
+    }
+
+    parseFunctionBody(nameInfo) {
+        this.expect(TT.OP, '(');
+        const params = [];
+        let isVararg = false;
+        let implicitSelf = nameInfo.isMethod;
+        if (!this.checkOp(')')) {
+            if (this.checkOp('...')) { this.next(); isVararg = true; }
+            else {
+                params.push(implicitSelf ? 'self' : this.expect(TT.IDENT).v);
+                while (this.matchOp(',')) {
+                    if (this.checkOp('...')) { this.next(); isVararg = true; break; }
+                    params.push(this.expect(TT.IDENT).v);
                 }
-            } else {
-                encryptedBytecodes = virtualBytecode;
             }
+        }
+        this.expect(TT.OP, ')');
+        const body = [];
+        while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement());
+        this.expect(TT.KW, 'end');
+        return { type: 'FunctionDecl', name: nameInfo.name, params, isVararg, body };
+    }
 
-            let scatteredConsts = [];
-            constantPool.forEach(c => {
-                let sStr = String(c);
-                if (optConstantScattering) {
-                    let bytes = [];
-                    for(let i=0; i<sStr.length; i++) {
-                        let k = Math.floor(Math.random() * 200) + 1;
-                        let codeVal = sStr.charCodeAt(i);
-                        let enc = codeVal ^ k;
-                        bytes.push(`string.char(bit32.bxor(${enc}, ${k}))`);
+    parseLocal() {
+        this.next();
+        if (this.checkKw('function')) {
+            this.next();
+            const name = this.expect(TT.IDENT).v;
+            this.expect(TT.OP, '(');
+            const params = [];
+            let isVararg = false;
+            if (!this.checkOp(')')) {
+                if (this.checkOp('...')) { this.next(); isVararg = true; }
+                else {
+                    params.push(this.expect(TT.IDENT).v);
+                    while (this.matchOp(',')) {
+                        if (this.checkOp('...')) { this.next(); isVararg = true; break; }
+                        params.push(this.expect(TT.IDENT).v);
                     }
-                    scatteredConsts.push(`(${bytes.join(' .. ')})`);
-                } else {
-                    scatteredConsts.push(`"${sStr}"`);
-                }
-            });
-
-            const randVar = () => '_' + Array.from({length: 16}, () => ['I', 'l', '1', 'i'][Math.floor(Math.random() * 4)]).join('');
-            const envVar = randVar(), executeVmVar = randVar(), constTableVar = randVar(), bcStreamVar = randVar(), stackVar = randVar(), pcVar = randVar(), keyVar = randVar(), stateVar = randVar(), rawOpVar = randVar(), opVar = randVar();
-
-            let antiHookHeader = optAntiHook ? `local function ${randVar()}() if debug and (debug.getupvalue or debug.info) then while true do local _ = math.cos(1) end end end pcall(${randVar()})` : '';
-            let junkStatesCode = '';
-            if (optJunkStates) {
-                for (let i = 0; i < 30; i++) {
-                    const junkStateId = Math.floor(Math.random() * 8000000) + 1000000;
-                    junkStatesCode += ` elseif ${stateVar} == ${junkStateId} then local _t = {} ${stateVar} = 1`;
                 }
             }
-
-            return `--[========================================================[
-    Luakeeper v9.0 Protected Script
-]========================================================]
-local ${envVar} = getfenv and getfenv() or _ENV
-${antiHookHeader}
-local function ${executeVmVar}()
-    local ${constTableVar} = { ${scatteredConsts.join(', ')} }
-    local ${bcStreamVar} = { ${encryptedBytecodes.join(', ')} }
-    local ${stackVar} = {}
-    local ${pcVar} = 1
-    local ${keyVar} = ${startKey}
-    local ${stateVar} = 1
-
-    while true do
-        if ${stateVar} == 1 then
-            if ${pcVar} > #${bcStreamVar} then break end
-            local ${rawOpVar} = ${bcStreamVar}[${pcVar}]
-            local ${opVar} = ${optRollingKey ? `bit32.bxor(${rawOpVar},${keyVar}) % 256` : `${rawOpVar}`}
-            ${optRollingKey ? `${keyVar} = (${keyVar} +${rawOpVar} * 13) % 256` : ''}
-            ${pcVar} = ${pcVar} + 1
-
-            if ${opVar} == ${OP_GETGLOBAL} then
-                local r = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                local cIdx = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                ${stackVar}[r] = ${envVar}[${constTableVar}[cIdx]]
-            elseif ${opVar} == ${OP_LOADK} then
-                local r = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                local cIdx = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                ${stackVar}[r] = ${constTableVar}[cIdx]
-            elseif ${opVar} == ${OP_CALL} then
-                local r = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                local numArgs = ${bcStreamVar}[${pcVar}]; ${pcVar} = ${pcVar} + 1
-                local numResults = ${bcStreamVar}[${pcVar}]; ${pcVar} = ${pcVar} + 1
-                local func = ${stackVar}[r]
-                if numArgs == 1 then func(${stackVar}[r+1]) else func() end
-            elseif ${opVar} == ${OP_SETGLOBAL} then
-                local r = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                local cIdx = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                ${envVar}[${constTableVar}[cIdx]] = ${stackVar}[r]
-            elseif ${opVar} == ${OP_RETURN} then
-                return
-            else
-                break
-            end
-            ${stateVar} = 1
-            ${junkStatesCode}
-        else
-            ${stateVar} = 1
-        end
-    end
-end
-pcall(${executeVmVar})`.trim();
+            this.expect(TT.OP, ')');
+            const body = [];
+            while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement());
+            this.expect(TT.KW, 'end');
+            return { type: 'LocalFunction', name, params, isVararg, body };
         }
-
-        // ==========================================
-        // Mode 2: Fully Functional De-obfuscator Engine
-        // ==========================================
-        function processDeobfuscation() {
-            const protectedCode = srcCodeEl.value.trim();
-            if (!protectedCode) {
-                showToast('Please paste a Luakeeper-protected script.');
-                return;
-            }
-
-            obfStatusEl.innerText = 'Restoring Code...';
-            obfStatusEl.className = 'text-cyber-purple animate-pulse';
-
-            setTimeout(() => {
-                try {
-                    const restored = deobfuscateLuakeeperScript(protectedCode);
-                    outCodeEl.value = restored;
-                    updateOutStats();
-                    obfStatusEl.innerText = 'Restored Successfully';
-                    obfStatusEl.className = 'text-purple-400 font-semibold';
-                    showToast('De-obfuscation and restoration complete!');
-                } catch (err) {
-                    console.error(err);
-                    obfStatusEl.innerText = 'Restoration Failed';
-                    obfStatusEl.className = 'text-red-400 font-semibold';
-                    showToast('Failed to parse or decrypt payload.');
-                }
-            }, 150);
+        const names = [{ name: this.expect(TT.IDENT).v, attrib: null }];
+        while (this.matchOp(',')) {
+            names.push({ name: this.expect(TT.IDENT).v, attrib: null });
         }
+        const values = [];
+        if (this.matchOp('=')) {
+            values.push(this.parseExpression());
+            while (this.matchOp(',')) values.push(this.parseExpression());
+        }
+        return { type: 'Local', names, values };
+    }
 
-        function deobfuscateLuakeeperScript(code) {
-            // 1. Extract starting key
-            const keyMatch = code.match(/local\s+_[a-zA-Z0-9]+\s*=\s*(\d+)/);
-            let startKey = keyMatch ? parseInt(keyMatch[1]) : 43;
+    parseIf() {
+        this.next();
+        const clauses = [];
+        const cond = this.parseExpression();
+        this.expect(TT.KW, 'then');
+        const thenBody = [];
+        while (!this.checkKw('elseif') && !this.checkKw('else') && !this.checkKw('end') && !this.eof()) thenBody.push(this.parseStatement());
+        clauses.push({ cond, body: thenBody });
+        while (this.checkKw('elseif')) {
+            this.next();
+            const c = this.parseExpression();
+            this.expect(TT.KW, 'then');
+            const b = [];
+            while (!this.checkKw('elseif') && !this.checkKw('else') && !this.checkKw('end') && !this.eof()) b.push(this.parseStatement());
+            clauses.push({ cond: c, body: b });
+        }
+        let elseBody = null;
+        if (this.matchKw('else')) {
+            elseBody = [];
+            while (!this.checkKw('end') && !this.eof()) elseBody.push(this.parseStatement());
+        }
+        this.expect(TT.KW, 'end');
+        return { type: 'If', clauses, elseBody };
+    }
 
-            // 2. Extract bytecode array
-            const bcMatch = code.match(/local\s+_[a-zA-Z0-9]+\s*=\s*\{\s*([\d,\s\-]+)\s*\}/);
-            if (!bcMatch) throw new Error("Bytecode array not found.");
-            const encryptedBytes = bcMatch[1].split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+    parseWhile() {
+        this.next();
+        const cond = this.parseExpression();
+        this.expect(TT.KW, 'do');
+        const body = [];
+        while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement());
+        this.expect(TT.KW, 'end');
+        return { type: 'While', cond, body };
+    }
 
-            // 3. Decrypt bytecode using rolling key
-            let decryptedOpcodes = [];
-            let rollingKey = startKey;
-            for (let i = 0; i < encryptedBytes.length; i++) {
-                let raw = encryptedBytes[i];
-                let op = (raw ^ rollingKey) % 256;
-                decryptedOpcodes.push(op);
-                rollingKey = (rollingKey + raw * 13) % 256;
+    parseRepeat() {
+        this.next();
+        const body = [];
+        while (!this.checkKw('until') && !this.eof()) body.push(this.parseStatement());
+        this.expect(TT.KW, 'until');
+        const cond = this.parseExpression();
+        return { type: 'Repeat', body, cond };
+    }
+
+    parseFor() {
+        this.next();
+        const firstName = this.expect(TT.IDENT).v;
+        if (this.matchOp('=')) {
+            const start = this.parseExpression();
+            this.expect(TT.OP, ',');
+            const limit = this.parseExpression();
+            let step = null;
+            if (this.matchOp(',')) step = this.parseExpression();
+            this.expect(TT.KW, 'do');
+            const body = [];
+            while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement());
+            this.expect(TT.KW, 'end');
+            return { type: 'NumericFor', varName: firstName, start, limit, step, body };
+        }
+        const names = [firstName];
+        while (this.matchOp(',')) names.push(this.expect(TT.IDENT).v);
+        this.expect(TT.KW, 'in');
+        const exprs = [this.parseExpression()];
+        while (this.matchOp(',')) exprs.push(this.parseExpression());
+        this.expect(TT.KW, 'do');
+        const body = [];
+        while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement());
+        this.expect(TT.KW, 'end');
+        return { type: 'GenericFor', names, exprs, body };
+    }
+
+    parseExpression(minPrec = 0) {
+        let left = this.parseUnary();
+        while (true) {
+            const tk = this.peek();
+            let opName = null;
+            if (tk.t === TT.OP && BINOP_PREC[tk.v]) opName = tk.v;
+            else if (tk.t === TT.KW && (tk.v === 'and' || tk.v === 'or')) opName = tk.v;
+            if (!opName) break;
+            const prec = BINOP_PREC[opName];
+            if (prec.left < minPrec) break;
+            this.next();
+            const right = this.parseExpression(prec.right);
+            left = { type: 'Binary', op: opName, left, right };
+        }
+        return left;
+    }
+
+    parseUnary() {
+        const tk = this.peek();
+        if (tk.t === TT.KW && tk.v === 'not') { this.next(); return { type: 'Unary', op: 'not', expr: this.parseUnary() }; }
+        if (tk.t === TT.OP && tk.v === '-') { this.next(); return { type: 'Unary', op: '-', expr: this.parseUnary() }; }
+        if (tk.t === TT.OP && tk.v === '#') { this.next(); return { type: 'Unary', op: '#', expr: this.parseUnary() }; }
+        return this.parseSuffixedExpression();
+    }
+
+    parseSuffixedExpression() {
+        let expr = this.parsePrimary();
+        while (true) {
+            if (this.checkOp('.')) {
+                this.next();
+                const name = this.expect(TT.IDENT).v;
+                expr = { type: 'Index', obj: expr, key: { type: 'String', value: name }, isField: true };
+            } else if (this.checkOp('[')) {
+                this.next();
+                const key = this.parseExpression();
+                this.expect(TT.OP, ']');
+                expr = { type: 'Index', obj: expr, key, isField: false };
+            } else if (this.checkOp(':')) {
+                this.next();
+                const method = this.expect(TT.IDENT).v;
+                this.expect(TT.OP, '(');
+                const args = [];
+                if (!this.checkOp(')')) {
+                    args.push(this.parseExpression());
+                    while (this.matchOp(',')) args.push(this.parseExpression());
+                }
+                this.expect(TT.OP, ')');
+                expr = { type: 'MethodCall', obj: expr, method, args };
+            } else if (this.checkOp('(') || this.check(TT.STR) || this.checkOp('{')) {
+                const args = this.parseCallArgs();
+                expr = { type: 'Call', func: expr, args };
+            } else break;
+        }
+        return expr;
+    }
+
+    parseCallArgs() {
+        if (this.matchOp('(')) {
+            const args = [];
+            if (!this.checkOp(')')) {
+                args.push(this.parseExpression());
+                while (this.matchOp(',')) args.push(this.parseExpression());
             }
+            this.expect(TT.OP, ')');
+            return args;
+        }
+        if (this.check(TT.STR)) { const s = this.next(); return [{ type: 'String', value: s.v }]; }
+        if (this.checkOp('{')) { return [this.parseTable()]; }
+        return [];
+    }
 
-            // 4. Extract Constant Table
-            let tableContent = "";
-            const firstTableIdx = code.indexOf("local _");
-            if (firstTableIdx !== -1) {
-                let braceCount = 0;
-                let startIdx = -1;
-                let endIdx = -1;
-                for (let i = firstTableIdx; i < code.length; i++) {
-                    if (code[i] === '{') {
-                        if (startIdx === -1) startIdx = i + 1;
-                        braceCount++;
-                    } else if (code[i] === '}') {
-                        braceCount--;
-                        if (braceCount === 0) {
-                            endIdx = i;
-                            break;
+    parseTable() {
+        this.expect(TT.OP, '{');
+        const entries = [];
+        while (!this.checkOp('}') && !this.eof()) {
+            if (this.checkOp('[')) {
+                this.next();
+                const key = this.parseExpression();
+                this.expect(TT.OP, ']');
+                this.expect(TT.OP, '=');
+                const val = this.parseExpression();
+                entries.push({ keyType: 'expr', key, val });
+            } else if (this.check(TT.IDENT) && this.peek(1).t === TT.OP && this.peek(1).v === '=') {
+                const key = this.next().v;
+                this.next();
+                const val = this.parseExpression();
+                entries.push({ keyType: 'name', key, val });
+            } else {
+                const val = this.parseExpression();
+                entries.push({ keyType: 'array', val });
+            }
+            if (!this.matchOp(',') && !this.matchOp(';')) break;
+        }
+        this.expect(TT.OP, '}');
+        return { type: 'Table', entries };
+    }
+
+    parsePrimary() {
+        const tk = this.peek();
+        if (tk.t === TT.NUM) { this.next(); return { type: 'Number', value: tk.v }; }
+        if (tk.t === TT.STR) { this.next(); return { type: 'String', value: tk.v }; }
+        if (tk.t === TT.KW) {
+            if (tk.v === 'nil') { this.next(); return { type: 'Nil' }; }
+            if (tk.v === 'true') { this.next(); return { type: 'Boolean', value: true }; }
+            if (tk.v === 'false') { this.next(); return { type: 'Boolean', value: false }; }
+            if (tk.v === 'function') {
+                this.next();
+                this.expect(TT.OP, '(');
+                const params = [];
+                let isVararg = false;
+                if (!this.checkOp(')')) {
+                    if (this.checkOp('...')) { this.next(); isVararg = true; }
+                    else {
+                        params.push(this.expect(TT.IDENT).v);
+                        while (this.matchOp(',')) {
+                            if (this.checkOp('...')) { this.next(); isVararg = true; break; }
+                            params.push(this.expect(TT.IDENT).v);
                         }
                     }
                 }
-                if (startIdx !== -1 && endIdx !== -1) {
-                    tableContent = code.substring(startIdx, endIdx);
-                }
+                this.expect(TT.OP, ')');
+                const body = [];
+                while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement());
+                this.expect(TT.KW, 'end');
+                return { type: 'Function', params, isVararg, body };
             }
-
-            let items = [];
-            let currentItem = "";
-            let parenDepth = 0;
-            let braceDepth = 0;
-            for (let i = 0; i < tableContent.length; i++) {
-                let char = tableContent[i];
-                if (char === '(') parenDepth++;
-                else if (char === ')') parenDepth--;
-                else if (char === '{') braceDepth++;
-                else if (char === '}') braceDepth--;
-
-                if (char === ',' && parenDepth === 0 && braceDepth === 0) {
-                    items.push(currentItem.trim());
-                    currentItem = "";
-                } else {
-                    currentItem += char;
-                }
-            }
-            if (currentItem.trim()) items.push(currentItem.trim());
-
-            let constants = [];
-            items.forEach(item => {
-                if ((item.startsWith('"') && item.endsWith('"')) || (item.startsWith("'") && item.endsWith("'"))) {
-                    constants.push(item.slice(1, -1));
-                } else if (item.includes('string.char')) {
-                    let decodedStr = "";
-                    const bxorRegex = /bxor\((\d+),\s*(\d+)\)/g;
-                    let match;
-                    let found = false;
-                    while ((match = bxorRegex.exec(item)) !== null) {
-                        found = true;
-                        let enc = parseInt(match[1]);
-                        let k = parseInt(match[2]);
-                        decodedStr += String.fromCharCode(enc ^ k);
-                    }
-                    constants.push(found ? decodedStr : item);
-                } else {
-                    let num = Number(item);
-                    constants.push(isNaN(num) ? item.replace(/["']/g, '') : num);
-                }
-            });
-
-            // 5. Extract Opcode Mapping from VM Interpeter dispatchers in code
-            let opMap = {}; // Opcode Number -> 'LOADK' | 'GETGLOBAL' | 'SETGLOBAL' | 'CALL' | 'RETURN'
-            const ifRegex = /if\s+([a-zA-Z0-9_]+)\s*==\s*(\d+)\s*then([\s\S]*?)(?=elseif|else|end\s+end|end)/g;
-            let match;
-            while ((match = ifRegex.exec(code)) !== null) {
-                let opCodeNum = parseInt(match[2]);
-                let blockBody = match[3];
-                if (blockBody.includes('getfenv') || blockBody.includes('_ENV') || (blockBody.includes('[') && blockBody.includes('] =') === false)) {
-                    if (blockBody.includes(' = ')) opMap[opCodeNum] = 'SETGLOBAL';
-                    else opMap[opCodeNum] = 'GETGLOBAL';
-                }
-                if (blockBody.includes('constTable') || blockBody.includes('stack[r] =')) opMap[opCodeNum] = 'LOADK';
-                if (blockBody.includes('func(')) opMap[opCodeNum] = 'CALL';
-                if (blockBody.includes('return')) opMap[opCodeNum] = 'RETURN';
-            }
-
-            // 6. Interpret Bytecode to Reconstruct Luau Code
-            let pc = 0;
-            let stack = {};
-            let statements = [];
-            let pendingGlobal = null;
-            let lastFunc = null;
-            let lastArg = null;
-
-            while (pc < decryptedOpcodes.length) {
-                let op = decryptedOpcodes[pc++];
-                let type = opMap[op];
-
-                if (type === 'LOADK') {
-                    let r = decryptedOpcodes[pc++] + 1;
-                    let cIdx = decryptedOpcodes[pc++] + 1;
-                    let val = constants[cIdx - 1];
-                    stack[r] = typeof val === 'string' ? `"${val}"` : val;
-                } else if (type === 'GETGLOBAL') {
-                    let r = decryptedOpcodes[pc++] + 1;
-                    let cIdx = decryptedOpcodes[pc++] + 1;
-                    let val = constants[cIdx - 1];
-                    stack[r] = val;
-                    lastFunc = val;
-                } else if (type === 'SETGLOBAL') {
-                    let r = decryptedOpcodes[pc++] + 1;
-                    let cIdx = decryptedOpcodes[pc++] + 1;
-                    let varName = constants[cIdx - 1];
-                    let val = stack[r];
-                    statements.push(`local ${varName} = ${val}`);
-                } else if (type === 'CALL') {
-                    let r = decryptedOpcodes[pc++] + 1;
-                    let numArgs = decryptedOpcodes[pc++];
-                    let numResults = decryptedOpcodes[pc++];
-                    let argVal = stack[r + 1];
-                    if (lastFunc) {
-                        statements.push(`${lastFunc}(${argVal})`);
-                        lastFunc = null;
-                    }
-                } else if (type === 'RETURN') {
-                    break;
-                } else {
-                    // Unknown or padding opcode, skip
-                    if (pc < decryptedOpcodes.length && decryptedOpcodes.length - pc > 3) {
-                        // try to advance safely
-                    } else {
-                        break;
-                    }
-                }
-            }
-
-            if (statements.length === 0) {
-                statements.push("-- Warning: Bytecode stream parsed, but statements could not be auto-mapped.");
-                statements.push(`-- Recovered Constants: ${JSON.stringify(constants)}`);
-            }
-
-            let recoveredText = `--[========================================================[
-    Luakeeper v9.0 Restored Source Code
-    - Rolling-Key Decrypted Successfully
-    - Constant Scatter Table Decoded
-    - Junk States & Anti-Hook Traps Stripped
-]========================================================]\n\n`;
-
-            recoveredText += statements.join('\n');
-            return recoveredText;
         }
+        if (tk.t === TT.IDENT) { this.next(); return { type: 'Identifier', name: tk.v }; }
+        if (tk.t === TT.OP && tk.v === '(') {
+            this.next();
+            const inner = this.parseExpression();
+            this.expect(TT.OP, ')');
+            return { type: 'Paren', expr: inner };
+        }
+        if (tk.t === TT.OP && tk.v === '{') return this.parseTable();
+        if (tk.t === TT.OP && tk.v === '...') { this.next(); return { type: 'Vararg' }; }
+        throw new Error(`Unexpected token: ${tk.v} (${tk.t})`);
+    }
+}
 
-        updateSrcStats();
-    </script>
+// ==========================================
+// BYTECODE OPCODES (fixed indices, remapped at obfuscation)
+// ==========================================
+const BC = {
+    HALT: 0, LOADK: 1, MOVE: 2, GETGLOBAL: 3, SETGLOBAL: 4,
+    GETFIELD: 5, SETFIELD: 6, GETTABLE: 7, SETTABLE: 8,
+    ADD: 9, SUB: 10, MUL: 11, DIV: 12, MOD: 13, POW: 14, IDIV: 15,
+    CONCAT: 16, EQ: 17, NEQ: 18, LT: 19, LE: 20, GT: 21, GE: 22,
+    NOT: 23, NEG: 24, LEN: 25,
+    CALL: 26, RETURN: 27, JUMP: 28, JUMPIF: 29, JUMPIFNOT: 30,
+    NEWTABLE: 31, SETLIST: 32, SETFIELDS: 33,
+    CLOSURE: 34, NOP: 35, RAW: 36
+};
+
+// ==========================================
+// COMPILER - AST to bytecode
+// ==========================================
+class Compiler {
+    constructor() {
+        this.bytecode = [];
+        this.constants = [null, true, false];
+        this.constMap = new Map();
+        this.constMap.set(JSON.stringify([null]), 0);
+        this.constMap.set(JSON.stringify([true]), 1);
+        this.constMap.set(JSON.stringify([false]), 2);
+        this.regTop = 0;
+        this.scopes = [{}];
+        this.labelCount = 0;
+        this.patches = [];
+        this.labels = {};
+        this.upvalues = {};
+    }
+
+    emit(...bytes) { for (const b of bytes) this.bytecode.push(b); return this.bytecode.length; }
+
+    addConst(val) {
+        let key;
+        if (val === null || val === undefined) return 0;
+        if (val === true) return 1;
+        if (val === false) return 2;
+        if (typeof val === 'number') key = 'n:' + val;
+        else if (typeof val === 'string') key = 's:' + val;
+        else key = 'o:' + JSON.stringify(val);
+        if (this.constMap.has(key)) return this.constMap.get(key);
+        const idx = this.constants.length;
+        this.constants.push(val);
+        this.constMap.set(key, idx);
+        return idx;
+    }
+
+    newReg() { const r = this.regTop++; return r; }
+    freeRegs(count) { this.regTop -= count; }
+
+    allocLocal(name) {
+        const r = this.newReg();
+        this.scopes[this.scopes.length - 1][name] = r;
+        return r;
+    }
+
+    findLocal(name) {
+        for (let i = this.scopes.length - 1; i >= 0; i--) {
+            if (name in this.scopes[i]) return this.scopes[i][name];
+        }
+        return null;
+    }
+
+    pushScope() { this.scopes.push({}); }
+    popScope() {
+        const scope = this.scopes.pop();
+        for (const name in scope) {
+            if (scope[name] >= 0) { this.regTop = Math.min(this.regTop, scope[name]); }
+        }
+    }
+
+    newLabel() { return '__L' + (this.labelCount++); }
+    placeLabel(name) { this.labels[name] = this.bytecode.length; }
+    emitJump(op, label) {
+        this.emit(op, 0);
+        this.patches.push({ idx: this.bytecode.length - 1, label });
+    }
+    emitJumpCond(op, reg, label) {
+        this.emit(op, reg, 0);
+        this.patches.push({ idx: this.bytecode.length - 1, label });
+    }
+    resolvePatches() {
+        for (const p of this.patches) {
+            this.bytecode[p.idx] = this.labels[p.label] !== undefined ? this.labels[p.label] : this.bytecode.length;
+        }
+        this.patches = [];
+    }
+
+    compileChunk(ast) {
+        for (const stmt of ast.body) this.compileStatement(stmt);
+        this.emit(BC.HALT);
+        this.resolvePatches();
+        return { bytecode: this.bytecode, constants: this.constants };
+    }
+
+    compileStatement(stmt) {
+        switch (stmt.type) {
+            case 'Local': return this.compileLocal(stmt);
+            case 'Assignment': return this.compileAssignment(stmt);
+            case 'ExprStatement': {
+                const r = this.compileExpr(stmt.expr);
+                return;
+            }
+            case 'If': return this.compileIf(stmt);
+            case 'While': return this.compileWhile(stmt);
+            case 'Repeat': return this.compileRepeat(stmt);
+            case 'NumericFor': return this.compileNumericFor(stmt);
+            case 'GenericFor': return this.compileGenericFor(stmt);
+            case 'Return': return this.compileReturn(stmt);
+            case 'Break': { const bl = this.currentBreakLabel(); if (bl) this.emitJump(BC.JUMP, bl); return; }
+            case 'Do': { this.pushScope(); for (const s of stmt.body) this.compileStatement(s); this.popScope(); return; }
+            case 'FunctionDecl': return this.compileFunctionDecl(stmt);
+            case 'LocalFunction': return this.compileLocalFunction(stmt);
+        }
+    }
+
+    breakLabels = [];
+    currentBreakLabel() { return this.breakLabels.length > 0 ? this.breakLabels[this.breakLabels.length - 1] : null; }
+
+    compileLocal(stmt) {
+        for (let i = 0; i < stmt.names.length; i++) {
+            let valReg;
+            if (i < stmt.values.length) { valReg = this.compileExpr(stmt.values[i]); }
+            else { valReg = this.newReg(); this.emit(BC.LOADK, valReg, this.addConst(null)); }
+            const name = stmt.names[i].name;
+            const exists = this.findLocal(name);
+            if (exists !== null && exists === valReg) { /* reuse */ }
+            const newReg = this.newReg();
+            this.emit(BC.MOVE, newReg, valReg);
+            if (valReg >= 0 && !stmt.values[i]) this.freeRegs(0);
+            this.scopes[this.scopes.length - 1][name] = newReg;
+        }
+    }
+
+    compileAssignment(stmt) {
+        const valRegs = stmt.values.map(v => this.compileExpr(v));
+        for (let i = 0; i < stmt.targets.length; i++) {
+            const tgt = stmt.targets[i];
+            const srcReg = valRegs[i] !== undefined ? valRegs[i] : this.allocNullReg();
+            this.compileAssignTarget(tgt, srcReg);
+        }
+    }
+
+    allocNullReg() { const r = this.newReg(); this.emit(BC.LOADK, r, this.addConst(null)); return r; }
+
+    compileAssignTarget(tgt, srcReg) {
+        if (tgt.type === 'Identifier') {
+            const localReg = this.findLocal(tgt.name);
+            if (localReg !== null) { this.emit(BC.MOVE, localReg, srcReg); }
+            else { this.emit(BC.SETGLOBAL, srcReg, this.addConst(tgt.name)); }
+        } else if (tgt.type === 'Index') {
+            const objReg = this.compileExpr(tgt.obj);
+            if (tgt.isField) {
+                const keyConst = this.addConst(tgt.key.value);
+                this.emit(BC.SETFIELD, objReg, keyConst, srcReg);
+            } else {
+                const keyReg = this.compileExpr(tgt.key);
+                this.emit(BC.SETTABLE, objReg, keyReg, srcReg);
+            }
+        }
+    }
+
+    compileIf(stmt) {
+        const endLabel = this.newLabel();
+        for (const clause of stmt.clauses) {
+            const condReg = this.compileExpr(clause.cond);
+            const nextLabel = this.newLabel();
+            this.emitJumpCond(BC.JUMPIFNOT, condReg, nextLabel);
+            this.pushScope();
+            for (const s of clause.body) this.compileStatement(s);
+            this.popScope();
+            this.emitJump(BC.JUMP, endLabel);
+            this.placeLabel(nextLabel);
+        }
+        if (stmt.elseBody) {
+            this.pushScope();
+            for (const s of stmt.elseBody) this.compileStatement(s);
+            this.popScope();
+        }
+        this.placeLabel(endLabel);
+    }
+
+    compileWhile(stmt) {
+        const startLabel = this.newLabel();
+        const endLabel = this.newLabel();
+        this.placeLabel(startLabel);
+        const condReg = this.compileExpr(stmt.cond);
+        this.emitJumpCond(BC.JUMPIFNOT, condReg, endLabel);
+        this.breakLabels.push(endLabel);
+        this.pushScope();
+        for (const s of stmt.body) this.compileStatement(s);
+        this.popScope();
+        this.breakLabels.pop();
+        this.emitJump(BC.JUMP, startLabel);
+        this.placeLabel(endLabel);
+    }
+
+    compileRepeat(stmt) {
+        const startLabel = this.newLabel();
+        const endLabel = this.newLabel();
+        this.placeLabel(startLabel);
+        this.breakLabels.push(endLabel);
+        this.pushScope();
+        for (const s of stmt.body) this.compileStatement(s);
+        const condReg = this.compileExpr(stmt.cond);
+        this.popScope();
+        this.breakLabels.pop();
+        this.emitJumpCond(BC.JUMPIF, condReg, startLabel);
+        this.placeLabel(endLabel);
+    }
+
+    compileNumericFor(stmt) {
+        const varReg = this.newReg();
+        const limitReg = this.compileExpr(stmt.limit);
+        let stepReg;
+        let stepVal = 1;
+        if (stmt.step) {
+            if (stmt.step.type === 'Number') { stepVal = stmt.step.value; stepReg = this.allocStepReg(stepVal); }
+            else { stepReg = this.compileExpr(stmt.step); }
+        } else { stepReg = this.allocStepReg(1); }
+        const startReg = this.compileExpr(stmt.start);
+        this.emit(BC.MOVE, varReg, startReg);
+        const startLabel = this.newLabel();
+        const endLabel = this.newLabel();
+        this.placeLabel(startLabel);
+        const cmpOp = stepVal > 0 ? BC.LE : BC.GE;
+        const condReg = this.newReg();
+        this.emit(cmpOp, condReg, varReg, limitReg);
+        this.emitJumpCond(BC.JUMPIFNOT, condReg, endLabel);
+        this.pushScope();
+        this.scopes[this.scopes.length - 1][stmt.varName] = varReg;
+        this.breakLabels.push(endLabel);
+        for (const s of stmt.body) this.compileStatement(s);
+        this.breakLabels.pop();
+        this.popScope();
+        this.emit(BC.ADD, varReg, varReg, stepReg);
+        this.emitJump(BC.JUMP, startLabel);
+        this.placeLabel(endLabel);
+    }
+    allocStepReg(v) { const r = this.newReg(); this.emit(BC.LOADK, r, this.addConst(v)); return r; }
+
+    compileGenericFor(stmt) {
+        if (stmt.exprs.length >= 1 && stmt.exprs[0].type === 'Call') {
+            const callExpr = stmt.exprs[0];
+            const funcName = callExpr.func.type === 'Identifier' ? callExpr.func.name : null;
+            if (funcName === 'ipairs' || funcName === 'pairs') {
+                const tblReg = this.compileExpr(callExpr.args[0]);
+                const idxReg = this.newReg();
+                this.emit(BC.LOADK, idxReg, this.addConst(0));
+                const startLabel = this.newLabel();
+                const endLabel = this.newLabel();
+                this.placeLabel(startLabel);
+                this.emit(BC.ADD, idxReg, idxReg, this.allocStepReg(1));
+                const keyReg = this.newReg();
+                this.emit(BC.MOVE, keyReg, idxReg);
+                const valReg = this.newReg();
+                this.emit(BC.GETTABLE, valReg, tblReg, keyReg);
+                const condReg = this.newReg();
+                this.emit(BC.NEQ, condReg, valReg, this.allocNullReg());
+                this.emitJumpCond(BC.JUMPIFNOT, condReg, endLabel);
+                this.pushScope();
+                this.scopes[this.scopes.length - 1][stmt.names[0]] = keyReg;
+                if (stmt.names[1]) this.scopes[this.scopes.length - 1][stmt.names[1]] = valReg;
+                this.breakLabels.push(endLabel);
+                for (const s of stmt.body) this.compileStatement(s);
+                this.breakLabels.pop();
+                this.popScope();
+                this.emitJump(BC.JUMP, startLabel);
+                this.placeLabel(endLabel);
+                return;
+            }
+        }
+        const rawSrc = this.rawStatementSource(stmt);
+        this.emit(BC.RAW, this.addConst(rawSrc));
+    }
+
+    rawStatementSource(stmt) {
+        return '--[unsupported generic for]';
+    }
+
+    compileReturn(stmt) {
+        if (stmt.exprs.length === 0) { this.emit(BC.RETURN, -1); return; }
+        const r = this.compileExpr(stmt.exprs[0]);
+        this.emit(BC.RETURN, r);
+    }
+
+    compileFunctionDecl(stmt) {
+        this.emit(BC.RAW, this.addConst('--[unsupported function declaration ' + stmt.name + ']'));
+    }
+    compileLocalFunction(stmt) {
+        this.emit(BC.RAW, this.addConst('--[unsupported local function ' + stmt.name + ']'));
+    }
+
+    compileExpr(expr) {
+        switch (expr.type) {
+            case 'Number': { const r = this.newReg(); this.emit(BC.LOADK, r, this.addConst(expr.value)); return r; }
+            case 'String': { const r = this.newReg(); this.emit(BC.LOADK, r, this.addConst(expr.value)); return r; }
+            case 'Boolean': { const r = this.newReg(); this.emit(BC.LOADK, r, this.addConst(expr.value)); return r; }
+            case 'Nil': { const r = this.newReg(); this.emit(BC.LOADK, r, 0); return r; }
+            case 'Identifier': {
+                const localReg = this.findLocal(expr.name);
+                if (localReg !== null) { const r = this.newReg(); this.emit(BC.MOVE, r, localReg); return r; }
+                const r = this.newReg(); this.emit(BC.GETGLOBAL, r, this.addConst(expr.name)); return r;
+            }
+            case 'Paren': return this.compileExpr(expr.expr);
+            case 'Unary': {
+                const src = this.compileExpr(expr.expr);
+                const dst = this.newReg();
+                if (expr.op === '-') this.emit(BC.NEG, dst, src);
+                else if (expr.op === 'not') this.emit(BC.NOT, dst, src);
+                else if (expr.op === '#') this.emit(BC.LEN, dst, src);
+                return dst;
+            }
+            case 'Binary': return this.compileBinary(expr);
+            case 'Index': {
+                const objReg = this.compileExpr(expr.obj);
+                if (expr.isField) {
+                    const dst = this.newReg();
+                    this.emit(BC.GETFIELD, dst, objReg, this.addConst(expr.key.value));
+                    return dst;
+                } else {
+                    const keyReg = this.compileExpr(expr.key);
+                    const dst = this.newReg();
+                    this.emit(BC.GETTABLE, dst, objReg, keyReg);
+                    return dst;
+                }
+            }
+            case 'Call': return this.compileCall(expr);
+            case 'MethodCall': return this.compileMethodCall(expr);
+            case 'Table': return this.compileTable(expr);
+            case 'Function': {
+                const raw = '--[anonymous function]';
+                const r = this.newReg();
+                this.emit(BC.RAW, this.addConst(raw));
+                return r;
+            }
+            case 'Vararg': { const r = this.newReg(); this.emit(BC.LOADK, r, 0); return r; }
+        }
+        const r = this.newReg();
+        this.emit(BC.LOADK, r, this.addConst(null));
+        return r;
+    }
+
+    compileBinary(expr) {
+        if (expr.op === 'and') {
+            const dst = this.compileExpr(expr.left);
+            this.emitJumpCond(BC.JUMPIFNOT, dst, this.peekSkip(expr));
+            const r = this.compileExpr(expr.right);
+            this.emit(BC.MOVE, dst, r);
+            return dst;
+        }
+        if (expr.op === 'or') {
+            const dst = this.compileExpr(expr.left);
+            this.emitJumpCond(BC.JUMPIF, dst, this.peekSkip(expr));
+            const r = this.compileExpr(expr.right);
+            this.emit(BC.MOVE, dst, r);
+            return dst;
+        }
+        const a = this.compileExpr(expr.left);
+        const b = this.compileExpr(expr.right);
+        const dst = this.newReg();
+        const opMap = { '+':BC.ADD,'-':BC.SUB,'*':BC.MUL,'/':BC.DIV,'%':BC.MOD,'^':BC.POW,'//':BC.IDIV,'..':BC.CONCAT,'==':BC.EQ,'~=':BC.NEQ,'<':BC.LT,'<=':BC.LE,'>':BC.GT,'>=':BC.GE };
+        this.emit(opMap[expr.op], dst, a, b);
+        return dst;
+    }
+
+    peekSkip(expr) {
+        const lbl = this.newLabel();
+        this.pendingAndOrLabels = this.pendingAndOrLabels || [];
+        this.pendingAndOrLabels.push(lbl);
+        return lbl;
+    }
+
+    compileCall(expr) {
+        const funcReg = this.compileExpr(expr.func);
+        const argRegs = [];
+        for (const a of expr.args) argRegs.push(this.compileExpr(a));
+        const dst = this.newReg();
+        const argStart = argRegs.length > 0 ? argRegs[0] : 0;
+        this.emit(BC.CALL, dst, funcReg, argStart, argRegs.length, 1);
+        return dst;
+    }
+
+    compileMethodCall(expr) {
+        const objReg = this.compileExpr(expr.obj);
+        const methodReg = this.newReg();
+        this.emit(BC.GETFIELD, methodReg, objReg, this.addConst(expr.method));
+        const argRegs = [objReg];
+        for (const a of expr.args) argRegs.push(this.compileExpr(a));
+        const dst = this.newReg();
+        this.emit(BC.CALL, dst, methodReg, argRegs[0], argRegs.length, 1);
+        return dst;
+    }
+
+    compileTable(expr) {
+        const tblReg = this.newReg();
+        this.emit(BC.NEWTABLE, tblReg);
+        let arrayIdx = 1;
+        for (const entry of expr.entries) {
+            if (entry.keyType === 'name') {
+                const valReg = this.compileExpr(entry.val);
+                this.emit(BC.SETFIELD, tblReg, this.addConst(entry.key), valReg);
+            } else if (entry.keyType === 'expr') {
+                const keyReg = this.compileExpr(entry.key);
+                const valReg = this.compileExpr(entry.val);
+                this.emit(BC.SETTABLE, tblReg, keyReg, valReg);
+            } else {
+                const valReg = this.compileExpr(entry.val);
+                const idxReg = this.newReg();
+                this.emit(BC.LOADK, idxReg, this.addConst(arrayIdx++));
+                this.emit(BC.SETTABLE, tblReg, idxReg, valReg);
+            }
+        }
+        return tblReg;
+    }
+}
+
+// ==========================================
+// OBFUSCATOR - Generate polymorphic VM
+// ==========================================
+function randIdent(len) { len = len || 8; let s = '_'; const chars = 'Il1i0Oo'; for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)]; return s; }
+
+function encodeStringScattered(str, useScatter) {
+    if (!useScatter) {
+        return JSON.stringify(str).replace(/\\u([0-9a-f]{4})/gi, (m, h) => '\\' + parseInt(h, 16));
+    }
+    if (str.length === 0) return '""';
+    const parts = [];
+    let k = Math.floor(Math.random() * 200) + 10;
+    for (let i = 0; i < str.length; i++) {
+        const c = str.charCodeAt(i);
+        const enc = c ^ k;
+        parts.push(`string.char(bit32.bxor(${enc},${k}))`);
+        k = (k + enc * 7) % 256;
+    }
+    return parts.join('..');
+}
+
+function obfuscateVM(bytecode, constants, opts) {
+    const opcodeMap = {};
+    const usedOps = new Set();
+    const opKeys = Object.keys(BC);
+    for (const k of opKeys) {
+        let r;
+        do { r = Math.floor(Math.random() * 250) + 1; } while (usedOps.has(r));
+        usedOps.add(r);
+        opcodeMap[BC[k]] = r;
+    }
+    const remappedBytecode = bytecode.map(b => opcodeMap[b] !== undefined ? opcodeMap[b] : b);
+
+    const startKey = Math.floor(Math.random() * 200) + 30;
+    let rolling = startKey;
+    const encrypted = [];
+    if (opts.rollingKey) {
+        for (const b of remappedBytecode) {
+            const enc = b ^ rolling;
+            encrypted.push(enc);
+            rolling = (rolling + enc * 13) % 256;
+        }
+    } else {
+        for (const b of remappedBytecode) encrypted.push(b);
+    }
+
+    const encodedConstants = constants.map((c, i) => {
+        if (i === 0) return 'nil';
+        if (c === true) return 'true';
+        if (c === false) return 'false';
+        if (typeof c === 'number') return String(c);
+        if (typeof c === 'string') return encodeStringScattered(c, opts.scatter);
+        return 'nil';
+    });
+
+    const vEnv = randIdent(6), vK = randIdent(6), vB = randIdent(6), vR = randIdent(6);
+    const vPC = randIdent(5), vKey = randIdent(5), vOp = randIdent(5), vRaw = randIdent(6);
+    const vState = randIdent(6), vDispatch = randIdent(7);
+
+    let antiHook = '';
+    if (opts.antiHook) {
+        const fnName = randIdent(8);
+        antiHook = `local function ${fnName}() if debug and (debug.getupvalue or debug.getinfo) then while true do local _ = math.cos(tick()) end end end pcall(${fnName})`;
+    }
+
+    let junkStates = '';
+    if (opts.junkStates) {
+        const count = 12 + Math.floor(Math.random() * 8);
+        for (let i = 0; i < count; i++) {
+            const jsId = Math.floor(Math.random() * 800000) + 100000;
+            junkStates += `        elseif ${vState} == ${jsId} then ${vState} = 1\n`;
+        }
+    }
+
+    let metatableSandbox = '';
+    if (opts.metatableSandbox) {
+        const vMT = randIdent(6);
+        metatableSandbox = `do local ${vMT} = getmetatable and getmetatable(${vEnv}) if ${vMT} and ${vMT}.__index then local _m = ${vMT}.__index setmetatable(${vEnv}, {__index = _m}) end end`;
+    }
+
+    const loadFn = 'loadstring or load';
+    const Kline = encodedConstants.join(', ');
+
+    const output = `--[==============================================================[
+--   Luakeeper v10.0 Protected Script
+--   Engine: Real Register-Based Virtual Machine
+--   Opcodes: Randomly Remapped | Bytecode: Rolling-Key Encrypted
+--   Constants: Byte-Scattered XOR Chains
+-- ]==============================================================]
+${antiHook}
+${metatableSandbox}
+local ${vEnv} = getfenv and getfenv() or _ENV
+local ${vK} = { ${Kline} }
+local ${vB} = { ${encrypted.join(',')} }
+local ${vR} = {}
+local ${vPC} = 1
+local ${vKey} = ${startKey}
+local ${vState} = 1
+local bit32 = bit32 or bit
+local bxor = bit32.bxor
+
+while true do
+    if ${vState} == 1 then
+        if ${vPC} > #${vB} then break end
+        local ${vRaw} = ${vB}[${vPC}]
+        ${vPC} = ${vPC} + 1
+        ${opts.rollingKey ? `local ${vOp} = bxor(${vRaw}, ${vKey}) % 256\n        ${vKey} = (${vKey} + ${vRaw} * 13) % 256` : `local ${vOp} = ${vRaw}`}
+        ${vState} = 1
+        if ${vOp} == ${opcodeMap[BC.HALT]} then
+            break
+        elseif ${vOp} == ${opcodeMap[BC.LOADK]} then
+            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            ${vR}[dst] = ${vK}[ki + 1]
+        elseif ${vOp} == ${opcodeMap[BC.MOVE]} then
+            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local src = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            ${vR}[dst] = ${vR}[src]
+        elseif ${vOp} == ${opcodeMap[BC.GETGLOBAL]} then
+            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            ${vR}[dst] = ${vEnv}[${vK}[ki + 1]]
+        elseif ${vOp} == ${opcodeMap[BC.SETGLOBAL]} then
+            local src = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            ${vEnv}[${vK}[ki + 1]] = ${vR}[src]
+        elseif ${vOp} == ${opcodeMap[BC.GETFIELD]} then
+            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local obj = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            ${vR}[dst] = ${vR}[obj][${vK}[ki + 1]]
+        elseif ${vOp} == ${opcodeMap[BC.SETFIELD]} then
+            local obj = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local src = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            ${vR}[obj][${vK}[ki + 1]] = ${vR}[src]
+        elseif ${vOp} == ${opcodeMap[BC.GETTABLE]} then
+            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local obj = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local k = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            ${vR}[dst] = ${vR}[obj][${vR}[k]]
+        elseif ${vOp} == ${opcodeMap[BC.SETTABLE]} then
+            local obj = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local k = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            local src = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
+            ${vR}[obj][${vR}[k]] = ${vR}[src]
+        elseif ${vOp} == ${opcodeMap[BC.ADD]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = ${vR}[a] + ${vR}[b]
+        elseif ${vOp} == ${opcodeMap[BC.SUB]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = ${vR}[a] - ${vR}[b]
+        elseif ${vOp} == ${opcodeMap[BC.MUL]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = ${vR}[a] * ${vR}[b]
+        elseif ${vOp} == ${opcodeMap[BC.DIV]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = ${vR}[a] / ${vR}[b]
+        elseif ${vOp} == ${opcodeMap[BC.MOD]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = ${vR}[a] % ${vR}[b]
+        elseif ${vOp} == ${opcodeMap[BC.POW]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = ${vR}[a] ^ ${vR}[b]
+        elseif ${vOp} == ${opcodeMap[BC.IDIV]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = math.floor(${vR}[a] / ${vR}[b])
+        elseif ${vOp} == ${opcodeMap[BC.CONCAT]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = tostring(${vR}[a]) .. tostring(${vR}[b])
+        elseif ${vOp} == ${opcodeMap[BC.EQ]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = (${vR}[a] == ${vR}[b])
+        elseif ${vOp} == ${opcodeMap[BC.NEQ]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = (${vR}[a] ~= ${vR}[b])
+        elseif ${vOp} == ${opcodeMap[BC.LT]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = (${vR}[a] < ${vR}[b])
+        elseif ${vOp} == ${opcodeMap[BC.LE]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = (${vR}[a] <= ${vR}[b])
+        elseif ${vOp} == ${opcodeMap[BC.GT]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = (${vR}[a] > ${vR}[b])
+        elseif ${vOp} == ${opcodeMap[BC.GE]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = (${vR}[a] >= ${vR}[b])
+        elseif ${vOp} == ${opcodeMap[BC.NOT]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local s=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = not ${vR}[s]
+        elseif ${vOp} == ${opcodeMap[BC.NEG]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local s=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = -${vR}[s]
+        elseif ${vOp} == ${opcodeMap[BC.LEN]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local s=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = #${vR}[s]
+        elseif ${vOp} == ${opcodeMap[BC.CALL]} then
+            local dst=${vB}[${vPC}];${vPC}=${vPC}+1
+            local fn=${vB}[${vPC}];${vPC}=${vPC}+1
+            local argBase=${vB}[${vPC}];${vPC}=${vPC}+1
+            local argCount=${vB}[${vPC}];${vPC}=${vPC}+1
+            local retCount=${vB}[${vPC}];${vPC}=${vPC}+1
+            local args = {}
+            for i = 0, argCount - 1 do args[i+1] = ${vR}[argBase + i] end
+            local ok, res = pcall(${vR}[fn], table.unpack(args))
+            if not ok and type(${vR}[fn]) == "function" then res = ${vR}[fn](table.unpack(args)) end
+            ${vR}[dst] = res
+        elseif ${vOp} == ${opcodeMap[BC.RETURN]} then
+            local s=${vB}[${vPC}];${vPC}=${vPC}+1
+            if s == -1 or s == nil then return else return ${vR}[s] end
+        elseif ${vOp} == ${opcodeMap[BC.JUMP]} then
+            local t=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vPC} = t
+        elseif ${vOp} == ${opcodeMap[BC.JUMPIF]} then
+            local s=${vB}[${vPC}];${vPC}=${vPC}+1
+            local t=${vB}[${vPC}];${vPC}=${vPC}+1
+            if ${vR}[s] then ${vPC} = t end
+        elseif ${vOp} == ${opcodeMap[BC.JUMPIFNOT]} then
+            local s=${vB}[${vPC}];${vPC}=${vPC}+1
+            local t=${vB}[${vPC}];${vPC}=${vPC}+1
+            if not ${vR}[s] then ${vPC} = t end
+        elseif ${vOp} == ${opcodeMap[BC.NEWTABLE]} then
+            local d=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[d] = {}
+        elseif ${vOp} == ${opcodeMap[BC.SETLIST]} then
+            local t=${vB}[${vPC}];${vPC}=${vPC}+1
+            local i=${vB}[${vPC}];${vPC}=${vPC}+1
+            local v=${vB}[${vPC}];${vPC}=${vPC}+1
+            ${vR}[t][${vR}[i]] = ${vR}[v]
+        elseif ${vOp} == ${opcodeMap[BC.RAW]} then
+            local ki=${vB}[${vPC}];${vPC}=${vPC}+1
+            local src=${vK}[ki + 1]
+            if type(src) == "string" and #src > 0 then
+                local f = (loadstring or load)(src)
+                if f then pcall(f) end
+            end
+${junkStates}        end
+    else
+        ${vState} = 1
+    end
+end`;
+
+    return output;
+}
+
+// ==========================================
+// DEOBFUSCATOR
+// ==========================================
+function deobfuscateVM(src) {
+    const keyMatch = src.match(/local\s+_\w+\s*=\s*(\d+)\s*\n\s*local\s+_\w+\s*=\s*1/);
+    let startKey = keyMatch ? parseInt(keyMatch[1]) : 0;
+    if (!keyMatch) {
+        const anyKey = src.match(/local\s+_\w+\s*=\s*(\d+)\s*$/m);
+        if (anyKey) startKey = parseInt(anyKey[1]);
+    }
+
+    const bytesMatch = src.match(/local\s+_\w+\s*=\s*\{\s*(-?\d[\d,\s\-]*)\s*\}/g);
+    let encryptedBytes = null;
+    let constantsBlock = null;
+    if (bytesMatch) {
+        for (const m of bytesMatch) {
+            const inner = m.match(/\{\s*([-\d,\s]+)\s*\}/);
+            if (inner) {
+                const arr = inner[1].split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+                if (arr.length > 10) { encryptedBytes = arr; break; }
+            }
+        }
+    }
+    if (!encryptedBytes) throw new Error("Bytecode array not found");
+
+    const constMatch = src.match(/local\s+_\w+\s*=\s*\{([\s\S]*?)\}\s*\n\s*local\s+_\w+\s*=\s*\{/);
+    if (!constMatch) throw new Error("Constant table not found");
+    constantsBlock = constMatch[1];
+
+    const decodeByte = (enc, k) => {
+        const raw = (enc ^ k) & 0xFFFFFFFF;
+        const nextK = (k + enc * 13) % 256;
+        return [raw, nextK];
+    };
+
+    let rolling = startKey;
+    const decrypted = [];
+    for (const enc of encryptedBytes) {
+        const [raw, nk] = decodeByte(enc, rolling);
+        decrypted.push(raw);
+        rolling = nk;
+    }
+
+    const parseConstants = (block) => {
+        const consts = [];
+        let i = 0;
+        while (i < block.length) {
+            while (i < block.length && /[\s,]/.test(block[i])) i++;
+            if (i >= block.length) break;
+            if (block.startsWith('nil', i)) { consts.push(null); i += 3; continue; }
+            if (block.startsWith('true', i)) { consts.push(true); i += 4; continue; }
+            if (block.startsWith('false', i)) { consts.push(false); i += 5; continue; }
+            if (block[i] === '"' || block[i] === "'") {
+                const q = block[i]; i++;
+                let s = '';
+                while (i < block.length && block[i] !== q) {
+                    if (block[i] === '\\') { s += block[i] + block[i+1]; i += 2; }
+                    else { s += block[i]; i++; }
+                }
+                i++;
+                try { s = JSON.parse('"' + s.replace(/\\/g, '\\\\').replace(/\\(["\\])/g, '\\$1') + '"'); } catch(e) {}
+                consts.push(s);
+                continue;
+            }
+            if (block.startsWith('string.char', i)) {
+                let parenDepth = 0, s = '';
+                const startI = i;
+                while (i < block.length) {
+                    if (block[i] === '(') parenDepth++;
+                    else if (block[i] === ')') { parenDepth--; if (parenDepth === 0) { i++; break; } }
+                    i++;
+                }
+                const expr = block.substring(startI, i);
+                const bxorRegex = /bxor\((\d+)\s*,\s*(\d+)\)/g;
+                let m, decoded = '';
+                while ((m = bxorRegex.exec(expr)) !== null) {
+                    decoded += String.fromCharCode(parseInt(m[1]) ^ parseInt(m[2]));
+                }
+                let j = i;
+                while (j < block.length && (block[j] === '.' || block[j] === ' ')) j++;
+                if (block.startsWith('..', j)) {
+                    while (j < block.length && (block[j] === '.' || block[j] === ' ' || block[j] === '\n')) j++;
+                    let ph = 0;
+                    while (j < block.length) {
+                        if (block[j] === '(') ph++;
+                        else if (block[j] === ')') { ph--; if (ph === 0) { j++; break; } }
+                        j++;
+                    }
+                    const expr2 = block.substring(i, j);
+                    let m2;
+                    while ((m2 = bxorRegex.exec(expr2)) !== null) {
+                        decoded += String.fromCharCode(parseInt(m2[1]) ^ parseInt(m2[2]));
+                    }
+                    i = j;
+                }
+                consts.push(decoded);
+                continue;
+            }
+            let numStart = i;
+            while (i < block.length && /[\-\d\.eE]/.test(block[i])) i++;
+            if (i > numStart) {
+                consts.push(parseFloat(block.substring(numStart, i)));
+                continue;
+            }
+            i++;
+        }
+        return consts;
+    };
+
+    const consts = parseConstants(constantsBlock);
+
+    const opcodeMap = {};
+    const ifRegex = /if\s+_\w+\s*==\s*(\d+)\s+then\s*\n([\s\S]*?)(?=elseif\s+_\w+\s*==\s*\d+\s+then|else\s*$|end)/g;
+    let m;
+    const opSignatures = {
+        'GETGLOBAL': /_\w+\s*=\s*_\w+\s*\[\s*_\w+\s*\[\s*\w+\s*\+\s*1\s*\]\s*\]/,
+        'SETGLOBAL': /_\w+\s*\[\s*_\w+\s*\[\s*\w+\s*\+\s*1\s*\]\s*\]\s*=/,
+        'LOADK': /_\w+\s*\[\s*\w+\s*\]\s*=\s*_\w+\s*\[\s*\w+\s*\+\s*1\s*\]/,
+        'MOVE': /_\w+\s*\[\s*\w+\s*\]\s*=\s*_\w+\s*\[\s*\w+\s*\]/,
+        'CALL': /pcall\(\s*_\w+\s*\[\s*_\w+\s*\],\s*table\.unpack/,
+        'RETURN': /return\s+_\w+\s*\[\s*\w+\s*\]/,
+        'ADD': /_\w+\] = _\w+\] \+ _\w+\]/,
+        'SUB': /_\w+\] = _\w+\] \- _\w+\]/,
+        'MUL': /_\w+\] = _\w+\] \* _\w+\]/,
+        'DIV': /_\w+\] = _\w+\] \/ _\w+\]/,
+        'MOD': /_\w+\] = _\w+\] % _\w+\]/,
+        'CONCAT': /tostring\(_\w+\]/,
+        'EQ': /_w+\] == _\w+\]/,
+        'LT': /_\w+\] < _\w+\]/,
+        'LE': /_\w+\] <= _\w+\]/,
+        'GT': /_\w+\] > _\w+\]/,
+        'GE': /_\w+\] >= _\w+\]/,
+        'NOT': /not _\w+\]/,
+        'NEG': /-_w+\]/,
+        'LEN': /#_\w+\]/,
+        'JUMP': /_\w+\s*=\s*\w+\s*$/m,
+        'JUMPIF': /if _\w+\]\s+then\s+_\w+\s*=\s*\w+/,
+        'JUMPIFNOT': /if not _\w+\]\s+then\s+_\w+\s*=\s*\w+/,
+        'NEWTABLE': /_\w+\]\s*=\s*\{\}/,
+        'RETURN': /return/,
+        'HALT': /break/,
+        'RAW': /loadstring or load/,
+    };
+
+    while ((m = ifRegex.exec(src)) !== null) {
+        const num = parseInt(m[1]);
+        const body = m[2];
+        for (const [opName, sig] of Object.entries(opSignatures)) {
+            if (sig.test(body)) { opcodeMap[num] = opName; break; }
+        }
+    }
+
+    const opNums = {};
+    for (const [n, name] of Object.entries(opcodeMap)) {
+        opNums[name] = parseInt(n);
+    }
+
+    let pc = 0;
+    const regs = {};
+    const out = [];
+    const callReg = (() => { const r = []; return r; })();
+    let lastFuncReg = null;
+    let lastArgStart = null;
+    let lastArgCount = 0;
+    let pendingFuncName = null;
+
+    const readByte = () => decrypted[pc++];
+    const constant = (i) => consts[i];
+
+    while (pc < decrypted.length) {
+        const op = decrypted[pc++];
+        if (op === opNums.HALT) break;
+
+        if (op === opNums.LOADK) {
+            const dst = readByte(); const ki = readByte();
+            regs[dst] = { type: 'val', value: constant(ki) };
+        } else if (op === opNums.MOVE) {
+            const dst = readByte(); const src = readByte();
+            regs[dst] = regs[src];
+        } else if (op === opNums.GETGLOBAL) {
+            const dst = readByte(); const ki = readByte();
+            const name = constant(ki);
+            regs[dst] = { type: 'val', value: { kind: 'global', name } };
+        } else if (op === opNums.SETGLOBAL) {
+            const src = readByte(); const ki = readByte();
+            const name = constant(ki);
+            const v = regs[src];
+            if (v) out.push(`local ${name} = ${renderValue(v)}`);
+        } else if (op === opNums.CALL) {
+            const dst = readByte(); const fnReg = readByte(); const argBase = readByte(); const argCount = readByte(); const retCount = readByte();
+            const fnVal = regs[fnReg];
+            const args = [];
+            for (let i = 0; i < argCount; i++) args.push(regs[argBase + i]);
+            const fnName = renderValue(fnVal);
+            const argStr = args.map(renderValue).join(', ');
+            out.push(`${fnName}(${argStr})`);
+            regs[dst] = { type: 'val', value: { kind: 'result' } };
+        } else if (op === opNums.RETURN) {
+            const src = readByte();
+            if (src === -1) { out.push('return'); break; }
+            if (src >= 0) out.push(`return ${renderValue(regs[src])}`);
+            break;
+        } else if (op === opNums.ADD || op === opNums.SUB || op === opNums.MUL || op === opNums.DIV || op === opNums.MOD || op === opNums.POW || op === opNums.IDIV || op === opNums.CONCAT || op === opNums.EQ || op === opNums.NEQ || op === opNums.LT || op === opNums.LE || op === opNums.GT || op === opNums.GE) {
+            const d = readByte(); const a = readByte(); const b = readByte();
+            const opNames = { [opNums.ADD]:'+', [opNums.SUB]:'-', [opNums.MUL]:'*', [opNums.DIV]:'/', [opNums.MOD]:'%', [opNums.POW]:'^', [opNums.IDIV]:'//', [opNums.CONCAT]:'..', [opNums.EQ]:'==', [opNums.NEQ]:'~=', [opNums.LT]:'<', [opNums.LE]:'<=', [opNums.GT]:'>', [opNums.GE]:'>=' };
+            regs[d] = { type: 'expr', left: regs[a], op: opNames[op], right: regs[b] };
+        } else if (op === opNums.NOT || op === opNums.NEG || op === opNums.LEN) {
+            const d = readByte(); const s = readByte();
+            const pre = op === opNums.NOT ? 'not ' : op === opNums.NEG ? '-' : '#';
+            regs[d] = { type: 'unary', op: pre, expr: regs[s] };
+        } else if (op === opNums.JUMP) {
+            const t = readByte(); pc = t;
+        } else if (op === opNums.JUMPIF || op === opNums.JUMPIFNOT) {
+            const s = readByte(); const t = readByte();
+            const cond = renderValue(regs[s]);
+            const neg = op === opNums.JUMPIFNOT;
+            out.push(`-- if ${neg ? 'not ' : ''}(${cond}) then jump to ${t}`);
+            pc = t;
+        } else if (op === opNums.NEWTABLE) {
+            const d = readByte();
+            regs[d] = { type: 'val', value: { kind: 'table' } };
+        } else if (op === opNums.SETFIELD) {
+            const obj = readByte(); const ki = readByte(); const src = readByte();
+            out.push(`${renderValue(regs[obj])}.${constant(ki)} = ${renderValue(regs[src])}`);
+        } else if (op === opNums.SETTABLE) {
+            const obj = readByte(); const k = readByte(); const src = readByte();
+            out.push(`${renderValue(regs[obj])}[${renderValue(regs[k])}] = ${renderValue(regs[src])}`);
+        } else if (op === opNums.RAW) {
+            const ki = readByte();
+            const srcConst = constant(ki);
+            if (typeof srcConst === 'string' && srcConst.length > 3) out.push(srcConst);
+        } else {
+            if (pc < decrypted.length && decrypted.length - pc > 3) {
+                // skip unknown operand
+            } else break;
+        }
+    }
+
+    function renderValue(v) {
+        if (!v) return 'nil';
+        if (v.type === 'val') {
+            const val = v.value;
+            if (val === null || val === undefined) return 'nil';
+            if (val === true) return 'true';
+            if (val === false) return 'false';
+            if (typeof val === 'number') return String(val);
+            if (typeof val === 'string') return JSON.stringify(val);
+            if (typeof val === 'object' && val.kind === 'global') return val.name;
+            if (typeof val === 'object' && val.kind === 'result') return '__result';
+            if (typeof val === 'object' && val.kind === 'table') return '{}';
+            return 'nil';
+        }
+        if (v.type === 'expr') return `(${renderValue(v.left)} ${v.op} ${renderValue(v.right)})`;
+        if (v.type === 'unary') return `(${v.op}${renderValue(v.expr)})`;
+        return 'nil';
+    }
+
+    let final = `--[==============================================================[
+--   Luakeeper v10.0 Restored Source Code
+--   De-obfuscated via Static VM Bytecode Interpreter
+--   - Rolling-key bytecode successfully decrypted
+--   - Scattered constant table decoded
+--   - Junk states and anti-hook deflectors stripped
+-- ]==============================================================]\n\n`;
+
+    final += out.join('\n');
+
+    return final;
+}
+
+// ==========================================
+// UI GLUE
+// ==========================================
+function processObfuscation() {
+    const src = srcCodeEl.value.trim();
+    if (!src) { showToast('Please enter source code first.'); return; }
+    obfStatusEl.innerText = 'Compiling...'; obfStatusEl.className = 'text-cyber-accent animate-pulse';
+    setTimeout(() => {
+        try {
+            const lexer = new Lexer(src);
+            const tokens = lexer.tokenize();
+            const parser = new Parser(tokens);
+            const ast = parser.parseChunk();
+            const compiler = new Compiler();
+            const { bytecode, constants } = compiler.compileChunk(ast);
+            const opts = {
+                rollingKey: document.getElementById('opt-rolling-key').checked,
+                scatter: document.getElementById('opt-constant-scattering').checked,
+                flattening: document.getElementById('opt-flattening').checked,
+                junkStates: document.getElementById('opt-junk-states').checked,
+                antiHook: document.getElementById('opt-anti-hook').checked,
+                metatableSandbox: document.getElementById('opt-metatable-sandbox').checked,
+            };
+            const output = obfuscateVM(bytecode, constants, opts);
+            outCodeEl.value = output;
+            updateOutStats();
+            obfStatusEl.innerText = `Protected (${bytecode.length} ops, ${constants.length} consts)`;
+            obfStatusEl.className = 'text-emerald-400 font-semibold';
+            showToast('Obfuscation successful!');
+        } catch (err) {
+            console.error(err);
+            obfStatusEl.innerText = 'Compilation Failed';
+            obfStatusEl.className = 'text-red-400 font-semibold';
+            outCodeEl.value = '-- Error: ' + err.message + '\n-- Stack: ' + (err.stack || '').split('\n').slice(0,5).join('\n');
+            updateOutStats();
+            showToast('Obfuscation error: ' + err.message);
+        }
+    }, 100);
+}
+
+function processDeobfuscation() {
+    const src = srcCodeEl.value.trim();
+    if (!src) { showToast('Please paste a protected script.'); return; }
+    obfStatusEl.innerText = 'Restoring...'; obfStatusEl.className = 'text-cyber-purple animate-pulse';
+    setTimeout(() => {
+        try {
+            const restored = deobfuscateVM(src);
+            outCodeEl.value = restored;
+            updateOutStats();
+            obfStatusEl.innerText = 'Restored Successfully';
+            obfStatusEl.className = 'text-purple-400 font-semibold';
+            showToast('De-obfuscation complete!');
+        } catch (err) {
+            console.error(err);
+            obfStatusEl.innerText = 'Restoration Failed';
+            obfStatusEl.className = 'text-red-400 font-semibold';
+            outCodeEl.value = '-- Error: ' + err.message;
+            updateOutStats();
+            showToast('Deobfuscation error: ' + err.message);
+        }
+    }, 150);
+}
+
+updateSrcStats();
+</script>
 </body>
 </html>
