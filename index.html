@@ -183,7 +183,8 @@
                     <span class="badge">Input</span>
                 </div>
             </header>
-            <textarea id="inputCode" placeholder="-- 보호할 코드를 입력하거나 파일을 업로드하세요&#10;print('Industrial Polymorphic VM Active')"></textarea>
+            <textarea id="inputCode" placeholder="-- 보호할 코드를 입력하거나 파일을 업로드하세요
+print('Industrial Polymorphic VM Active')"></textarea>
         </div>
 
         <!-- 난독화된 코드 출력 영역 -->
@@ -253,151 +254,193 @@
         function rName() {
             const chars = "IlIlIIlI1";
             let res = "_";
-            for(let i=0; i<16; i++) {
+            for(let i=0; i<18; i++) {
                 res += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             return res;
         }
 
-        // 다형성 명령어 매핑 무작위 생성기 (Polymorphic ISA Builder)
         function generatePolymorphicISA() {
             let ops = [
-                "OP_LOADK", "OP_GETGLOBAL", "OP_CALL", "OP_ADD", 
-                "OP_SUB", "OP_MOVE", "OP_JMP", "OP_EQ", "OP_RET", "OP_PRINT"
+                "OP_LOADK", "OP_GETGLOBAL", "OP_CALL", "OP_RET", "OP_SETGLOBAL", "OP_MOVE"
             ];
-            let available = Array.from({length: 250}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+            let available = Array.from({length: 255}, (_, i) => i).sort(() => Math.random() - 0.5);
             let map = {};
-            ops.forEach((op, idx) => {
-                map[op] = available[idx];
-            });
+            ops.forEach((op, idx) => { map[op] = available[idx]; });
             return map;
         }
 
         function industrialObfuscate() {
-            let code = document.getElementById('inputCode').value;
-            if (!code.trim()) {
+            let src = document.getElementById('inputCode').value;
+            if (!src.trim()) {
                 alert("난독화할 코드를 입력해주세요!");
                 return;
             }
 
-            // 1. 다형성 ISA 매핑 생성
             let isa = generatePolymorphicISA();
+            let constantPool = [];
+            let virtualBytecode = [];
 
-            // 2. 간단한 구문 분석 및 바이트코드 컴파일 시뮬레이션
-            let cleanCode = code.replace(/--.*$/gm, '').trim();
-            let bytecodeStream = [];
-            
-            // 입력된 코드를 바이트 단위로 쪼개고 상수 파편화 구조 적용
-            let scatteredChunks = [];
-            for (let i = 0; i < cleanCode.length; i++) {
-                let charCode = cleanCode.charCodeAt(i);
-                let randKey = Math.floor(Math.random() * 200) + 1;
-                let encVal = charCode ^ randKey;
-                scatteredChunks.push(`bit32.bxor(${encVal}, ${randKey})`);
+            function addConstant(val) {
+                let idx = constantPool.indexOf(val);
+                if (idx === -1) {
+                    constantPool.push(val);
+                    idx = constantPool.length - 1;
+                }
+                return idx;
             }
 
-            // 3. 롤링 키(Rolling-Key) 암호화 적용 바이트스트림 생성
-            let rawBytes = [];
-            let currentKey = Math.floor(Math.random() * 150) + 50;
-            for (let i = 0; i < cleanCode.length; i++) {
-                let b = cleanCode.charCodeAt(i);
-                let encryptedB = (b + currentKey) % 256;
-                rawBytes.push(encryptedB);
-                currentKey = (currentKey * 33 + encryptedB + 7) % 256;
+            let cleanSrc = src.replace(/--.*$/gm, '');
+            let tokens = cleanSrc.match(/"[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*'|[a-zA-Z_][a-zA-Z0-9_]*|\d+|==|!=|<=|>=|=|(|)|,|\./g) || [];
+
+            let ptr = 0;
+            while(ptr < tokens.length) {
+                let token = tokens[ptr];
+
+                if (ptr + 3 < tokens.length && tokens[ptr+1] === '(' && (tokens[ptr+2].startsWith('"') || tokens[ptr+2].startsWith("'")) && tokens[ptr+3] === ')') {
+                    let globalNameIdx = addConstant(token);
+                    let rawStr = tokens[ptr+2].slice(1, -1);
+                    let strConstIdx = addConstant(rawStr);
+
+                    virtualBytecode.push(isa["OP_GETGLOBAL"], 0, globalNameIdx); 
+                    virtualBytecode.push(isa["OP_LOADK"], 1, strConstIdx);      
+                    virtualBytecode.push(isa["OP_CALL"], 0, 1, 0);               
+                    ptr += 4;
+                    continue;
+                }
+                
+                if (ptr + 2 < tokens.length && tokens[ptr+1] === '=' && (tokens[ptr+2].startsWith('"') || tokens[ptr+2].startsWith("'"))) {
+                    let globalNameIdx = addConstant(token);
+                    let rawStr = tokens[ptr+2].slice(1, -1);
+                    let strConstIdx = addConstant(rawStr);
+                    virtualBytecode.push(isa["OP_LOADK"], 0, strConstIdx);
+                    virtualBytecode.push(isa["OP_SETGLOBAL"], 0, globalNameIdx);
+                    ptr += 3;
+                    continue;
+                }
+                let genericConstIdx = addConstant(token);
+                virtualBytecode.push(isa["OP_LOADK"], 5, genericConstIdx);
+                ptr++;
             }
 
-            // 4. 120개 이상의 타임아웃 트랩이 포함된 가비지 스테이트 머신 생성
-            let junkStates = "";
-            for (let i = 1; i <= 120; i++) {
-                let stateCode = Math.floor(Math.random() * 900000000) + 100000000;
-                let nextCode = i < 120 ? Math.floor(Math.random() * 900000000) + 100000000 : 999999999;
-                junkStates += `
-    elseif ${rName()} == ${stateCode} and (7 * ((${i} % 5) ^ 2) - 1 ~= 888) then
-        local ${rName()} = setmetatable({}, {
-            __index = function(t, k)
-                local acc = 0
-                for j = 1, 200 do acc = acc + math.sin(j) * math.cos(j) end
-                return acc
-            end,
-            __newindex = function(t, k, v)
-                while true do end
-            end
-        })
-        ${rName()} = ${nextCode}
-                `;
+            let rollingKey = Math.floor(Math.random() * 180) + 40;
+            let startKey = rollingKey;
+            let encryptedBytecode = [];
+            for (let i = 0; i < virtualBytecode.length; i++) {
+                let b = virtualBytecode[i];
+                let enc = (b ^ rollingKey) % 256;
+                encryptedBytecode.push(enc);
+                rollingKey = (rollingKey + enc * 13) % 256;
             }
 
-            // 5. 환경 샌드박스 및 안티디버그 쉴드
-            let vEnvShield = rName();
-            let vStateVar = rName();
-            let vPcVar = rName();
-            let vVmFunc = rName();
+            let scatteredConsts = [];
+            constantPool.forEach(c => {
+                let bytes = [];
+                let sStr = String(c);
+                for(let i=0; i<sStr.length; i++) {
+                    let k = Math.floor(Math.random() * 200) + 1;
+                    let codeVal = sStr.charCodeAt(i);
+                    let enc = codeVal ^ k;
+                    bytes.push(`string.char(bit32.bxor(${enc}, ${k}))`);
+                }
+                scatteredConsts.push(bytes.join(' .. '));
+            });
 
-            let sandboxShield = `
-local function ${vEnvShield}()
-    local env = getfenv and getfenv() or _ENV
-    if not env or type(env) ~= "table" then
-        while true do end
-    end
-    setmetatable(env, {
-        __index = function(t, k)
-            if k == "debug" or k == "getfenv" or k == "setfenv" or k == "hookfunction" then
-                while true do
-                    -- 분석 도구 및 후킹 탐지 시 과부하 무한 루프 트랩
-                    local x = math.sin(math.random()) 
-                end
-            end
-            return rawget(t, k)
-        end
-    })
-end
-pcall(${vEnvShield})
-            `;
+            let controlFlowTraps = "";
+            for (let i = 1; i <= 130; i++) {
+                let trapId = Math.floor(Math.random() * 8000000) + 2000000;
+                let nextState = Math.random() > 0.5 ? 1 : Math.floor(Math.random() * 8000000) + 2000000;
+                controlFlowTraps += `
+    elseif _state == ${trapId} then
+        local _trapArr = setmetatable({}, { __index = function(t, k) return rawget(t, k) or error() end, __newindex = function() while true do end end })
+        _state = ${nextState}`;
+            }
 
-            // 6. 최종 독립형 Luau VM 런타임 조립
+            let v_registers = rName();
+            let v_pc = rName();
+            let v_bc = rName();
+            let v_consts = rName();
+            let v_op = rName();
+            let v_key = rName();
+
             let industrialResult = `
 --[========================================================[
-    Luakeeper Industrial Polymorphic VM Engine v7.0
-    - Polymorphic Custom ISA Mapping
-    - Rolling-Key Bytecode Stream Decoder
-    - 120+ Timeout Traps & Control Flow Flattening
-    - Metatable Sandbox & Anti-Hooking Shield
-    - Dynamic Constant Pool Scattering
+    Luakeeper v7.5 Industrial Grade Polymorphic VM Engine
+    - Polymorphic Dynamic ISA Mapping
+    - Rolling-Key Bytecode Stream Interlocking
+    - 130+ Flattening Anti-Timeout & Hook Deflector
 ]========================================================]
-
-${sandboxShield}
-
-local function ${vVmFunc}()
-    local ${vStateVar} = ${Math.floor(Math.random() * 900000000) + 100000000}
-    local ${vPcVar} = 1
-    
-    while true do
-        if ${vStateVar} == 999999999 then
-            -- 동적 상수 풀 파편화 결합 및 즉시 실행
-            local ${rName()} = {${scatteredChunks.join(',')}}
-            local ${rName()} = {}
-            for i = 1, #${rName()} do
-                table.insert(${rName()}, string.char(${rName()}[i]))
+local _ENV = getfenv and getfenv() or _ENV
+local _rawget = rawget
+local _setmetatable = setmetatable
+local function _antiHook()
+    if debug and (debug.getupvalue or debug.info) then
+        _setmetatable(_ENV, {
+            __index = function(t, k)
+                if k == "debug" or k == "getfenv" or k == "setfenv" then
+                    while true do local _ = math.cos(1) * math.sin(1) end
+                end
+                return _rawget(t, k)
             end
-            local ${rName()} = table.concat(${rName()})
-            
-            -- 샌드박스 환경 내부에서 안전하게 로드 및 실행
-            local ok, err = pcall(function()
-                load(${rName()})()
-            end)
-            if not ok then
+        })
+    end
+end
+pcall(_antiHook)
+
+local function _executeVM()
+    local ${v_consts} = {
+        ${scatteredConsts.map(x => `(${x})`).join(',\n        ')}
+    }
+    local ${v_bc} = { ${encryptedBytecode.join(', ')} }
+    local ${v_registers} = {}
+    local ${v_pc} = 1
+    local ${v_key} = ${startKey}
+    local _state = 1
+
+    while true do
+        if _state == 1 then
+            if ${v_pc} > #${v_bc} then break end
+            local _rawOp = ${v_bc}[${v_pc}]
+            local ${v_op} = bit32.bxor(_rawOp, ${v_key}) % 256
+            ${v_key} = (${v_key} + _rawOp * 13) % 256
+            ${v_pc} = ${v_pc} + 1
+
+            if ${v_op} == ${isa["OP_GETGLOBAL"]} then
+                local r = ${v_bc}[${v_pc}] + 1; ${v_pc} = ${v_pc} + 1
+                local cIdx = ${v_bc}[${v_pc}] + 1; ${v_pc} = ${v_pc} + 1
+                ${v_registers}[r] = _ENV[${v_consts}[cIdx]]
+            elseif ${v_op} == ${isa["OP_LOADK"]} then
+                local r = ${v_bc}[${v_pc}] + 1; ${v_pc} = ${v_pc} + 1
+                local cIdx = ${v_bc}[${v_pc}] + 1; ${v_pc} = ${v_pc} + 1
+                ${v_registers}[r] = ${v_consts}[cIdx]
+            elseif ${v_op} == ${isa["OP_CALL"]} then
+                local r = ${v_bc}[${v_pc}] + 1; ${v_pc} = ${v_pc} + 1
+                local numArgs = ${v_bc}[${v_pc}]; ${v_pc} = ${v_pc} + 1
+                local numResults = ${v_bc}[${v_pc}]; ${v_pc} = ${v_pc} + 1
+                local func = ${v_registers}[r]
+                if numArgs == 1 then
+                    func(${v_registers}[r+1])
+                else
+                    func()
+                end
+            elseif ${v_op} == ${isa["OP_SETGLOBAL"]} then
+                local r = ${v_bc}[${v_pc}] + 1; ${v_pc} = ${v_pc} + 1
+                local cIdx = ${v_bc}[${v_pc}] + 1; ${v_pc} = ${v_pc} + 1
+                _ENV[${v_consts}[cIdx]] = ${v_registers}[r]
+            elseif ${v_op} == ${isa["OP_RET"]} then
+                return
+            else
                 while true do end
             end
-            break
-        ${junkStates}
+            _state = ${Math.random() > 0.6 ? Math.floor(Math.random() * 8000000) + 2000000 : 1}
+            ${controlFlowTraps}
         else
-            ${vStateVar} = ${Math.floor(Math.random() * 900000000) + 100000000}
+            _state = 1
         end
     end
 end
-
-pcall(${vVmFunc})
-            `.trim();
+pcall(_executeVM)
+`.trim();
 
             document.getElementById('outputCode').value = industrialResult;
         }
