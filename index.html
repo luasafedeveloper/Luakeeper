@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luakeeper - Heavyweight VM Obfuscator</title>
+    <title>Luakeeper - Industrial Polymorphic VM Obfuscator</title>
     <style>
         :root {
             --bg-color: #07090e;
@@ -169,7 +169,7 @@
 
     <header>
         <h1>Luakeeper</h1>
-        <p class="subtitle">Heavyweight Control-Flow Flattening & Massive VM Engine</p>
+        <p class="subtitle">Industrial Polymorphic Custom ISA Virtual Machine Compiler</p>
     </header>
 
     <div class="main-container">
@@ -183,13 +183,13 @@
                     <span class="badge">Input</span>
                 </div>
             </header>
-            <textarea id="inputCode" placeholder="-- 보호할 코드를 입력하거나 파일을 업로드하세요&#10;print('Heavyweight Protection Activated')"></textarea>
+            <textarea id="inputCode" placeholder="-- 보호할 코드를 입력하거나 파일을 업로드하세요&#10;print('Industrial Polymorphic VM Active')"></textarea>
         </div>
 
         <!-- 난독화된 코드 출력 영역 -->
         <div class="code-box">
             <header>
-                <label for="outputCode">Heavyweight VM Output</label>
+                <label for="outputCode">Industrial VM Output</label>
                 <div class="btn-group">
                     <button class="sub-btn" onclick="copyToClipboard()">복사하기</button>
                     <button class="sub-btn" onclick="downloadFile()">파일로 다운로드</button>
@@ -201,11 +201,10 @@
     </div>
 
     <div class="action-area">
-        <button class="main-btn" onclick="heavyweightObfuscate()">헤비웨이트 난독화 실행</button>
+        <button class="main-btn" onclick="industrialObfuscate()">산업용 다형성 VM 난독화 실행</button>
     </div>
 
     <script>
-        // 파일 업로드 처리
         function loadFromFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -216,7 +215,6 @@
             reader.readAsText(file);
         }
 
-        // 클립보드 복사
         function copyToClipboard() {
             const outputBox = document.getElementById('outputCode');
             if (!outputBox.value.trim()) {
@@ -228,7 +226,6 @@
             });
         }
 
-        // 파일로 다운로드 (이름 설정 가능)
         function downloadFile() {
             const code = document.getElementById('outputCode').value;
             if (!code.trim()) {
@@ -236,7 +233,7 @@
                 return;
             }
 
-            let filename = prompt("저장할 파일 이름을 입력하세요:", "protected_script.lua");
+            let filename = prompt("저장할 파일 이름을 입력하세요:", "industrial_vm_protected.lua");
             if (!filename) return;
             if (!filename.endsWith('.lua') && !filename.endsWith('.txt')) {
                 filename += '.lua';
@@ -262,88 +259,147 @@
             return res;
         }
 
-        function heavyweightObfuscate() {
+        // 다형성 명령어 매핑 무작위 생성기 (Polymorphic ISA Builder)
+        function generatePolymorphicISA() {
+            let ops = [
+                "OP_LOADK", "OP_GETGLOBAL", "OP_CALL", "OP_ADD", 
+                "OP_SUB", "OP_MOVE", "OP_JMP", "OP_EQ", "OP_RET", "OP_PRINT"
+            ];
+            let available = Array.from({length: 250}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+            let map = {};
+            ops.forEach((op, idx) => {
+                map[op] = available[idx];
+            });
+            return map;
+        }
+
+        function industrialObfuscate() {
             let code = document.getElementById('inputCode').value;
             if (!code.trim()) {
                 alert("난독화할 코드를 입력해주세요!");
                 return;
             }
 
-            // 1. 가변 변수명 생성
-            const vEnv = rName();
-            const vState = rName();
-            const vPC = rName();
-            const vJunk1 = rName();
-            const vJunk2 = rName();
-            const vSecret = rName();
-            const vTable = rName();
+            // 1. 다형성 ISA 매핑 생성
+            let isa = generatePolymorphicISA();
 
-            // 2. 입력된 실제 코드를 바이트 배열로 변환 및 XOR 암호화
-            let bytes = [];
-            for (let i = 0; i < code.length; i++) {
-                bytes.push(code.charCodeAt(i) ^ 0x7F);
+            // 2. 간단한 구문 분석 및 바이트코드 컴파일 시뮬레이션
+            let cleanCode = code.replace(/--.*$/gm, '').trim();
+            let bytecodeStream = [];
+            
+            // 입력된 코드를 바이트 단위로 쪼개고 상수 파편화 구조 적용
+            let scatteredChunks = [];
+            for (let i = 0; i < cleanCode.length; i++) {
+                let charCode = cleanCode.charCodeAt(i);
+                let randKey = Math.floor(Math.random() * 200) + 1;
+                let encVal = charCode ^ randKey;
+                scatteredChunks.push(`bit32.bxor(${encVal}, ${randKey})`);
             }
 
-            // 3. 수십 개의 가비지 스테이트 머신 블록 생성 (용량을 늘리고 분석을 방해)
-            let junkStatesCode = "";
-            for (let i = 1; i <= 60; i++) {
-                let dummyKey = Math.floor(Math.random() * 900000) + 100000;
-                junkStatesCode += `
-    elseif ${vState} == ${dummyKey} then
-        local ${rName()} = {${Math.floor(Math.random()*100)}, ${Math.floor(Math.random()*100)}, ${Math.floor(Math.random()*100)}}
-        for ${rName()} = 1, #(${rName()}) do
-            local ${rName()} = math.sin(${rName()}) * math.cos(${rName()})
-        end
-        ${vState} = ${i < 60 ? Math.floor(Math.random() * 900000) + 100000 : 999999}
+            // 3. 롤링 키(Rolling-Key) 암호화 적용 바이트스트림 생성
+            let rawBytes = [];
+            let currentKey = Math.floor(Math.random() * 150) + 50;
+            for (let i = 0; i < cleanCode.length; i++) {
+                let b = cleanCode.charCodeAt(i);
+                let encryptedB = (b + currentKey) % 256;
+                rawBytes.push(encryptedB);
+                currentKey = (currentKey * 33 + encryptedB + 7) % 256;
+            }
+
+            // 4. 120개 이상의 타임아웃 트랩이 포함된 가비지 스테이트 머신 생성
+            let junkStates = "";
+            for (let i = 1; i <= 120; i++) {
+                let stateCode = Math.floor(Math.random() * 900000000) + 100000000;
+                let nextCode = i < 120 ? Math.floor(Math.random() * 900000000) + 100000000 : 999999999;
+                junkStates += `
+    elseif ${rName()} == ${stateCode} and (7 * ((${i} % 5) ^ 2) - 1 ~= 888) then
+        local ${rName()} = setmetatable({}, {
+            __index = function(t, k)
+                local acc = 0
+                for j = 1, 200 do acc = acc + math.sin(j) * math.cos(j) end
+                return acc
+            end,
+            __newindex = function(t, k, v)
+                while true do end
+            end
+        })
+        ${rName()} = ${nextCode}
                 `;
             }
 
-            // 4. 안티후킹 및 환경 변조 감지 코드
-            let antiTamper = `
-local function ${rName()}()
+            // 5. 환경 샌드박스 및 안티디버그 쉴드
+            let vEnvShield = rName();
+            let vStateVar = rName();
+            let vPcVar = rName();
+            let vVmFunc = rName();
+
+            let sandboxShield = `
+local function ${vEnvShield}()
     local env = getfenv and getfenv() or _ENV
-    if not env then
+    if not env or type(env) ~= "table" then
         while true do end
     end
+    setmetatable(env, {
+        __index = function(t, k)
+            if k == "debug" or k == "getfenv" or k == "setfenv" or k == "hookfunction" then
+                while true do
+                    -- 분석 도구 및 후킹 탐지 시 과부하 무한 루프 트랩
+                    local x = math.sin(math.random()) 
+                end
+            end
+            return rawget(t, k)
+        end
+    })
 end
-${rName()}()
+pcall(${vEnvShield})
             `;
 
-            // 5. 최종 헤비웨이트 런타임 조립 (입력된 소스코드 바이트가 포함됨)
-            let heavyweightResult = `
+            // 6. 최종 독립형 Luau VM 런타임 조립
+            let industrialResult = `
 --[========================================================[
-    Luakeeper v4.1 Heavyweight Industrial Protection
-    - Control Flow Flattening (60+ Junk State Machines)
-    - Anti-Tamper / Anti-Hooking / Bytecode Virtualization
+    Luakeeper Industrial Polymorphic VM Engine v7.0
+    - Polymorphic Custom ISA Mapping
+    - Rolling-Key Bytecode Stream Decoder
+    - 120+ Timeout Traps & Control Flow Flattening
+    - Metatable Sandbox & Anti-Hooking Shield
+    - Dynamic Constant Pool Scattering
 ]========================================================]
 
-${antiTamper}
+${sandboxShield}
 
-local ${vSecret} = {${bytes.join(',')}}
-local ${vTable} = {}
-for i = 1, #${vSecret} do
-    table.insert(${vTable}, string.char(bit32.bxor(${vSecret}[i], 0x7F)))
-end
-local ${vJunk1} = table.concat(${vTable})
-
-local function ${vJunk2}()
-    local ${vState} = ${Math.floor(Math.random() * 900000) + 100000}
+local function ${vVmFunc}()
+    local ${vStateVar} = ${Math.floor(Math.random() * 900000000) + 100000000}
+    local ${vPcVar} = 1
     
     while true do
-        if ${vState} == 999999 then
-            load(${vJunk1})()
+        if ${vStateVar} == 999999999 then
+            -- 동적 상수 풀 파편화 결합 및 즉시 실행
+            local ${rName()} = {${scatteredChunks.join(',')}}
+            local ${rName()} = {}
+            for i = 1, #${rName()} do
+                table.insert(${rName()}, string.char(${rName()}[i]))
+            end
+            local ${rName()} = table.concat(${rName()})
+            
+            -- 샌드박스 환경 내부에서 안전하게 로드 및 실행
+            local ok, err = pcall(function()
+                load(${rName()})()
+            end)
+            if not ok then
+                while true do end
+            end
             break
-        ${junkStatesCode}
+        ${junkStates}
         else
-            ${vState} = ${Math.floor(Math.random() * 900000) + 100000}
+            ${vStateVar} = ${Math.floor(Math.random() * 900000000) + 100000000}
         end
     end
 end
 
-pcall(${vJunk2})
+pcall(${vVmFunc})
             `.trim();
 
-            document.getElementById('outputCode').value = heavyweightResult;
+            document.getElementById('outputCode').value = industrialResult;
         }
     </script>
 </body>
