@@ -119,7 +119,7 @@ body { font-family: 'Inter', sans-serif; background-color: #0a0d14; color: #c0ca
 </div>
 <div class="p-6 overflow-y-auto text-xs sm:text-sm space-y-4 text-slate-300">
 <div><h4 class="font-semibold text-cyber-accent mb-1">1. High-Compatibility Payload Wrapper</h4><p class="text-slate-400">For massive scripts (like 2000+ lines with functions, coroutines, and hooks), the engine wraps the entire payload securely. This guarantees 100% compatibility with complex scripts where traditional bytecode would fail.</p></div>
-<div><h4 class="font-semibold text-cyber-accent mb-1">2. Hex XOR Compression</h4><p class="text-slate-400">Large strings are compressed using Hex XOR to prevent hitting Roblox's script size limits. File sizes are drastically reduced while maintaining maximum obfuscation.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">2. Chunked Hex XOR Compression</h4><p class="text-slate-400">Large strings are compressed using Hex XOR to prevent hitting Roblox's script size limits and are split into chunks to evade static scanning. File sizes are drastically reduced while maintaining maximum obfuscation.</p></div>
 <div><h4 class="font-semibold text-cyber-accent mb-1">3. Accurate Decompiler</h4><p class="text-slate-400">Statically decodes Hex XOR payloads and rolling-key bytecode arrays back into readable Luau source code seamlessly.</p></div>
 </div>
 <div class="p-4 border-t border-cyber-700 text-right"><button onclick="toggleDocsModal()" class="px-4 py-1.5 bg-cyber-700 hover:bg-cyber-600 text-white rounded text-xs">Close</button></div>
@@ -281,7 +281,7 @@ function encodeStringScattered(str, useScatter) {
     if (!useScatter) return JSON.stringify(str).replace(/\\u([0-9a-f]{4})/gi, (m, h) => '\\' + parseInt(h, 16));
     if (str.length === 0) return '""';
     
-    // If the string is large (like a whole script), use Hex XOR to save space and prevent Roblox size limits
+    // Chunked Hex XOR for massive strings
     if (str.length > 100) {
         let hex = '';
         let k = Math.floor(Math.random() * 200) + 10;
@@ -289,7 +289,11 @@ function encodeStringScattered(str, useScatter) {
             let c = str.charCodeAt(i) ^ k;
             hex += c.toString(16).padStart(2, '0');
         }
-        return `(function() local h = "${hex}" return h:gsub("..", function(cc) return string.char(bit32.bxor(tonumber(cc, 16), ${k})) end) end)()`;
+        let chunks = [];
+        for (let i = 0; i < hex.length; i += 5000) {
+            chunks.push(`"${hex.substring(i, i + 5000)}"`);
+        }
+        return `(function() local t = {${chunks.join(',')}} local h = table.concat(t) local r = {} for i = 1, #h, 2 do table.insert(r, string.char(bit32.bxor(tonumber(h:sub(i, i+1), 16), ${k}))) end return table.concat(r) end)()`;
     }
     
     const parts = [];
@@ -366,7 +370,7 @@ function obfuscateVM(bytecode, constants, opts) {
 --   Luakeeper v10.0 Protected Script
 --   Engine: Real Register-Based Virtual Machine
 --   Opcodes: Randomly Remapped | Bytecode: Rolling-Key Encrypted
---   Constants: Hex XOR Compressed
+--   Constants: Chunked Hex XOR Compressed
 -- ]==============================================================]
 ${antiHook}
 ${metatableSandbox}
@@ -513,7 +517,7 @@ while true do
             local ki=${vB}[${vPC}];${vPC}=${vPC}+1
             local src=${vK}[ki + 1]
             if type(src) == "string" and #src > 0 then
-                local f = (loadstring or load)(src)
+                local f = (loadstring or load)(src, nil, nil, ${vEnv})
                 if f then pcall(f) end
             end
 ${junkStates}        end
@@ -613,6 +617,28 @@ function deobfuscateVM(src) {
                 }
                 consts.push(decoded);
                 continue;
+            }
+            if (block.startsWith('(function() local t = {', i)) {
+                let endIdx = block.indexOf('end)()', i);
+                if (endIdx !== -1) {
+                    endIdx += 6;
+                    let expr = block.substring(i, endIdx);
+                    let chunksMatch = expr.match(/local t = \{([^}]+)\}/);
+                    let keyMatch = expr.match(/bit32\.bxor\(tonumber\(h:sub\(i, i\+1\), 16\), (\d+)\)/);
+                    if (chunksMatch && keyMatch) {
+                        let chunks = chunksMatch[1].match(/"([^"]+)"/g).map(s => s.replace(/"/g, ''));
+                        let hex = chunks.join('');
+                        let k = parseInt(keyMatch[1]);
+                        let decoded = '';
+                        for (let j = 0; j < hex.length; j += 2) {
+                            let byte = parseInt(hex.substring(j, j+2), 16);
+                            decoded += String.fromCharCode((byte ^ k) & 0xFF);
+                        }
+                        consts.push(decoded);
+                        i = endIdx;
+                        continue;
+                    }
+                }
             }
             if (block.startsWith('(function()', i)) {
                 let endIdx = block.indexOf('end)()', i);
@@ -796,9 +822,7 @@ function processObfuscation() {
     obfStatusEl.innerText = 'Compiling...'; obfStatusEl.className = 'text-cyber-accent animate-pulse';
     setTimeout(() => {
         try {
-            // Guarantee 100% compatibility with massive scripts by using the secure payload wrapper
             const ast = { type: 'Chunk', body: [{ type: 'RawScript', value: src }] };
-            
             const compiler = new Compiler();
             const { bytecode, constants } = compiler.compileChunk(ast);
             const opts = {
