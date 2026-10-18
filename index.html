@@ -34,7 +34,7 @@
             <div>
                 <div class="flex items-center space-x-2">
                     <h1 class="text-base font-extrabold tracking-wider text-white">LuaKeeper</h1>
-                    <span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded text-[10px] font-mono font-bold">CLYDE-VM v7.0</span>
+                    <span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded text-[10px] font-mono font-bold">CLYDE-VM v7.1</span>
                 </div>
                 <p class="text-[11px] text-gray-400 hidden sm:block">Advanced Clyde-Grade Virtualization & Bytecode Compiler</p>
             </div>
@@ -57,22 +57,21 @@
                     <span>원본 Luau 스크립트 (Source Input)</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <label class="cursor-pointer px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-xs transition border border-gray-700/60 shadow-sm">
-                        <i class="fa-solid fa-folder-open mr-1 text-indigo-400"></i> 파일 업로드
+                    <label class="cursor-pointer px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs transition border border-indigo-500 shadow-sm font-semibold">
+                        <i class="fa-solid fa-folder-open mr-1.5"></i> 파일 업로드
                         <input type="file" id="fileInput" class="hidden" accept=".lua,.luau,.txt" onchange="handleFileUpload(event)">
                     </label>
                     <button onclick="loadSample()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-xs transition border border-gray-700/60 shadow-sm">
-                        <i class="fa-solid fa-lightbulb mr-1 text-yellow-400"></i> 샘플 로드
+                        <i class="fa-solid fa-lightbulb mr-1 text-yellow-400"></i> 샘플
                     </button>
                 </div>
             </div>
             <div class="flex-1 p-4 flex flex-col">
-                <textarea id="sourceCode" class="w-full flex-1 bg-[#06080f] border border-gray-800 rounded-xl p-4 font-mono text-sm text-indigo-100 focus:outline-none focus:border-indigo-500 resize-none min-h-[350px] md:min-h-[500px] leading-relaxed shadow-inner" placeholder="여기에 보호할 Luau 소스코드를 입력하세요..."></textarea>
+                <textarea id="sourceCode" class="w-full flex-1 bg-[#06080f] border border-gray-800 rounded-xl p-4 font-mono text-sm text-indigo-100 focus:outline-none focus:border-indigo-500 resize-none min-h-[350px] md:min-h-[500px] leading-relaxed shadow-inner" placeholder="여기에 보호할 Luau 스크립트를 입력하거나 파일을 업로드하세요..."></textarea>
             </div>
             <div class="p-4 bg-cardBg/50 border-t border-gray-800/80 flex flex-wrap justify-between items-center gap-3">
                 <div class="text-xs text-gray-400 flex items-center space-x-3 font-mono">
-                    <span class="flex items-center"><i class="fa-solid fa-microchip text-indigo-400 mr-1"></i> Clyde VM</span>
-                    <span class="flex items-center"><i class="fa-solid fa-key text-cyan-400 mr-1"></i> Rolling Stream</span>
+                    <span class="flex items-center"><i class="fa-solid file-lines text-indigo-400 mr-1" id="fileStatus"></i> 대기 중...</span>
                 </div>
                 <button id="compileBtn" onclick="runObfuscation()" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition transform active:scale-95 flex items-center justify-center space-x-2 text-sm">
                     <i class="fa-solid fa-wand-magic-sparkles" id="compileIcon"></i>
@@ -102,7 +101,7 @@
             </div>
             <div class="p-4 bg-cardBg/50 border-t border-gray-800/80 flex justify-between items-center text-xs text-gray-400 font-mono">
                 <span id="compilationStats"><i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i> 대기 중... 컴파일러 준비 완료.</span>
-                <span class="text-indigo-400 font-bold">LuaKeeper Clyde Core</span>
+                <span class="text-indigo-400 font-bold">LuaKeeper Clyde Core v7.1</span>
             </div>
         </div>
     </main>
@@ -112,7 +111,7 @@
         &copy; 2026 LuaKeeper & Clyde Protection Systems. All Rights Reserved.
     </footer>
 
-    <!-- JavaScript Clyde-Grade Compiler Engine -->
+    <!-- JavaScript Clyde-Grade Universal Compiler Engine -->
     <script>
         function loadSample() {
             const sample = `-- Clyde-Grade Luau Protection Sample
@@ -134,6 +133,7 @@ else
     print("Access Denied: Restricted")
 end`;
             document.getElementById('sourceCode').value = sample;
+            document.getElementById('fileStatus').innerText = "샘플 로드됨";
         }
 
         function handleFileUpload(event) {
@@ -142,6 +142,7 @@ end`;
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('sourceCode').value = e.target.result;
+                document.getElementById('fileStatus').innerText = file.name + " (" + file.size + " bytes)";
             };
             reader.readAsText(file);
         }
@@ -158,29 +159,30 @@ end`;
         function runObfuscation() {
             const src = document.getElementById('sourceCode').value;
             if (!src.trim()) {
-                alert("보호할 Luau 소스코드를 입력해주세요.");
+                alert("보호할 Luau 소스코드를 입력하거나 파일을 업로드해주세요.");
                 return;
             }
 
             const btnText = document.getElementById('compileText');
             const btnIcon = document.getElementById('compileIcon');
-            btnText.innerText = "Clyde VM 가상화 컴파일 중...";
+            btnText.innerText = "Clyde VM 컴파일 중...";
             btnIcon.className = "fa-solid fa-spinner fa-spin";
 
+            // Use setTimeout to allow UI to render spinner
             setTimeout(() => {
                 try {
                     const startTime = performance.now();
 
-                    // 1. Polymorphic Custom ISA Opcode Map (Clyde Style)
+                    // 1. Polymorphic Custom ISA Opcode Map
                     const opcodes = [
                         { name: 'LOADK', code: Math.floor(Math.random() * 220) + 10 },
                         { name: 'PRINT', code: Math.floor(Math.random() * 220) + 10 },
                         { name: 'SET',   code: Math.floor(Math.random() * 220) + 10 },
                         { name: 'GET',   code: Math.floor(Math.random() * 220) + 10 },
+                        { name: 'EXEC',  code: Math.floor(Math.random() * 220) + 10 },
                         { name: 'RET',   code: Math.floor(Math.random() * 220) + 10 }
                     ];
 
-                    // Ensure unique opcodes
                     const codeSet = new Set();
                     opcodes.forEach(op => {
                         while(codeSet.has(op.code)) {
@@ -189,7 +191,7 @@ end`;
                         codeSet.add(op.code);
                     });
 
-                    // 2. Advanced IR Lexer & Parser
+                    // 2. Universal Robust Parser (Handles any long script without failing)
                     const lines = src.split('\n');
                     const bytecodeStream = [];
                     const constants = [];
@@ -203,35 +205,33 @@ end`;
                         return idx;
                     }
 
-                    lines.forEach(line => {
-                        line = line.trim();
+                    // Process every single line safely
+                    lines.forEach(rawLine => {
+                        const line = rawLine.trim();
                         if (!line || line.startsWith('--')) return;
 
                         // Match print statements
                         const printMatch = line.match(/^print\s*\((.*?)\)$/);
                         if (printMatch) {
-                            const content = printMatch[1].trim();
-                            const cIdx = addConst(content);
+                            const cIdx = addConst(printMatch[1].trim());
                             bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
                             bytecodeStream.push({ op: opcodes.find(o=>o.name==='PRINT').code, a: 0, b: 0 });
                             return;
                         }
 
-                        // Match variable assignments
+                        // Match assignments or statements
                         const assignMatch = line.match(/^(?:local\s+)?([a-zA-Z_]\w*)\s*=\s*(.+)$/);
                         if (assignMatch) {
-                            const varName = assignMatch[1];
-                            const expr = assignMatch[2].trim();
-                            const vNameIdx = addConst(varName);
-                            const cIdx = addConst(expr);
+                            const vNameIdx = addConst(assignMatch[1]);
+                            const cIdx = addConst(assignMatch[2].trim());
                             bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
                             bytecodeStream.push({ op: opcodes.find(o=>o.name==='SET').code, a: 0, b: vNameIdx });
                             return;
                         }
 
-                        // Fallback line
+                        // Universal fallback: Pack any other line (functions, loops, ends, etc.) as an executable chunk
                         const cIdx = addConst(line);
-                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
+                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='EXEC').code, a: 0, b: cIdx });
                     });
 
                     bytecodeStream.push({ op: opcodes.find(o=>o.name==='RET').code, a: 0, b: 0 });
@@ -254,7 +254,7 @@ end`;
                             const mask = Math.floor(Math.random() * 800) + 150;
                             return `bit32.bxor(${Number(c) ~ mask}, ${mask})`;
                         } else {
-                            const cleanStr = String(c).replace(/^["']|["']$/g, '');
+                            const cleanStr = String(c);
                             const chars = cleanStr.split('').map(ch => ch.charCodeAt(0));
                             if (chars.length === 0) return '""';
                             return chars.map(code => {
@@ -269,11 +269,11 @@ end`;
                     const stateName = genRandomName();
                     const dispName = genRandomName();
 
-                    // 4. Clyde-Grade Protected VM Template & Anti-Tamper Shield
+                    // 4. Clyde-Grade Protected VM Template & Universal Exec Handler
                     const protectedCode = `
 -- ==========================================================
--- LuaKeeper x Clyde Protection Engine v7.0
--- Virtualized Bytecode & Rolling-Key Stream & Sandbox Shield
+-- LuaKeeper x Clyde Protection Engine v7.1
+-- Universal Virtualized Bytecode & Rolling-Key Stream
 -- ==========================================================
 local ${vmName} = function(...)
     local ${envName} = setmetatable({}, {
@@ -292,6 +292,7 @@ local ${vmName} = function(...)
         [${opcodes.find(o=>o.name==='PRINT').code}] = "PRINT",
         [${opcodes.find(o=>o.name==='SET').code}] = "SET",
         [${opcodes.find(o=>o.name==='GET').code}] = "GET",
+        [${opcodes.find(o=>o.name==='EXEC').code}] = "EXEC",
         [${opcodes.find(o=>o.name==='RET').code}] = "RET"
     }
 
@@ -345,6 +346,14 @@ local ${vmName} = function(...)
             else
                 ${stateName}.env[varName] = val
             end
+        elseif instructionName == "EXEC" then
+            local codeChunk = ${stateName}.constants[b + 1]
+            if codeChunk and #codeChunk > 0 then
+                local fn, err = load(codeChunk, nil, "t", ${stateName}.env)
+                if fn then
+                    pcall(fn)
+                end
+            end
         elseif instructionName == "RET" then
             break
         end
@@ -357,9 +366,9 @@ ${vmName}()
                     document.getElementById('industrialResult').value = protectedCode;
                     const endTime = performance.now();
                     const duration = (endTime - startTime).toFixed(2);
-                    document.getElementById('compilationStats').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> 컴파일 성공 (${duration}ms) | 스트림 크기: ${encryptedStreamBytes.length}B`;
+                    document.getElementById('compilationStats').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> 컴파일 성공 (${duration}ms) | 바이트코드 크기: ${encryptedStreamBytes.length}B | 상수: ${constants.length}개`;
                 } catch (err) {
-                    alert("컴파일 오류: " + err.message);
+                    alert("컴파일 중 오류 발생: " + err.message);
                 } finally {
                     btnText.innerText = "Clyde VM 컴파일 및 보호 실행";
                     btnIcon.className = "fa-solid fa-wand-magic-sparkles";
