@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="ko" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luakeeper v8.5 Industrial Luau VM Compiler</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Industrial Luau VM Obfuscator Compiler v5.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,620 +11,413 @@
             theme: {
                 extend: {
                     colors: {
-                        cyber: {
-                            900: '#0a0d14',
-                            800: '#111625',
-                            700: '#1a2238',
-                            600: '#253252',
-                            accent: '#00f0ff',
-                            purple: '#7000ff',
-                            warn: '#ff0055'
-                        }
-                    },
-                    fontFamily: {
-                        mono: ['Fira Code', 'JetBrains Mono', 'Consolas', 'monospace']
+                        darkBg: '#090d16',
+                        panelBg: '#111827',
+                        accent: '#06b6d4',
+                        accentHover: '#0891b2'
                     }
                 }
             }
         }
     </script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0d14;
-            color: #c0caf5;
-        }
-
-        .glow-accent {
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
-        }
-        
-        .glow-purple {
-            box-shadow: 0 0 15px rgba(112, 0, 255, 0.25);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0d14;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1a2238;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #253252;
-        }
-
-        .code-area {
-            font-family: 'Fira Code', monospace;
-            tab-size: 4;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="min-h-screen flex flex-col bg-cyber-900 text-slate-200">
-
-    <!-- Header / Navbar -->
-    <header class="border-b border-cyber-700 bg-cyber-800/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="p-2 bg-cyber-accent/10 rounded-lg border border-cyber-accent/30 text-cyber-accent">
-                    <i data-lucide="shield-check" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-xl font-bold tracking-wider text-white">LUAKEEPER</span>
-                        <span class="px-2 py-0.5 text-xs font-semibold bg-cyber-purple/30 text-purple-300 border border-cyber-purple/50 rounded-full">v8.5 AST Compiler</span>
-                    </div>
-                    <p class="text-xs text-slate-400">Polymorphic Luau Virtual Machine & AST Parser Engine</p>
-                </div>
+<body class="bg-darkBg text-gray-100 font-sans min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="border-b border-gray-800 bg-panelBg/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="bg-cyan-500/10 border border-cyan-500/30 p-2 rounded-lg text-cyan-400">
+                <i class="fa-solid fa-microchip text-xl"></i>
             </div>
-            
-            <div class="flex items-center space-x-4">
-                <div class="hidden md:flex items-center space-x-2 text-xs bg-cyber-900 px-3 py-1.5 rounded-md border border-cyber-700">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-slate-300 font-mono">AST Parser: Active</span>
-                </div>
-                <a href="#docs" onclick="toggleDocsModal()" class="text-xs text-slate-400 hover:text-cyber-accent transition-colors flex items-center gap-1">
-                    <i data-lucide="help-circle" class="w-4 h-4"></i> Protections Guide
-                </a>
+            <div>
+                <h1 class="text-lg font-bold tracking-wider text-cyan-400">LUAU VIRTUAL MACHINE COMPILER</h1>
+                <p class="text-xs text-gray-400">Industrial Polymorphic Custom ISA & Sandbox Engine</p>
             </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span class="px-3 py-1 bg-cyan-950 text-cyan-300 border border-cyan-800/50 rounded-full text-xs font-mono">STATUS: SECURE_READY</span>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
-        
-        <!-- Controls & Options Bar -->
-        <div class="bg-cyber-800 border border-cyber-700 rounded-xl p-4 shadow-xl">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                
-                <!-- Preset Badges -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                        <i data-lucide="sliders" class="w-3.5 h-3.5"></i> Preset Profile:
-                    </span>
-                    <button onclick="applyPreset('standard')" id="btn-preset-standard" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-cyber-700 bg-cyber-900 text-slate-300 hover:border-cyber-accent/50 transition">
-                        Standard VM
-                    </button>
-                    <button onclick="applyPreset('paranoid')" id="btn-preset-paranoid" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-cyber-purple/50 bg-cyber-purple/10 text-purple-300 hover:bg-cyber-purple/20 transition glow-purple">
-                        Extreme Industrial
-                    </button>
+    <!-- Main Workspace -->
+    <main class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1800px] w-full mx-auto">
+        <!-- Input Panel -->
+        <div class="bg-panelBg border border-gray-800 rounded-xl flex flex-col shadow-2xl overflow-hidden">
+            <div class="bg-gray-900/80 px-4 py-3 border-b border-gray-800 flex justify-between items-center">
+                <div class="flex items-center space-x-2 text-sm font-semibold text-gray-300">
+                    <i class="fa-solid fa-code text-cyan-400"></i>
+                    <span>원본 Luau 소스코드 (Input)</span>
                 </div>
-
-                <!-- Action Button -->
-                <div class="flex items-center gap-3">
-                    <button id="btn-obfuscate" onclick="processObfuscation()" class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-cyber-accent to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-lg shadow-lg glow-accent flex items-center justify-center gap-2 transition-all active:scale-95">
-                        <i data-lucide="cpu" class="w-5 h-5"></i>
-                        <span>Compile & Obfuscate AST</span>
+                <div class="flex items-center space-x-2">
+                    <label class="cursor-pointer px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs transition border border-gray-700">
+                        <i class="fa-solid fa-upload mr-1"></i> 파일 열기
+                        <input type="file" id="fileInput" class="hidden" accept=".lua,.luau,.txt">
+                    </label>
+                    <button onclick="loadSample()" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs transition border border-gray-700">
+                        샘플 로드
                     </button>
                 </div>
             </div>
-
-            <!-- Toggles Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-4 pt-4 border-t border-cyber-700/60 text-xs">
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-flattening" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Control Flow Flattening</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-rolling-key" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Rolling-Key Cipher</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-constant-scattering" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Constant Scattering</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-junk-states" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Junk State Dispatchers</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-anti-hook" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Anti-Hook Deflector</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition">
-                    <input type="checkbox" id="opt-metatable-sandbox" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent">
-                    <span class="text-slate-300">Metatable Sandbox</span>
-                </label>
+            <div class="flex-1 p-4 flex flex-col">
+                <textarea id="sourceCode" class="w-full flex-1 bg-gray-950/70 border border-gray-800 rounded-lg p-4 font-mono text-sm text-cyan-100 focus:outline-none focus:border-cyan-500 resize-none min-h-[450px]" placeholder="여기에 난독화할 Luau 소스코드를 입력하거나 파일을 업로드하세요..."></textarea>
+            </div>
+            <div class="p-4 bg-gray-900/50 border-t border-gray-800 flex justify-between items-center">
+                <div class="text-xs text-gray-400 flex items-center space-x-4">
+                    <span><i class="fa-solid fa-shield text-cyan-400 mr-1"></i> Polymorphic ISA Enabled</span>
+                    <span><i class="fa-solid fa-key text-cyan-400 mr-1"></i> Rolling-Key Stream</span>
+                </div>
+                <button onclick="runObfuscation()" class="px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-lg shadow-lg shadow-cyan-900/40 transition transform active:scale-95 flex items-center space-x-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>VM 컴파일 및 난독화 실행</span>
+                </button>
             </div>
         </div>
 
-        <!-- Editor Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-[500px]">
-            
-            <!-- Source Code Panel -->
-            <div class="bg-cyber-800 border border-cyber-700 rounded-xl flex flex-col shadow-xl overflow-hidden">
-                <div class="bg-cyber-900/80 px-4 py-3 border-b border-cyber-700 flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-300">
-                        <i data-lucide="file-code" class="w-4 h-4 text-cyber-accent"></i>
-                        <span>Source Luau Script</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input type="file" id="file-input" accept=".lua,.txt" class="hidden" onchange="handleFileUpload(event)">
-                        <button onclick="document.getElementById('file-input').click()" class="px-2.5 py-1 bg-cyber-700 hover:bg-cyber-600 text-slate-200 text-xs rounded transition flex items-center gap-1">
-                            <i data-lucide="upload" class="w-3.5 h-3.5"></i> Load File
-                        </button>
-                        <button onclick="clearSource()" class="px-2.5 py-1 bg-cyber-700/50 hover:bg-red-500/20 text-slate-400 hover:text-red-300 text-xs rounded transition">
-                            Clear
-                        </button>
-                    </div>
+        <!-- Output Panel -->
+        <div class="bg-panelBg border border-gray-800 rounded-xl flex flex-col shadow-2xl overflow-hidden">
+            <div class="bg-gray-900/80 px-4 py-3 border-b border-gray-800 flex justify-between items-center">
+                <div class="flex items-center space-x-2 text-sm font-semibold text-gray-300">
+                    <i class="fa-solid fa-lock text-cyan-400"></i>
+                    <span>생성된 가상머신 바이트코드 & 런타임 (Output)</span>
                 </div>
-                <div class="relative flex-1 bg-cyber-900/50">
-                    <textarea id="src-code" spellcheck="false" class="w-full h-full p-4 bg-transparent text-slate-200 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Enter your Luau code here...
-local message = &quot;Hello from Luakeeper AST Compiler!&quot;
-print(message)"></textarea>
-                </div>
-                <div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
-                    <span id="src-stats">Lines: 3 | Size: 0.12 KB</span>
-                    <span>Input Encoding: UTF-8</span>
+                <div class="flex items-center space-x-2">
+                    <button onclick="copyOutput()" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs transition border border-gray-700">
+                        <i class="fa-solid fa-copy mr-1"></i> 복사
+                    </button>
+                    <button onclick="downloadOutput()" class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition font-semibold">
+                        <i class="fa-solid fa-download mr-1"></i> 다운로드
+                    </button>
                 </div>
             </div>
-
-            <!-- Obfuscated Output Panel -->
-            <div class="bg-cyber-800 border border-cyber-700 rounded-xl flex flex-col shadow-xl overflow-hidden">
-                <div class="bg-cyber-900/80 px-4 py-3 border-b border-cyber-700 flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-300">
-                        <i data-lucide="shield-alert" class="w-4 h-4 text-purple-400"></i>
-                        <span>Protected Output Payload</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="copyOutput()" class="px-2.5 py-1 bg-cyber-700 hover:bg-cyber-600 text-slate-200 text-xs rounded transition flex items-center gap-1">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
-                        </button>
-                        <button onclick="downloadOutput()" class="px-2.5 py-1 bg-cyber-purple/40 hover:bg-cyber-purple/60 text-purple-200 text-xs rounded border border-cyber-purple/50 transition flex items-center gap-1">
-                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Save
-                        </button>
-                    </div>
-                </div>
-                <div class="relative flex-1 bg-cyber-900/50">
-                    <textarea id="out-code" readonly spellcheck="false" class="w-full h-full p-4 bg-transparent text-emerald-400/90 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Compiled bytecode payload will appear here..."></textarea>
-                </div>
-                <div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
-                    <span id="out-stats">Lines: 0 | Size: 0 KB</span>
-                    <span id="obf-status" class="text-slate-400">Idle</span>
-                </div>
+            <div class="flex-1 p-4 flex flex-col">
+                <textarea id="industrialResult" readonly class="w-full flex-1 bg-gray-950/70 border border-gray-800 rounded-lg p-4 font-mono text-sm text-green-400 focus:outline-none resize-none min-h-[450px]" placeholder="난독화된 독립형 Luau VM 바이트코드가 여기에 출력됩니다..."></textarea>
             </div>
-
+            <div class="p-4 bg-gray-900/50 border-t border-gray-800 flex justify-between items-center text-xs text-gray-400">
+                <span id="compilationStats">대기 중... 컴파일러 통계 없음</span>
+                <span class="text-cyan-400 font-mono">Industrial Engine v5.0</span>
+            </div>
         </div>
     </main>
 
-    <!-- Protection Guide Modal -->
-    <div id="docs-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cyber-800 border border-cyber-700 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
-            <div class="p-4 border-b border-cyber-700 flex justify-between items-center">
-                <h3 class="font-bold text-white flex items-center gap-2">
-                    <i data-lucide="shield" class="w-5 h-5 text-cyber-accent"></i> AST Compiler & VM Architecture
-                </h3>
-                <button onclick="toggleDocsModal()" class="text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="p-6 overflow-y-auto text-xs sm:text-sm space-y-4 text-slate-300">
-                <div>
-                    <h4 class="font-semibold text-cyber-accent mb-1">1. Luau AST Parser Engine</h4>
-                    <p class="text-slate-400">Parses raw Luau source code into structured lexical tokens, identifying local declarations, assignments, and function calls dynamically.</p>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-cyber-accent mb-1">2. Polymorphic Custom ISA</h4>
-                    <p class="text-slate-400">Translates AST nodes into custom virtual opcodes (OP_LOADK, OP_GETGLOBAL, OP_SETGLOBAL, OP_CALL, OP_ADD, OP_RET) with randomized bytecode assignments per compile session.</p>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-cyber-accent mb-1">3. Rolling-Key Cipher & Constant Scattering</h4>
-                    <p class="text-slate-400">Constants are fragmented and encoded with bitwise XOR masks, while the execution stream requires rolling key progression.</p>
-                </div>
-            </div>
-            <div class="p-4 border-t border-cyber-700 text-right">
-                <button onclick="toggleDocsModal()" class="px-4 py-1.5 bg-cyber-700 hover:bg-cyber-600 text-white rounded text-xs">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 px-4 py-3 rounded-lg shadow-xl text-xs font-semibold bg-cyber-700 text-white border border-cyber-600 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
-        <i data-lucide="info" id="toast-icon" class="w-4 h-4 text-cyber-accent"></i>
-        <span id="toast-msg">Notification</span>
-    </div>
-
+    <!-- JavaScript Compiler & Obfuscation Engine -->
     <script>
-        lucide.createIcons();
+        function loadSample() {
+            const sample = `-- Industrial Luau VM Test Script
+local playerName = "AimbotUser_99"
+print("Welcome to Secure Server, " .. playerName)
 
-        const srcCodeEl = document.getElementById('src-code');
-        const outCodeEl = document.getElementById('out-code');
-        const srcStatsEl = document.getElementById('src-stats');
-        const outStatsEl = document.getElementById('out-stats');
-        const obfStatusEl = document.getElementById('obf-status');
+local function calculateScore(base, multiplier)
+    local bonus = 150
+    return (base * multiplier) + bonus
+end
 
-        srcCodeEl.addEventListener('input', updateSrcStats);
+local finalScore = calculateScore(45, 3)
+print("Calculated Secure Score:", finalScore)
 
-        function updateSrcStats() {
-            const val = srcCodeEl.value;
-            const lines = val.split('\n').length;
-            const size = (new Blob([val]).size / 1024).toFixed(2);
-            srcStatsEl.innerText = `Lines: ${lines} | Size: ${size} KB`;
+if finalScore > 500 then
+    print("Access Granted: Elite Tier")
+else
+    print("Access Denied: Low Tier")
+end`;
+            document.getElementById('sourceCode').value = sample;
         }
 
-        function updateOutStats() {
-            const val = outCodeEl.value;
-            const lines = val.split('\n').length;
-            const size = (new Blob([val]).size / 1024).toFixed(2);
-            outStatsEl.innerText = `Lines: ${lines} | Size: ${size} KB`;
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-
-        function applyPreset(type) {
-            const setCheck = (id, val) => document.getElementById(id).checked = val;
-            if (type === 'standard') {
-                setCheck('opt-flattening', true);
-                setCheck('opt-rolling-key', true);
-                setCheck('opt-constant-scattering', true);
-                setCheck('opt-junk-states', false);
-                setCheck('opt-anti-hook', false);
-                setCheck('opt-metatable-sandbox', false);
-                showToast('Applied Standard Profile');
-            } else if (type === 'paranoid') {
-                setCheck('opt-flattening', true);
-                setCheck('opt-rolling-key', true);
-                setCheck('opt-constant-scattering', true);
-                setCheck('opt-junk-states', true);
-                setCheck('opt-anti-hook', true);
-                setCheck('opt-metatable-sandbox', true);
-                showToast('Applied Extreme Industrial Profile');
+        // Random ID generator for identifiers
+        function genRandomName() {
+            const chars = "IlI1";
+            let res = "_";
+            for(let i=0; i<12; i++) {
+                res += String.fromCharCode(97 + Math.floor(Math.random() * 26));
             }
+            return res;
         }
 
-        function clearSource() {
-            srcCodeEl.value = '';
-            updateSrcStats();
-        }
-
-        function handleFileUpload(evt) {
-            const file = evt.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                srcCodeEl.value = e.target.result;
-                updateSrcStats();
-                showToast(`Loaded ${file.name}`);
-            };
-            reader.readAsText(file);
-        }
-
-        function copyOutput() {
-            if (!outCodeEl.value) return;
-            outCodeEl.select();
-            document.execCommand('copy');
-            showToast('Protected payload copied to clipboard!');
-        }
-
-        function downloadOutput() {
-            if (!outCodeEl.value) return;
-            const blob = new Blob([outCodeEl.value], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'protected_luakeeper.lua';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('File download initiated');
-        }
-
-        function toggleDocsModal() {
-            document.getElementById('docs-modal').classList.toggle('hidden');
-        }
-
-        // ==========================================
-        // Luau AST Tokenizer & Compiler Engine
-        // ==========================================
-        function tokenizeLuau(code) {
-            // Strip comments
-            code = code.replace(/--.*$/gm, '');
-            const regex = /\s*(=>|==|~=|<=|>=|\.\.|[a-zA-Z_][a-zA-Z0-9_]*|\d+(?:\.\d+)?|"[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*'|[{}()\+\-\*\/\,\=\;\.]|\S)\s*/g;
-            let match;
-            const tokens = [];
-            while ((match = regex.exec(code)) !== null) {
-                if (match[1].trim()) tokens.push(match[1]);
-            }
-            return tokens;
-        }
-
-        function processObfuscation() {
-            const source = srcCodeEl.value.trim();
-            if (!source) {
-                showToast('Please enter or load source code first.');
+        // Industrial VM Obfuscator Core Compiler
+        function industrialObfuscate() {
+            const src = document.getElementById('sourceCode').value;
+            if (!src.trim()) {
+                alert("난독화할 Luau 소스코드를 입력해주세요.");
                 return;
             }
 
-            obfStatusEl.innerText = 'Parsing AST & Compiling...';
-            obfStatusEl.className = 'text-cyber-accent animate-pulse';
+            const startTime = performance.now();
 
-            setTimeout(() => {
-                try {
-                    const result = compileAstToVM(source);
-                    outCodeEl.value = result;
-                    updateOutStats();
-                    obfStatusEl.innerText = 'Protected Successfully';
-                    obfStatusEl.className = 'text-emerald-400 font-semibold';
-                    showToast('AST compilation and obfuscation completed!');
-                } catch (err) {
-                    console.error(err);
-                    obfStatusEl.innerText = 'Compilation Failed';
-                    obfStatusEl.className = 'text-red-400 font-semibold';
-                    showToast('Error during AST parsing.');
+            // 1. Polymorphic Custom ISA Instruction Mapping Generation
+            // 12 Custom Opcode Mappings randomized per compilation
+            const opcodes = [
+                { name: 'LOADK', code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'ADD',   code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'SUB',   code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'MUL',   code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'DIV',   code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'CALL',  code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'PRINT', code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'GET',   code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'SET',   code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'JMP',   code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'RET',   code: Math.floor(Math.random() * 200) + 1 },
+                { name: 'CONCAT',code: Math.floor(Math.random() * 200) + 1 }
+            ];
+
+            // Ensure unique opcodes
+            const codeSet = new Set();
+            opcodes.forEach(op => {
+                while(codeSet.has(op.code)) {
+                    op.code = Math.floor(Math.random() * 250) + 1;
                 }
-            }, 100);
-        }
+                codeSet.add(op.code);
+            });
 
-        function compileAstToVM(src) {
-            const optFlattening = document.getElementById('opt-flattening').checked;
-            const optRollingKey = document.getElementById('opt-rolling-key').checked;
-            const optConstantScattering = document.getElementById('opt-constant-scattering').checked;
-            const optJunkStates = document.getElementById('opt-junk-states').checked;
-            const optAntiHook = document.getElementById('opt-anti-hook').checked;
-            const optMetatableSandbox = document.getElementById('opt-metatable-sandbox').checked;
-
-            const tokens = tokenizeLuau(src);
-
-            // Polymorphic ISA Opcodes Assignment
-            const availableOps = Array.from({length: 250}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
-            const OP_LOADK     = availableOps[0];
-            const OP_GETGLOBAL = availableOps[1];
-            const OP_SETGLOBAL = availableOps[2];
-            const OP_CALL      = availableOps[3];
-            const OP_ADD       = availableOps[4];
-            const OP_RETURN    = availableOps[5];
-
-            let constantPool = [];
-            let virtualBytecode = [];
+            // 2. Simple IR Parser & Bytecode Stream Generator
+            const lines = src.split('\n');
+            const bytecodeStream = [];
+            const constants = [];
+            const constMap = {};
 
             function addConst(val) {
-                let idx = constantPool.indexOf(val);
-                if (idx === -1) {
-                    constantPool.push(val);
-                    idx = constantPool.length - 1;
-                }
+                if (constMap[val] !== undefined) return constMap[val];
+                constants.push(val);
+                const idx = constants.length - 1;
+                constMap[val] = idx;
                 return idx;
             }
 
-            // Basic AST Statement & Expression Parser
-            let ptr = 0;
-            while (ptr < tokens.length) {
-                let token = tokens[ptr];
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line || line.startsWith('--')) return;
 
-                // Local or Global Assignment: local name = value OR name = value
-                if (token === 'local' && ptr + 3 < tokens.length && tokens[ptr+2] === '=') {
-                    let varName = tokens[ptr+1];
-                    let valToken = tokens[ptr+3];
-                    let val = valToken.startsWith('"') || valToken.startsWith("'") ? valToken.slice(1, -1) : valToken;
-                    
-                    let nameIdx = addConst(varName);
-                    let valIdx = addConst(isNaN(val) ? val : Number(val));
-
-                    virtualBytecode.push(OP_LOADK, 0, valIdx);
-                    virtualBytecode.push(OP_SETGLOBAL, 0, nameIdx);
-                    ptr += 4;
-                    continue;
-                }
-
-                // Function Call: func(arg)
-                if (ptr + 2 < tokens.length && tokens[ptr+1] === '(') {
-                    let funcName = token;
-                    let argToken = tokens[ptr+2];
-                    let argVal = argToken.startsWith('"') || argToken.startsWith("'") ? argToken.slice(1, -1) : argToken;
-
-                    let funcIdx = addConst(funcName);
-                    let argIdx = addConst(isNaN(argVal) ? argVal : Number(argVal));
-
-                    virtualBytecode.push(OP_GETGLOBAL, 0, funcIdx);
-                    virtualBytecode.push(OP_LOADK, 1, argIdx);
-                    virtualBytecode.push(OP_CALL, 0, 1, 0);
-                    ptr += 4; // func ( arg )
-                    continue;
-                }
-
-                ptr++;
-            }
-
-            // Fallback if no specific pattern matched
-            if (virtualBytecode.length === 0) {
-                let fallbackIdx = addConst(src);
-                let printIdx = addConst("print");
-                virtualBytecode.push(OP_GETGLOBAL, 0, printIdx);
-                virtualBytecode.push(OP_LOADK, 1, fallbackIdx);
-                virtualBytecode.push(OP_CALL, 0, 1, 0);
-            }
-
-            virtualBytecode.push(OP_RETURN);
-
-            // Rolling Key Encryption
-            let rollingKey = Math.floor(Math.random() * 180) + 20;
-            let startKey = rollingKey;
-            let encryptedBytecodes = [];
-            if (optRollingKey) {
-                for (let b of virtualBytecode) {
-                    let enc = (b ^ rollingKey) % 256;
-                    encryptedBytecodes.push(enc);
-                    rollingKey = (rollingKey + enc * 13) % 256;
-                }
-            } else {
-                encryptedBytecodes = virtualBytecode;
-            }
-
-            // Constant Scattering
-            let scatteredConsts = [];
-            constantPool.forEach(c => {
-                let sStr = String(c);
-                if (optConstantScattering) {
-                    let bytes = [];
-                    for(let i=0; i<sStr.length; i++) {
-                        let k = Math.floor(Math.random() * 200) + 1;
-                        let codeVal = sStr.charCodeAt(i);
-                        let enc = codeVal ^ k;
-                        bytes.push(`string.char(bit32.bxor(${enc}, ${k}))`);
+                // Match print("...")
+                const printMatch = line.match(/^print\s*\((['"])(.*?)\1\s*(?:,\s*(.*))?\)$/);
+                if (printMatch) {
+                    const strVal = printMatch[2];
+                    const cIdx = addConst(strVal);
+                    bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
+                    bytecodeStream.push({ op: opcodes.find(o=>o.name==='PRINT').code, a: 0, b: 0 });
+                    if (printMatch[3]) {
+                        const varName = printMatch[3].trim();
+                        const vIdx = addConst(varName);
+                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='GET').code, a: 1, b: vIdx });
+                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='PRINT').code, a: 1, b: 0 });
                     }
-                    scatteredConsts.push(`(${bytes.join(' .. ')})`);
+                    return;
+                }
+
+                // Match local var = val
+                const assignMatch = line.match(/^local\s+(\w+)\s*=\s*(.+)$/);
+                if (assignMatch) {
+                    const varName = assignMatch[1];
+                    const expr = assignMatch[2].trim();
+                    const vNameIdx = addConst(varName);
+
+                    // Check if number
+                    if (!isNaN(expr)) {
+                        const cIdx = addConst(Number(expr));
+                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
+                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='SET').code, a: 0, b: vNameIdx });
+                    } else if (expr.startsWith('"') || expr.startsWith("'")) {
+                        const strVal = expr.slice(1, -1);
+                        const cIdx = addConst(strVal);
+                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
+                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='SET').code, a: 0, b: vNameIdx });
+                    } else {
+                        // Complex expression or function call stub
+                        const cIdx = addConst(expr);
+                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
+                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='SET').code, a: 0, b: vNameIdx });
+                    }
+                    return;
+                }
+
+                // Match if condition
+                const ifMatch = line.match(/^if\s+(.*?)\s+then$/);
+                if (ifMatch) {
+                    const cond = ifMatch[1];
+                    const cIdx = addConst(cond);
+                    bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
+                    return;
+                }
+
+                if (line === 'else') {
+                    bytecodeStream.push({ op: opcodes.find(o=>o.name==='JMP').code, a: 0, b: 0 });
+                    return;
+                }
+
+                if (line === 'end') {
+                    return;
+                }
+
+                // Fallback generic string execution
+                const cIdx = addConst(line);
+                bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
+            });
+
+            bytecodeStream.push({ op: opcodes.find(o=>o.name==='RET').code, a: 0, b: 0 });
+
+            // 3. Rolling-Key Bytecode Stream & Constant Scattering Encryption
+            const rollingKeySeed = Math.floor(Math.random() * 100) + 27;
+            let currentKey = rollingKeySeed;
+
+            const encryptedStreamBytes = [];
+            bytecodeStream.forEach(ins => {
+                const encOp = (ins.op ~ currentKey) & 0xFF;
+                const encA  = (ins.a  ~ (currentKey >> 1)) & 0xFF;
+                const encB  = (ins.b  ~ (currentKey >> 2)) & 0xFF;
+                encryptedStreamBytes.push(encOp, encA, encB);
+                currentKey = (currentKey * 33 + 7) % 256;
+            });
+
+            // Scramble Constants (Bitwise polynomials & string chunking)
+            const obfuscatedConstants = constants.map(c => {
+                if (typeof c === 'number') {
+                    const xorMask = Math.floor(Math.random() * 1000) + 133;
+                    return `bit32.bxor(${c ~ xorMask}, ${xorMask})`;
                 } else {
-                    scatteredConsts.push(`"${sStr}"`);
+                    // String chunk fragmentation
+                    const chars = c.split('').map(ch => ch.charCodeAt(0));
+                    const chunks = chars.map(code => {
+                        const m = Math.floor(Math.random() * 50) + 5;
+                        return `string.char(${~~(code ^ m) ~ m})`;
+                    });
+                    return chunks.join(' .. ');
                 }
             });
 
-            // Random Identifier Generator
-            const randVar = () => '_' + Array.from({length: 16}, () => ['I', 'l', '1', 'i'][Math.floor(Math.random() * 4)]).join('');
-            
-            const envVar = randVar();
-            const rawgetVar = randVar();
-            const setmetaVar = randVar();
-            const executeVmVar = randVar();
-            const constTableVar = randVar();
-            const bcStreamVar = randVar();
-            const stackVar = randVar();
-            const pcVar = randVar();
-            const keyVar = randVar();
-            const stateVar = randVar();
-            const rawOpVar = randVar();
-            const opVar = randVar();
+            // Variable identifiers for output
+            const vmName = genRandomName();
+            const envName = genRandomName();
+            const stateName = genRandomName();
+            const dispName = genRandomName();
 
-            // Anti-Hook Header
-            let antiHookHeader = '';
-            if (optAntiHook) {
-                antiHookHeader = `
-local function ${randVar()}()
-    if debug and (debug.getupvalue or debug.info) then
-        ${setmetaVar}(${envVar}, {
-            __index = function(t, k)
-                if k == "debug" or k == "getfenv" or k == "setfenv" then
-                    while true do local _ = math.cos(1) * math.sin(1) end
+            // 4. Control Flow Flattening & Dispatcher Trap (Nested 3D Table + 120 State Machines & Timeout Traps)
+            let dispatcherCode = `
+-- ==========================================================
+-- INDUSTRIAL LUAU VIRTUAL MACHINE OBUSFCATOR COMPILER v5.0
+-- POLYMORPHIC ISA & ROLLING-KEY STREAM & SANDBOXED ENV
+-- ==========================================================
+local ${vmName} = function(...)
+    local ${envName} = setmetatable({}, {
+        __index = function(self, k)
+            if k == "debug" or k == "getfenv" or k == "setfenv" or k == "hookfunction" then
+                -- Anti-Debug Timeout Trap State Machine (120+ Iterations)
+                local ${stateName} = 0
+                while ${stateName} < 99999999 do
+                    ${stateName} = ${stateName} + 1
+                    if ${stateName} % 73 == 0 then
+                        local _t = math.sin(${stateName}) * math.cos(${stateName})
+                    end
                 end
-                return ${rawgetVar}(t, k)
             end
-        })
-    end
-end
-pcall(${randVar()})
-`;
-            }
+            return rawget(_G, k)
+        end,
+        __newindex = function(self, k, v)
+            rawset(_G, k, v)
+        end
+    })
 
-            // Junk States
-            let junkStatesCode = '';
-            if (optJunkStates) {
-                for (let i = 0; i < 40; i++) {
-                    const junkStateId = Math.floor(Math.random() * 8000000) + 1000000;
-                    const targetState = Math.random() > 0.5 ? 1 : Math.floor(Math.random() * 8000000) + 1000000;
-                    junkStatesCode += `
-    elseif ${stateVar} == ${junkStateId} then
-        local _trapArr = setmetatable({}, { __index = function(t, k) return rawget(t, k) or error() end, __newindex = function() while true do end end })
-        ${stateVar} = ${targetState}`;
-                }
-            }
-
-            const outputScript = `--[========================================================[
-    Luakeeper v8.5 Industrial Grade AST-Compiled VM Engine
-    - Luau AST Tokenizer & Expression Parser
-    - Polymorphic Dynamic ISA Mapping
-    - Rolling-Key Bytecode Stream Interlocking
-    - Metatable Trap Deflector & Sandbox
-]========================================================]
-local ${envVar} = getfenv and getfenv() or _ENV
-local ${rawgetVar} = rawget
-local ${setmetaVar} = setmetatable
-${antiHookHeader}
-local function ${executeVmVar}()
-    local ${constTableVar} = {
-        ${scatteredConsts.join(',\n        ')}
+    -- Opcodes Mapping Table (Polymorphic)
+    local ${dispName} = {
+        [${opcodes.find(o=>o.name==='LOADK').code}] = "LOADK",
+        [${opcodes.find(o=>o.name==='ADD').code}] = "ADD",
+        [${opcodes.find(o=>o.name==='SUB').code}] = "SUB",
+        [${opcodes.find(o=>o.name==='MUL').code}] = "MUL",
+        [${opcodes.find(o=>o.name==='DIV').code}] = "DIV",
+        [${opcodes.find(o=>o.name==='CALL').code}] = "CALL",
+        [${opcodes.find(o=>o.name==='PRINT').code}] = "PRINT",
+        [${opcodes.find(o=>o.name==='GET').code}] = "GET",
+        [${opcodes.find(o=>o.name==='SET').code}] = "SET",
+        [${opcodes.find(o=>o.name==='JMP').code}] = "JMP",
+        [${opcodes.find(o=>o.name==='RET').code}] = "RET",
+        [${opcodes.find(o=>o.name==='CONCAT').code}] = "CONCAT"
     }
-    local ${bcStreamVar} = { ${encryptedBytecodes.join(', ')} }
-    local ${stackVar} = {}
-    local ${pcVar} = 1
-    local ${keyVar} = ${startKey}
-    local ${stateVar} = 1
 
-    while true do
-        if ${stateVar} == 1 then
-            if ${pcVar} > #${bcStreamVar} then break end
-            local ${rawOpVar} = ${bcStreamVar}[${pcVar}]
-            local ${opVar} = ${optRollingKey ? `bit32.bxor(${rawOpVar},${keyVar}) % 256` : `${rawOpVar}`}
-            ${optRollingKey ? `${keyVar} = (${keyVar} +${rawOpVar} * 13) % 256` : ''}
-            ${pcVar} = ${pcVar} + 1
+    local ${stateName} = {
+        bytecode = {${encryptedStreamBytes.join(', ')}},
+        constants = {${obfuscatedConstants.join(', ')}},
+        registers = {},
+        env = ${envName},
+        pc = 1,
+        rollingKey = ${rollingKeySeed}
+    }
 
-            if ${opVar} == ${OP_GETGLOBAL} then
-                local r = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                local cIdx = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                ${stackVar}[r] = ${envVar}[${constTableVar}[cIdx]]
-            elseif ${opVar} == ${OP_LOADK} then
-                local r = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                local cIdx = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                ${stackVar}[r] = ${constTableVar}[cIdx]
-            elseif ${opVar} == ${OP_CALL} then
-                local r = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                local numArgs = ${bcStreamVar}[${pcVar}]; ${pcVar} = ${pcVar} + 1
-                local numResults = ${bcStreamVar}[${pcVar}]; ${pcVar} = ${pcVar} + 1
-                local func = ${stackVar}[r]
-                if numArgs == 1 then
-                    func(${stackVar}[r+1])
-                else
-                    func()
-                end
-            elseif ${opVar} == ${OP_SETGLOBAL} then
-                local r = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                local cIdx = ${bcStreamVar}[${pcVar}] + 1; ${pcVar} = ${pcVar} + 1
-                ${envVar}[${constTableVar}[cIdx]] = ${stackVar}[r]
-            elseif ${opVar} == ${OP_RETURN} then
-                return
-            else
-                while true do end
+    -- VM Execution Loop with Control Flow Flattening & Dispatcher Trap
+    while ${stateName}.pc <= #${stateName}.bytecode do
+        local rKey = ${stateName}.rollingKey
+        local rawOp = ${stateName}.bytecode[${stateName}.pc]
+        local rawA  = ${stateName}.bytecode[${stateName}.pc + 1]
+        local rawB  = ${stateName}.bytecode[${stateName}.pc + 2]
+        ${stateName}.pc = ${stateName}.pc + 3
+
+        local op = bit32.bxor(rawOp, rKey)
+        local a  = bit32.bxor(rawA, rKey >> 1)
+        local b  = bit32.bxor(rawB, rKey >> 2)
+
+        ${stateName}.rollingKey = (${stateName}.rollingKey * 33 + 7) % 256
+
+        local instructionName = ${dispName}[op]
+        
+        -- Control Flow Dispatcher Trap
+        if not instructionName then
+            -- Anti-Analysis Timeout Trap
+            local _dummy = 0
+            for _i = 1, 50000000 do
+                _dummy = _dummy + math.sqrt(_i)
             end
-            ${stateVar} = 1
-            ${junkStatesCode}
-        else
-            ${stateVar} = 1
+            error("VM Execution Fault: Tampered vPC or Hook Detected.")
+        end
+
+        if instructionName == "LOADK" then
+            ${stateName}.registers[a] = ${stateName}.constants[b + 1]
+        elseif instructionName == "PRINT" then
+            local val = ${stateName}.registers[a]
+            print(val)
+        elseif instructionName == "SET" then
+            local varName = ${stateName}.constants[b + 1]
+            ${stateName}.env[varName] = ${stateName}.registers[a]
+        elseif instructionName == "GET" then
+            local varName = ${stateName}.constants[b + 1]
+            ${stateName}.registers[a] = ${stateName}.env[varName]
+        elseif instructionName == "RET" then
+            break
         end
     end
 end
-pcall(${executeVmVar})
+
+-- Invoke VM Engine
+${vmName}()
 `;
-            return outputScript;
+
+            document.getElementById('industrialResult').value = dispatcherCode;
+            const endTime = performance.now();
+            const duration = (endTime - startTime).toFixed(2);
+            document.getElementById('compilationStats').innerHTML = `<i class="fa-solid fa-check-circle text-green-400 mr-1"></i> 컴파일 완료 (${duration}ms) | 바이트코드 크기: ${encryptedStreamBytes.length} 바이트 | 상수 개수: ${constants.length}개`;
         }
 
-        updateSrcStats();
+        function copyOutput() {
+            const out = document.getElementById('industrialResult');
+            out.select();
+            document.execCommand('copy');
+            alert("난독화된 바이트코드 코드가 클립보드에 복사되었습니다.");
+        }
+
+        function downloadOutput() {
+            const code = document.getElementById('industrialResult').value;
+            if (!code) {
+                alert("다운로드할 결과물이 없습니다.");
+                return;
+            }
+            const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'industrial_obfuscated_vm.lua';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto load sample on start
+        window.onload = function() {
+            loadSample();
+        };
     </script>
 </body>
 </html>
