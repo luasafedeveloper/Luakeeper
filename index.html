@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luakeeper v4.0 - Heavyweight VM Obfuscator</title>
+    <title>Luakeeper - Heavyweight VM Obfuscator</title>
     <style>
         :root {
             --bg-color: #07090e;
             --card-bg: #0f1420;
             --border-color: #1e293b;
-            --accent-color: #ef4444; /* 강력한 보안 상징의 레드 계열 */
-            --accent-hover: #dc2626;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
             --text-color: #f8fafc;
             --text-sub: #94a3b8;
         }
@@ -85,6 +85,26 @@
             color: var(--accent-color);
         }
 
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sub-btn {
+            background-color: #1e293b;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .sub-btn:hover {
+            background-color: #334155;
+        }
+
         textarea {
             width: 100%;
             height: 420px;
@@ -112,9 +132,9 @@
             width: 100%;
         }
 
-        button {
+        button.main-btn {
             background-color: var(--accent-color);
-            color: #fff;
+            color: #000;
             border: none;
             padding: 16px 40px;
             font-size: 1.05rem;
@@ -122,55 +142,117 @@
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3);
         }
 
-        button:hover {
+        button.main-btn:hover {
             background-color: var(--accent-hover);
+            color: #fff;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
         }
 
         .badge {
             font-size: 0.75rem;
             padding: 4px 8px;
-            background-color: rgba(239, 68, 68, 0.1);
+            background-color: rgba(56, 189, 248, 0.1);
             color: var(--accent-color);
             border-radius: 4px;
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        input[type="file"] {
+            display: none;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🔒 Luakeeper v4.0</h1>
+        <h1>Luakeeper</h1>
         <p class="subtitle">Heavyweight Control-Flow Flattening & Massive VM Engine</p>
     </header>
 
     <div class="main-container">
+        <!-- 원본 코드 입력 영역 -->
         <div class="code-box">
             <header>
                 <label for="inputCode">Source Luau Code</label>
-                <span class="badge">Plain Text</span>
+                <div class="btn-group">
+                    <button class="sub-btn" onclick="document.getElementById('fileInput').click()">파일 업로드</button>
+                    <input type="file" id="fileInput" accept=".lua,.txt" onchange="loadFromFile(event)">
+                    <span class="badge">Input</span>
+                </div>
             </header>
-            <textarea id="inputCode" placeholder="-- 보호할 코드를 입력하세요&#10;print('Heavyweight Protection Activated')"></textarea>
+            <textarea id="inputCode" placeholder="-- 보호할 코드를 입력하거나 파일을 업로드하세요&#10;print('Heavyweight Protection Activated')"></textarea>
         </div>
 
+        <!-- 난독화된 코드 출력 영역 -->
         <div class="code-box">
             <header>
                 <label for="outputCode">Heavyweight VM Output</label>
-                <span class="badge">Massive Flattened Bytecode</span>
+                <div class="btn-group">
+                    <button class="sub-btn" onclick="copyToClipboard()">복사하기</button>
+                    <button class="sub-btn" onclick="downloadFile()">파일로 다운로드</button>
+                    <span class="badge">Protected</span>
+                </div>
             </header>
-            <textarea id="outputCode" placeholder="수천 줄의 거대한 가비지 스테이트 머신 결과가 여기에 출력됩니다..." readonly></textarea>
+            <textarea id="outputCode" placeholder="난독화된 결과가 여기에 출력됩니다..." readonly></textarea>
         </div>
     </div>
 
     <div class="action-area">
-        <button onclick="heavyweightObfuscate()">🔥 렉 유발 초강력 헤비웨이트 난독화 실행</button>
+        <button class="main-btn" onclick="heavyweightObfuscate()">헤비웨이트 난독화 실행</button>
     </div>
 
     <script>
+        // 파일 업로드 처리
+        function loadFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('inputCode').value = e.target.result;
+            };
+            reader.readAsText(file);
+        }
+
+        // 클립보드 복사
+        function copyToClipboard() {
+            const outputBox = document.getElementById('outputCode');
+            if (!outputBox.value.trim()) {
+                alert("복사할 내용이 없습니다.");
+                return;
+            }
+            navigator.clipboard.writeText(outputBox.value).then(() => {
+                alert("클립보드에 복사되었습니다.");
+            });
+        }
+
+        // 파일로 다운로드 (이름 설정 가능)
+        function downloadFile() {
+            const code = document.getElementById('outputCode').value;
+            if (!code.trim()) {
+                alert("다운로드할 난독화된 코드가 없습니다.");
+                return;
+            }
+
+            let filename = prompt("저장할 파일 이름을 입력하세요:", "protected_script.lua");
+            if (!filename) return;
+            if (!filename.endsWith('.lua') && !filename.endsWith('.txt')) {
+                filename += '.lua';
+            }
+
+            const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         function rName() {
             const chars = "IlIlIIlI1";
             let res = "_";
@@ -183,11 +265,11 @@
         function heavyweightObfuscate() {
             let code = document.getElementById('inputCode').value;
             if (!code.trim()) {
-                alert("코드를 입력해주세요!");
+                alert("난독화할 코드를 입력해주세요!");
                 return;
             }
 
-            // 1. 코드 난독화용 무작위 변수명 대량 생성
+            // 1. 가변 변수명 생성
             const vEnv = rName();
             const vState = rName();
             const vPC = rName();
@@ -196,18 +278,16 @@
             const vSecret = rName();
             const vTable = rName();
 
-            // 2. 바이트 배열 및 XOR 키 생성
+            // 2. 입력된 실제 코드를 바이트 배열로 변환 및 XOR 암호화
             let bytes = [];
             for (let i = 0; i < code.length; i++) {
                 bytes.push(code.charCodeAt(i) ^ 0x7F);
             }
 
-            // 3. 수십 개의 가비지 스테이트 머신 블록 생성 (코드 용량을 수천 줄로 불리는 핵심)
+            // 3. 수십 개의 가비지 스테이트 머신 블록 생성 (용량을 늘리고 분석을 방해)
             let junkStatesCode = "";
-            let junkStateKeys = [];
             for (let i = 1; i <= 60; i++) {
                 let dummyKey = Math.floor(Math.random() * 900000) + 100000;
-                junkStateKeys.push(dummyKey);
                 junkStatesCode += `
     elseif ${vState} == ${dummyKey} then
         local ${rName()} = {${Math.floor(Math.random()*100)}, ${Math.floor(Math.random()*100)}, ${Math.floor(Math.random()*100)}}
@@ -218,24 +298,23 @@
                 `;
             }
 
-            // 4. 안티후킹 및 환경 변조 감지 코드 주입
+            // 4. 안티후킹 및 환경 변조 감지 코드
             let antiTamper = `
 local function ${rName()}()
     local env = getfenv and getfenv() or _ENV
     if not env then
-        while true do end -- 디버깅 감지 시 무한 루프 과부하
+        while true do end
     end
 end
 ${rName()}()
             `;
 
-            // 5. 최종 헤비웨이트 런타임 조립 (수천 줄 규모의 압도적 구조)
+            // 5. 최종 헤비웨이트 런타임 조립 (입력된 소스코드 바이트가 포함됨)
             let heavyweightResult = `
 --[========================================================[
-    Luakeeper v4.0 Heavyweight Industrial Protection
+    Luakeeper v4.1 Heavyweight Industrial Protection
     - Control Flow Flattening (60+ Junk State Machines)
     - Anti-Tamper / Anti-Hooking / Bytecode Virtualization
-    - Target: Surpassing Commercial Top-tier Protection
 ]========================================================]
 
 ${antiTamper}
@@ -247,10 +326,8 @@ for i = 1, #${vSecret} do
 end
 local ${vJunk1} = table.concat(${vTable})
 
--- Heavyweight State Machine & Flow Flattening Controller
 local function ${vJunk2}()
     local ${vState} = ${Math.floor(Math.random() * 900000) + 100000}
-    local ${vPC} = 1
     
     while true do
         if ${vState} == 999999 then
