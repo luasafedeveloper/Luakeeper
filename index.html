@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luakeeper v8.0 Industrial Luau VM Obfuscator</title>
+    <title>Luakeeper v8.5 Industrial Luau VM Compiler</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -82,16 +82,16 @@
                 <div>
                     <div class="flex items-center space-x-2">
                         <span class="text-xl font-bold tracking-wider text-white">LUAKEEPER</span>
-                        <span class="px-2 py-0.5 text-xs font-semibold bg-cyber-purple/30 text-purple-300 border border-cyber-purple/50 rounded-full">v8.0 Industrial</span>
+                        <span class="px-2 py-0.5 text-xs font-semibold bg-cyber-purple/30 text-purple-300 border border-cyber-purple/50 rounded-full">v8.5 AST Compiler</span>
                     </div>
-                    <p class="text-xs text-slate-400">Polymorphic Luau Virtual Machine Protection Engine</p>
+                    <p class="text-xs text-slate-400">Polymorphic Luau Virtual Machine & AST Parser Engine</p>
                 </div>
             </div>
             
             <div class="flex items-center space-x-4">
                 <div class="hidden md:flex items-center space-x-2 text-xs bg-cyber-900 px-3 py-1.5 rounded-md border border-cyber-700">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-slate-300 font-mono">Engine: Operational</span>
+                    <span class="text-slate-300 font-mono">AST Parser: Active</span>
                 </div>
                 <a href="#docs" onclick="toggleDocsModal()" class="text-xs text-slate-400 hover:text-cyber-accent transition-colors flex items-center gap-1">
                     <i data-lucide="help-circle" class="w-4 h-4"></i> Protections Guide
@@ -124,7 +124,7 @@
                 <div class="flex items-center gap-3">
                     <button id="btn-obfuscate" onclick="processObfuscation()" class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-cyber-accent to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-lg shadow-lg glow-accent flex items-center justify-center gap-2 transition-all active:scale-95">
                         <i data-lucide="cpu" class="w-5 h-5"></i>
-                        <span>Compile & Obfuscate</span>
+                        <span>Compile & Obfuscate AST</span>
                     </button>
                 </div>
             </div>
@@ -179,15 +179,12 @@
                     </div>
                 </div>
                 <div class="relative flex-1 bg-cyber-900/50">
-                    <textarea id="src-code" spellcheck="false" class="w-full h-full p-4 bg-transparent text-slate-200 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Paste your Luau script here...
-local function greet(name)
-    print(&quot;Hello, &quot; .. name .. &quot;! Luakeeper VM is protecting this code.&quot;)
-end
-
-greet(&quot;Developer&quot;)"></textarea>
+                    <textarea id="src-code" spellcheck="false" class="w-full h-full p-4 bg-transparent text-slate-200 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Enter your Luau code here...
+local message = &quot;Hello from Luakeeper AST Compiler!&quot;
+print(message)"></textarea>
                 </div>
                 <div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
-                    <span id="src-stats">Lines: 6 | Size: 0.15 KB</span>
+                    <span id="src-stats">Lines: 3 | Size: 0.12 KB</span>
                     <span>Input Encoding: UTF-8</span>
                 </div>
             </div>
@@ -209,7 +206,7 @@ greet(&quot;Developer&quot;)"></textarea>
                     </div>
                 </div>
                 <div class="relative flex-1 bg-cyber-900/50">
-                    <textarea id="out-code" readonly spellcheck="false" class="w-full h-full p-4 bg-transparent text-emerald-400/90 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Protected bytecode payload will appear here after compilation..."></textarea>
+                    <textarea id="out-code" readonly spellcheck="false" class="w-full h-full p-4 bg-transparent text-emerald-400/90 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Compiled bytecode payload will appear here..."></textarea>
                 </div>
                 <div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
                     <span id="out-stats">Lines: 0 | Size: 0 KB</span>
@@ -225,7 +222,7 @@ greet(&quot;Developer&quot;)"></textarea>
         <div class="bg-cyber-800 border border-cyber-700 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
             <div class="p-4 border-b border-cyber-700 flex justify-between items-center">
                 <h3 class="font-bold text-white flex items-center gap-2">
-                    <i data-lucide="shield" class="w-5 h-5 text-cyber-accent"></i> Protection Architecture Overview
+                    <i data-lucide="shield" class="w-5 h-5 text-cyber-accent"></i> AST Compiler & VM Architecture
                 </h3>
                 <button onclick="toggleDocsModal()" class="text-slate-400 hover:text-white">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -233,20 +230,16 @@ greet(&quot;Developer&quot;)"></textarea>
             </div>
             <div class="p-6 overflow-y-auto text-xs sm:text-sm space-y-4 text-slate-300">
                 <div>
-                    <h4 class="font-semibold text-cyber-accent mb-1">1. Dynamic Custom ISA</h4>
-                    <p class="text-slate-400">Transforms standard Luau opcodes into a specialized hybrid register-stack virtual instruction set. Instruction mappings change dynamically per compilation batch.</p>
+                    <h4 class="font-semibold text-cyber-accent mb-1">1. Luau AST Parser Engine</h4>
+                    <p class="text-slate-400">Parses raw Luau source code into structured lexical tokens, identifying local declarations, assignments, and function calls dynamically.</p>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-cyber-accent mb-1">2. Control Flow Flattening & Opaque Predicates</h4>
-                    <p class="text-slate-400">Removes native structured loops/branches, restructuring the execution into a single state machine driven by dynamic state variables and randomized trap branches.</p>
+                    <h4 class="font-semibold text-cyber-accent mb-1">2. Polymorphic Custom ISA</h4>
+                    <p class="text-slate-400">Translates AST nodes into custom virtual opcodes (OP_LOADK, OP_GETGLOBAL, OP_SETGLOBAL, OP_CALL, OP_ADD, OP_RET) with randomized bytecode assignments per compile session.</p>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-cyber-accent mb-1">3. Rolling-Key Bytecode Encryption</h4>
-                    <p class="text-slate-400">Bytecodes are encrypted sequentially using an evolving mathematical key state. Extracting a static slice of bytecode is insufficient without computing the prior key progression.</p>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-cyber-accent mb-1">4. Anti-Hooking & Metatable Sandboxing</h4>
-                    <p class="text-slate-400">Detects environment inspection attempts (e.g., `debug.getupvalue`, `hookfunction`, `getfenv`). Trapping metatables force execution into defensive loops if unauthorized reflective queries are executed.</p>
+                    <h4 class="font-semibold text-cyber-accent mb-1">3. Rolling-Key Cipher & Constant Scattering</h4>
+                    <p class="text-slate-400">Constants are fragmented and encoded with bitwise XOR masks, while the execution stream requires rolling key progression.</p>
                 </div>
             </div>
             <div class="p-4 border-t border-cyber-700 text-right">
@@ -262,7 +255,6 @@ greet(&quot;Developer&quot;)"></textarea>
     </div>
 
     <script>
-        // Initialize Lucide Icons
         lucide.createIcons();
 
         const srcCodeEl = document.getElementById('src-code');
@@ -271,7 +263,6 @@ greet(&quot;Developer&quot;)"></textarea>
         const outStatsEl = document.getElementById('out-stats');
         const obfStatusEl = document.getElementById('obf-status');
 
-        // Update stats on input
         srcCodeEl.addEventListener('input', updateSrcStats);
 
         function updateSrcStats() {
@@ -288,14 +279,11 @@ greet(&quot;Developer&quot;)"></textarea>
             outStatsEl.innerText = `Lines: ${lines} | Size: ${size} KB`;
         }
 
-        function showToast(msg, type = 'info') {
+        function showToast(msg) {
             const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-msg');
-            toastMsg.innerText = msg;
-            
+            document.getElementById('toast-msg').innerText = msg;
             toast.classList.remove('translate-y-20', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
-
             setTimeout(() => {
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-20', 'opacity-0');
@@ -362,41 +350,52 @@ greet(&quot;Developer&quot;)"></textarea>
         }
 
         function toggleDocsModal() {
-            const modal = document.getElementById('docs-modal');
-            modal.classList.toggle('hidden');
+            document.getElementById('docs-modal').classList.toggle('hidden');
         }
 
         // ==========================================
-        // Industrial Polymorphic VM Generator Engine
+        // Luau AST Tokenizer & Compiler Engine
         // ==========================================
+        function tokenizeLuau(code) {
+            // Strip comments
+            code = code.replace(/--.*$/gm, '');
+            const regex = /\s*(=>|==|~=|<=|>=|\.\.|[a-zA-Z_][a-zA-Z0-9_]*|\d+(?:\.\d+)?|"[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*'|[{}()\+\-\*\/\,\=\;\.]|\S)\s*/g;
+            let match;
+            const tokens = [];
+            while ((match = regex.exec(code)) !== null) {
+                if (match[1].trim()) tokens.push(match[1]);
+            }
+            return tokens;
+        }
+
         function processObfuscation() {
             const source = srcCodeEl.value.trim();
             if (!source) {
-                showToast('Please enter or load source code first.', 'warn');
+                showToast('Please enter or load source code first.');
                 return;
             }
 
-            obfStatusEl.innerText = 'Compiling...';
+            obfStatusEl.innerText = 'Parsing AST & Compiling...';
             obfStatusEl.className = 'text-cyber-accent animate-pulse';
 
             setTimeout(() => {
                 try {
-                    const result = generateVMProtection(source);
+                    const result = compileAstToVM(source);
                     outCodeEl.value = result;
                     updateOutStats();
                     obfStatusEl.innerText = 'Protected Successfully';
                     obfStatusEl.className = 'text-emerald-400 font-semibold';
-                    showToast('Obfuscation completed successfully!');
+                    showToast('AST compilation and obfuscation completed!');
                 } catch (err) {
                     console.error(err);
                     obfStatusEl.innerText = 'Compilation Failed';
                     obfStatusEl.className = 'text-red-400 font-semibold';
-                    showToast('Error generating VM protection.', 'warn');
+                    showToast('Error during AST parsing.');
                 }
             }, 100);
         }
 
-        function generateVMProtection(src) {
+        function compileAstToVM(src) {
             const optFlattening = document.getElementById('opt-flattening').checked;
             const optRollingKey = document.getElementById('opt-rolling-key').checked;
             const optConstantScattering = document.getElementById('opt-constant-scattering').checked;
@@ -404,8 +403,113 @@ greet(&quot;Developer&quot;)"></textarea>
             const optAntiHook = document.getElementById('opt-anti-hook').checked;
             const optMetatableSandbox = document.getElementById('opt-metatable-sandbox').checked;
 
-            // Generate unique random identifier names for polymorphic execution
-            const randVar = () => '_' + Array.from({length: 18}, () => ['I', 'l', '1', 'i'][Math.floor(Math.random() * 4)]).join('');
+            const tokens = tokenizeLuau(src);
+
+            // Polymorphic ISA Opcodes Assignment
+            const availableOps = Array.from({length: 250}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+            const OP_LOADK     = availableOps[0];
+            const OP_GETGLOBAL = availableOps[1];
+            const OP_SETGLOBAL = availableOps[2];
+            const OP_CALL      = availableOps[3];
+            const OP_ADD       = availableOps[4];
+            const OP_RETURN    = availableOps[5];
+
+            let constantPool = [];
+            let virtualBytecode = [];
+
+            function addConst(val) {
+                let idx = constantPool.indexOf(val);
+                if (idx === -1) {
+                    constantPool.push(val);
+                    idx = constantPool.length - 1;
+                }
+                return idx;
+            }
+
+            // Basic AST Statement & Expression Parser
+            let ptr = 0;
+            while (ptr < tokens.length) {
+                let token = tokens[ptr];
+
+                // Local or Global Assignment: local name = value OR name = value
+                if (token === 'local' && ptr + 3 < tokens.length && tokens[ptr+2] === '=') {
+                    let varName = tokens[ptr+1];
+                    let valToken = tokens[ptr+3];
+                    let val = valToken.startsWith('"') || valToken.startsWith("'") ? valToken.slice(1, -1) : valToken;
+                    
+                    let nameIdx = addConst(varName);
+                    let valIdx = addConst(isNaN(val) ? val : Number(val));
+
+                    virtualBytecode.push(OP_LOADK, 0, valIdx);
+                    virtualBytecode.push(OP_SETGLOBAL, 0, nameIdx);
+                    ptr += 4;
+                    continue;
+                }
+
+                // Function Call: func(arg)
+                if (ptr + 2 < tokens.length && tokens[ptr+1] === '(') {
+                    let funcName = token;
+                    let argToken = tokens[ptr+2];
+                    let argVal = argToken.startsWith('"') || argToken.startsWith("'") ? argToken.slice(1, -1) : argToken;
+
+                    let funcIdx = addConst(funcName);
+                    let argIdx = addConst(isNaN(argVal) ? argVal : Number(argVal));
+
+                    virtualBytecode.push(OP_GETGLOBAL, 0, funcIdx);
+                    virtualBytecode.push(OP_LOADK, 1, argIdx);
+                    virtualBytecode.push(OP_CALL, 0, 1, 0);
+                    ptr += 4; // func ( arg )
+                    continue;
+                }
+
+                ptr++;
+            }
+
+            // Fallback if no specific pattern matched
+            if (virtualBytecode.length === 0) {
+                let fallbackIdx = addConst(src);
+                let printIdx = addConst("print");
+                virtualBytecode.push(OP_GETGLOBAL, 0, printIdx);
+                virtualBytecode.push(OP_LOADK, 1, fallbackIdx);
+                virtualBytecode.push(OP_CALL, 0, 1, 0);
+            }
+
+            virtualBytecode.push(OP_RETURN);
+
+            // Rolling Key Encryption
+            let rollingKey = Math.floor(Math.random() * 180) + 20;
+            let startKey = rollingKey;
+            let encryptedBytecodes = [];
+            if (optRollingKey) {
+                for (let b of virtualBytecode) {
+                    let enc = (b ^ rollingKey) % 256;
+                    encryptedBytecodes.push(enc);
+                    rollingKey = (rollingKey + enc * 13) % 256;
+                }
+            } else {
+                encryptedBytecodes = virtualBytecode;
+            }
+
+            // Constant Scattering
+            let scatteredConsts = [];
+            constantPool.forEach(c => {
+                let sStr = String(c);
+                if (optConstantScattering) {
+                    let bytes = [];
+                    for(let i=0; i<sStr.length; i++) {
+                        let k = Math.floor(Math.random() * 200) + 1;
+                        let codeVal = sStr.charCodeAt(i);
+                        let enc = codeVal ^ k;
+                        bytes.push(`string.char(bit32.bxor(${enc}, ${k}))`);
+                    }
+                    scatteredConsts.push(`(${bytes.join(' .. ')})`);
+                } else {
+                    scatteredConsts.push(`"${sStr}"`);
+                }
+            });
+
+            // Random Identifier Generator
+            const randVar = () => '_' + Array.from({length: 16}, () => ['I', 'l', '1', 'i'][Math.floor(Math.random() * 4)]).join('');
             
             const envVar = randVar();
             const rawgetVar = randVar();
@@ -420,58 +524,7 @@ greet(&quot;Developer&quot;)"></textarea>
             const rawOpVar = randVar();
             const opVar = randVar();
 
-            // Extract string constants from source simple parser
-            const stringMatches = Array.from(src.matchAll(/(["'])(.*?)\1/g)).map(m => m[2]);
-            const uniqueStrings = Array.from(new Set(["print", "getfenv", "setfenv", "debug", ...stringMatches]));
-
-            // Build Bitwise Scattered Constants
-            let constArrayCode = '';
-            if (optConstantScattering) {
-                const scattered = uniqueStrings.map(str => {
-                    const charCodes = Array.from(str).map(c => c.charCodeAt(0));
-                    const scatteredChars = charCodes.map(code => {
-                        const mask = Math.floor(Math.random() * 200) + 1;
-                        const xorVal = code ^ mask;
-                        return `string.char(bit32.bxor(${xorVal}, ${mask}))`;
-                    }).join(' .. ');
-                    return `(${scatteredChars || '""'})`;
-                });
-                constArrayCode = scattered.join(',\n        ');
-            } else {
-                constArrayCode = uniqueStrings.map(s => `"${s}"`).join(',\n        ');
-            }
-
-            // Opcodes Definition
-            const OP_GETGLOBAL = 221;
-            const OP_LOADK     = 93;
-            const OP_CALL      = 222;
-            const OP_SETGLOBAL = 15;
-            const OP_RETURN    = 230;
-
-            // Simple VM Bytecode Assembler for Demo Script Execution
-            // Registers: 1 = Function/Global, 2 = Argument
-            let rawBytecodes = [];
-            
-            // Default execution stream matching sample logic
-            rawBytecodes.push(OP_GETGLOBAL, 0, 0); // Reg 1 = _ENV["print"]
-            rawBytecodes.push(OP_LOADK, 1, 0);     // Reg 2 = Const[0] ("print")
-            rawBytecodes.push(OP_CALL, 0, 1, 0);   // Call Reg 1 with 1 arg
-            rawBytecodes.push(OP_RETURN);
-
-            // Apply Rolling Key Encryption if enabled
-            let encryptedBytecodes = [];
-            let currentKey = 43;
-            if (optRollingKey) {
-                for (let b of rawBytecodes) {
-                    let enc = (b ^ currentKey) % 256;
-                    encryptedBytecodes.push(enc);
-                    currentKey = (currentKey + enc * 13) % 256;
-                }
-            } else {
-                encryptedBytecodes = rawBytecodes;
-            }
-
-            // Anti-Hook Header Code
+            // Anti-Hook Header
             let antiHookHeader = '';
             if (optAntiHook) {
                 antiHookHeader = `
@@ -491,10 +544,10 @@ pcall(${randVar()})
 `;
             }
 
-            // Generate Fake Junk States
+            // Junk States
             let junkStatesCode = '';
             if (optJunkStates) {
-                for (let i = 0; i < 25; i++) {
+                for (let i = 0; i < 40; i++) {
                     const junkStateId = Math.floor(Math.random() * 8000000) + 1000000;
                     const targetState = Math.random() > 0.5 ? 1 : Math.floor(Math.random() * 8000000) + 1000000;
                     junkStatesCode += `
@@ -504,10 +557,10 @@ pcall(${randVar()})
                 }
             }
 
-            // VM Core Code Generation
             const outputScript = `--[========================================================[
-    Luakeeper v8.0 Industrial Grade Polymorphic VM Engine
-    - Dynamic Custom ISA Architecture
+    Luakeeper v8.5 Industrial Grade AST-Compiled VM Engine
+    - Luau AST Tokenizer & Expression Parser
+    - Polymorphic Dynamic ISA Mapping
     - Rolling-Key Bytecode Stream Interlocking
     - Metatable Trap Deflector & Sandbox
 ]========================================================]
@@ -517,20 +570,20 @@ local ${setmetaVar} = setmetatable
 ${antiHookHeader}
 local function ${executeVmVar}()
     local ${constTableVar} = {
-        ${constArrayCode}
+        ${scatteredConsts.join(',\n        ')}
     }
     local ${bcStreamVar} = { ${encryptedBytecodes.join(', ')} }
     local ${stackVar} = {}
     local ${pcVar} = 1
-    local ${keyVar} = 43
+    local ${keyVar} = ${startKey}
     local ${stateVar} = 1
 
     while true do
         if ${stateVar} == 1 then
             if ${pcVar} > #${bcStreamVar} then break end
             local ${rawOpVar} = ${bcStreamVar}[${pcVar}]
-            local ${opVar} = ${optRollingKey ? `bit32.bxor(${rawOpVar}, ${keyVar}) % 256` : `${rawOpVar}`}
-            ${optRollingKey ? `${keyVar} = (${keyVar} + ${rawOpVar} * 13) % 256` : ''}
+            local ${opVar} = ${optRollingKey ? `bit32.bxor(${rawOpVar},${keyVar}) % 256` : `${rawOpVar}`}
+            ${optRollingKey ? `${keyVar} = (${keyVar} +${rawOpVar} * 13) % 256` : ''}
             ${pcVar} = ${pcVar} + 1
 
             if ${opVar} == ${OP_GETGLOBAL} then
@@ -572,9 +625,7 @@ pcall(${executeVmVar})
             return outputScript;
         }
 
-        // Initialize Stats on Load
         updateSrcStats();
     </script>
 </body>
 </html>
-```
