@@ -118,12 +118,10 @@ body { font-family: 'Inter', sans-serif; background-color: #0a0d14; color: #c0ca
 <button onclick="toggleDocsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
 </div>
 <div class="p-6 overflow-y-auto text-xs sm:text-sm space-y-4 text-slate-300">
-<div><h4 class="font-semibold text-cyber-accent mb-1">1. Real Luau Lexer</h4><p class="text-slate-400">Proper tokenization of identifiers, numbers (int/float/hex), strings (single/double/long-bracket), keywords, and operators.</p></div>
-<div><h4 class="font-semibold text-cyber-accent mb-1">2. Pratt Parser + AST</h4><p class="text-slate-400">Expression parsing with correct precedence climbing. Statement parsing for local/assign/call/if/while/for/return.</p></div>
-<div><h4 class="font-semibold text-cyber-accent mb-1">3. Register-Based Bytecode Compiler</h4><p class="text-slate-400">30-opcode instruction set. Compiles AST to flat integer bytecode stream with proper register allocation and jump backpatching.</p></div>
-<div><h4 class="font-semibold text-cyber-accent mb-1">4. Rolling-Key Encryption</h4><p class="text-slate-400">Every byte XOR-encoded with rolling key. key = (key + enc*13) % 256. Bidirectional.</p></div>
-<div><h4 class="font-semibold text-cyber-accent mb-1">5. Constant Scattering</h4><p class="text-slate-400">Strings broken into per-byte bxor chains with independent rolling keys.</p></div>
-<div><h4 class="font-semibold text-cyber-accent mb-1">6. De-obfuscator</h4><p class="text-slate-400">Reverses rolling-key decryption, decodes constants, re-interprets bytecode into readable Luau.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">1. Real Luau Lexer & Parser</h4><p class="text-slate-400">Full support for Lua/Luau syntax including type annotations (`: number`), compound operators (`+=`), and empty statements (`;`). Fallback to RAW injection for unsupported edge cases.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">2. Register-Based Bytecode Compiler</h4><p class="text-slate-400">36-opcode instruction set. Compiles AST to flat integer bytecode stream with proper register allocation and jump backpatching.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">3. Rolling-Key Encryption</h4><p class="text-slate-400">Every byte XOR-encoded with rolling key. key = (key + enc*13) % 256. Bidirectional.</p></div>
+<div><h4 class="font-semibold text-cyber-accent mb-1">4. Constant Scattering</h4><p class="text-slate-400">Strings broken into per-byte bxor chains with independent rolling keys.</p></div>
 </div>
 <div class="p-4 border-t border-cyber-700 text-right"><button onclick="toggleDocsModal()" class="px-4 py-1.5 bg-cyber-700 hover:bg-cyber-600 text-white rounded text-xs">Close</button></div>
 </div>
@@ -207,11 +205,7 @@ function downloadOutput() {
 }
 function toggleDocsModal() { document.getElementById('docs-modal').classList.toggle('hidden'); }
 
-// ==========================================
-// LUAU LEXER - Real tokenization
-// ==========================================
 const TT = { IDENT:1, NUM:2, STR:3, KW:4, OP:5, EOF:6 };
-
 const KEYWORDS = new Set(['and','break','do','else','elseif','end','false','for','function','if','in','local','nil','not','or','repeat','return','then','true','until','while','continue']);
 
 class Lexer {
@@ -219,21 +213,10 @@ class Lexer {
     peek(off = 0) { return this.src[this.pos + off] || ''; }
     next() { return this.src[this.pos++] || ''; }
     eof() { return this.pos >= this.src.length; }
-
     isAlpha(c) { return /[a-zA-Z_]/.test(c); }
     isDigit(c) { return /[0-9]/.test(c); }
     isAlphaNum(c) { return /[a-zA-Z0-9_]/.test(c); }
-
-    skipLongBracket() {
-        const startLevel = this.matchLongBracketStart();
-        if (startLevel === -1) return false;
-        const closeStr = ']' + '='.repeat(startLevel) + ']';
-        const closeIdx = this.src.indexOf(closeStr, this.pos);
-        if (closeIdx === -1) { this.pos = this.src.length; return true; }
-        this.pos = closeIdx + closeStr.length;
-        return true;
-    }
-
+    skipLongBracket() { const startLevel = this.matchLongBracketStart(); if (startLevel === -1) return false; const closeStr = ']' + '='.repeat(startLevel) + ']'; const closeIdx = this.src.indexOf(closeStr, this.pos); if (closeIdx === -1) { this.pos = this.src.length; return true; } this.pos = closeIdx + closeStr.length; return true; }
     matchLongBracketStart() {
         if (this.peek() !== '[') return -1;
         let i = 1, level = 0;
@@ -241,7 +224,6 @@ class Lexer {
         if (this.peek(i) === '[') { this.pos += i + 1; return level; }
         return -1;
     }
-
     readLongString(level) {
         const closeStr = ']' + '='.repeat(level) + ']';
         const closeIdx = this.src.indexOf(closeStr, this.pos);
@@ -250,7 +232,6 @@ class Lexer {
         else { val = this.src.substring(this.pos, closeIdx); this.pos = closeIdx + closeStr.length; }
         return val;
     }
-
     tokenize() {
         while (!this.eof()) {
             const c = this.peek();
@@ -299,16 +280,9 @@ class Lexer {
                         this.next();
                         const esc = this.next();
                         const escMap = { n:'\n', t:'\t', r:'\r', '\\':'\\', '"':'"', "'":"'", '0':'\0', 'a':'\a', 'b':'\b', 'f':'\f', 'v':'\v' };
-                        if (esc === 'x') {
-                            let hex = '';
-                            for (let i=0;i<2;i++) hex += this.next();
-                            s += String.fromCharCode(parseInt(hex,16));
-                        } else if (esc === 'u') {
-                            let hex = '';
-                            if (this.peek() === '{') { this.next(); while (this.peek() !== '}') hex += this.next(); this.next(); }
-                            else { for (let i=0;i<4;i++) hex += this.next(); }
-                            s += String.fromCodePoint(parseInt(hex,16));
-                        } else if (esc === '\n') { s += '\n'; }
+                        if (esc === 'x') { let hex = ''; for (let i=0;i<2;i++) hex += this.next(); s += String.fromCharCode(parseInt(hex,16)); }
+                        else if (esc === 'u') { let hex = ''; if (this.peek() === '{') { this.next(); while (this.peek() !== '}') hex += this.next(); this.next(); } else { for (let i=0;i<4;i++) hex += this.next(); } s += String.fromCodePoint(parseInt(hex,16)); }
+                        else if (esc === '\n') { s += '\n'; }
                         else if (escMap[esc] !== undefined) { s += escMap[esc]; }
                         else { s += esc; }
                     } else { s += this.next(); }
@@ -320,23 +294,14 @@ class Lexer {
             if (c === '[') {
                 const save = this.pos;
                 const level = this.matchLongBracketStart();
-                if (level !== -1) {
-                    const str = this.readLongString(level);
-                    this.tokens.push({ t: TT.STR, v: str });
-                    continue;
-                }
+                if (level !== -1) { const str = this.readLongString(level); this.tokens.push({ t: TT.STR, v: str }); continue; }
                 this.pos = save;
             }
-            const multi = ['...', '..', '==', '~=', '<=', '>=', '::', '//'];
+            const multi = ['...', '..=', '..', '==', '~=', '<=', '>=', '+=', '-=', '*=', '/=', '%=', '^=', '::', '//'];
             let matched = null;
-            for (const op of multi) {
-                if (this.src.substr(this.pos, op.length) === op) { matched = op; break; }
-            }
+            for (const op of multi) { if (this.src.substr(this.pos, op.length) === op) { matched = op; break; } }
             if (matched) { this.pos += matched.length; this.tokens.push({ t: TT.OP, v: matched }); continue; }
-            if ('+-*/%^#=<>(){}[];,.:&|~'.includes(c)) {
-                this.tokens.push({ t: TT.OP, v: this.next() });
-                continue;
-            }
+            if ('+-*/%^#=<>(){}[];,.:&|~'.includes(c)) { this.tokens.push({ t: TT.OP, v: this.next() }); continue; }
             this.pos++;
         }
         this.tokens.push({ t: TT.EOF, v: null });
@@ -344,14 +309,10 @@ class Lexer {
     }
 }
 
-// ==========================================
-// LUAU PRATT PARSER - Real AST
-// ==========================================
 const BINOP_PREC = {
     'or': { left: 1, right: 2 }, 'and': { left: 2, right: 3 },
     '<': { left: 3, right: 3 }, '>': { left: 3, right: 3 }, '<=': { left: 3, right: 3 }, '>=': { left: 3, right: 3 }, '~=': { left: 3, right: 3 }, '==': { left: 3, right: 3 },
-    '..': { left: 5, right: 4 },
-    '+': { left: 6, right: 6 }, '-': { left: 6, right: 6 },
+    '..': { left: 5, right: 4 }, '+': { left: 6, right: 6 }, '-': { left: 6, right: 6 },
     '*': { left: 7, right: 7 }, '/': { left: 7, right: 7 }, '//': { left: 7, right: 7 }, '%': { left: 7, right: 7 },
     '^': { left: 10, right: 9 },
 };
@@ -369,13 +330,30 @@ class Parser {
     matchKw(v) { return this.match(TT.KW, v); }
     expect(t, v) { const tk = this.next(); if (tk.t !== t || (v !== undefined && tk.v !== v)) throw new Error(`Expected ${v||t} got ${tk.v} (${tk.t})`); return tk; }
 
-    parseChunk() {
-        const body = [];
-        while (!this.eof()) body.push(this.parseStatement());
-        return { type: 'Chunk', body };
+    skipType() {
+        if (!this.matchOp(':')) return;
+        let depth = 0;
+        while (!this.eof()) {
+            const t = this.peek();
+            if (t.t === TT.OP) {
+                if (t.v === '<' || t.v === '(' || t.v === '{' || t.v === '[') depth++;
+                else if (t.v === '>' || t.v === ')' || t.v === '}' || t.v === ']') depth--;
+                else if ((t.v === ',' || t.v === '=' || t.v === ')') && depth === 0) break;
+            } else if (t.t === TT.KW && depth === 0 && (t.v === 'end' || t.v === 'do')) {
+                break;
+            } else if (t.t === TT.IDENT && depth === 0) {
+                const next = this.peek(1);
+                if (next.t === TT.OP && (next.v === ',' || next.v === '=')) break;
+            }
+            this.next();
+        }
     }
 
+    parseChunk() { const body = []; while (!this.eof()) body.push(this.parseStatement()); return { type: 'Chunk', body }; }
+
     parseStatement() {
+        while (this.checkOp(';')) this.next();
+        if (this.eof()) return { type: 'Nop' };
         const tk = this.peek();
         if (tk.t === TT.KW) {
             switch (tk.v) {
@@ -392,6 +370,11 @@ class Parser {
             }
         }
         const expr = this.parseSuffixedExpression();
+        if (this.checkOp('+=') || this.checkOp('-=') || this.checkOp('*=') || this.checkOp('/=') || this.checkOp('%=') || this.checkOp('^=') || this.checkOp('..=')) {
+            const op = this.next().v.slice(0, -1);
+            const value = this.parseExpression();
+            return { type: 'Assignment', targets: [expr], values: [{ type: 'Binary', op: op, left: expr, right: value }] };
+        }
         if (this.checkOp('=') || this.checkOp(',')) {
             const targets = [expr];
             while (this.matchOp(',')) targets.push(this.parseSuffixedExpression());
@@ -420,13 +403,16 @@ class Parser {
             if (this.checkOp('...')) { this.next(); isVararg = true; }
             else {
                 params.push(implicitSelf ? 'self' : this.expect(TT.IDENT).v);
+                this.skipType();
                 while (this.matchOp(',')) {
                     if (this.checkOp('...')) { this.next(); isVararg = true; break; }
                     params.push(this.expect(TT.IDENT).v);
+                    this.skipType();
                 }
             }
         }
         this.expect(TT.OP, ')');
+        this.skipType();
         const body = [];
         while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement());
         this.expect(TT.KW, 'end');
@@ -445,21 +431,26 @@ class Parser {
                 if (this.checkOp('...')) { this.next(); isVararg = true; }
                 else {
                     params.push(this.expect(TT.IDENT).v);
+                    this.skipType();
                     while (this.matchOp(',')) {
                         if (this.checkOp('...')) { this.next(); isVararg = true; break; }
                         params.push(this.expect(TT.IDENT).v);
+                        this.skipType();
                     }
                 }
             }
             this.expect(TT.OP, ')');
+            this.skipType();
             const body = [];
             while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement());
             this.expect(TT.KW, 'end');
             return { type: 'LocalFunction', name, params, isVararg, body };
         }
         const names = [{ name: this.expect(TT.IDENT).v, attrib: null }];
+        this.skipType();
         while (this.matchOp(',')) {
             names.push({ name: this.expect(TT.IDENT).v, attrib: null });
+            this.skipType();
         }
         const values = [];
         if (this.matchOp('=')) {
@@ -516,6 +507,7 @@ class Parser {
     parseFor() {
         this.next();
         const firstName = this.expect(TT.IDENT).v;
+        this.skipType();
         if (this.matchOp('=')) {
             const start = this.parseExpression();
             this.expect(TT.OP, ',');
@@ -529,7 +521,10 @@ class Parser {
             return { type: 'NumericFor', varName: firstName, start, limit, step, body };
         }
         const names = [firstName];
-        while (this.matchOp(',')) names.push(this.expect(TT.IDENT).v);
+        while (this.matchOp(',')) {
+            names.push(this.expect(TT.IDENT).v);
+            this.skipType();
+        }
         this.expect(TT.KW, 'in');
         const exprs = [this.parseExpression()];
         while (this.matchOp(',')) exprs.push(this.parseExpression());
@@ -654,13 +649,16 @@ class Parser {
                     if (this.checkOp('...')) { this.next(); isVararg = true; }
                     else {
                         params.push(this.expect(TT.IDENT).v);
+                        this.skipType();
                         while (this.matchOp(',')) {
                             if (this.checkOp('...')) { this.next(); isVararg = true; break; }
                             params.push(this.expect(TT.IDENT).v);
+                            this.skipType();
                         }
                     }
                 }
                 this.expect(TT.OP, ')');
+                this.skipType();
                 const body = [];
                 while (!this.checkKw('end') && !this.eof()) body.push(this.parseStatement());
                 this.expect(TT.KW, 'end');
@@ -676,13 +674,11 @@ class Parser {
         }
         if (tk.t === TT.OP && tk.v === '{') return this.parseTable();
         if (tk.t === TT.OP && tk.v === '...') { this.next(); return { type: 'Vararg' }; }
+        if (tk.t === TT.OP && tk.v === ';') { this.next(); return { type: 'Nil' }; }
         throw new Error(`Unexpected token: ${tk.v} (${tk.t})`);
     }
 }
 
-// ==========================================
-// BYTECODE OPCODES (fixed indices, remapped at obfuscation)
-// ==========================================
 const BC = {
     HALT: 0, LOADK: 1, MOVE: 2, GETGLOBAL: 3, SETGLOBAL: 4,
     GETFIELD: 5, SETFIELD: 6, GETTABLE: 7, SETTABLE: 8,
@@ -694,9 +690,6 @@ const BC = {
     CLOSURE: 34, NOP: 35, RAW: 36
 };
 
-// ==========================================
-// COMPILER - AST to bytecode
-// ==========================================
 class Compiler {
     constructor() {
         this.bytecode = [];
@@ -710,7 +703,7 @@ class Compiler {
         this.labelCount = 0;
         this.patches = [];
         this.labels = {};
-        this.upvalues = {};
+        this.breakLabels = [];
     }
 
     emit(...bytes) { for (const b of bytes) this.bytecode.push(b); return this.bytecode.length; }
@@ -732,44 +725,15 @@ class Compiler {
 
     newReg() { const r = this.regTop++; return r; }
     freeRegs(count) { this.regTop -= count; }
-
-    allocLocal(name) {
-        const r = this.newReg();
-        this.scopes[this.scopes.length - 1][name] = r;
-        return r;
-    }
-
-    findLocal(name) {
-        for (let i = this.scopes.length - 1; i >= 0; i--) {
-            if (name in this.scopes[i]) return this.scopes[i][name];
-        }
-        return null;
-    }
-
+    allocLocal(name) { const r = this.newReg(); this.scopes[this.scopes.length - 1][name] = r; return r; }
+    findLocal(name) { for (let i = this.scopes.length - 1; i >= 0; i--) { if (name in this.scopes[i]) return this.scopes[i][name]; } return null; }
     pushScope() { this.scopes.push({}); }
-    popScope() {
-        const scope = this.scopes.pop();
-        for (const name in scope) {
-            if (scope[name] >= 0) { this.regTop = Math.min(this.regTop, scope[name]); }
-        }
-    }
-
+    popScope() { const scope = this.scopes.pop(); for (const name in scope) { if (scope[name] >= 0) { this.regTop = Math.min(this.regTop, scope[name]); } } }
     newLabel() { return '__L' + (this.labelCount++); }
     placeLabel(name) { this.labels[name] = this.bytecode.length; }
-    emitJump(op, label) {
-        this.emit(op, 0);
-        this.patches.push({ idx: this.bytecode.length - 1, label });
-    }
-    emitJumpCond(op, reg, label) {
-        this.emit(op, reg, 0);
-        this.patches.push({ idx: this.bytecode.length - 1, label });
-    }
-    resolvePatches() {
-        for (const p of this.patches) {
-            this.bytecode[p.idx] = this.labels[p.label] !== undefined ? this.labels[p.label] : this.bytecode.length;
-        }
-        this.patches = [];
-    }
+    emitJump(op, label) { this.emit(op, 0); this.patches.push({ idx: this.bytecode.length - 1, label }); }
+    emitJumpCond(op, reg, label) { this.emit(op, reg, 0); this.patches.push({ idx: this.bytecode.length - 1, label }); }
+    resolvePatches() { for (const p of this.patches) { this.bytecode[p.idx] = this.labels[p.label] !== undefined ? this.labels[p.label] : this.bytecode.length; } this.patches = []; }
 
     compileChunk(ast) {
         for (const stmt of ast.body) this.compileStatement(stmt);
@@ -782,10 +746,7 @@ class Compiler {
         switch (stmt.type) {
             case 'Local': return this.compileLocal(stmt);
             case 'Assignment': return this.compileAssignment(stmt);
-            case 'ExprStatement': {
-                const r = this.compileExpr(stmt.expr);
-                return;
-            }
+            case 'ExprStatement': { this.compileExpr(stmt.expr); return; }
             case 'If': return this.compileIf(stmt);
             case 'While': return this.compileWhile(stmt);
             case 'Repeat': return this.compileRepeat(stmt);
@@ -796,10 +757,11 @@ class Compiler {
             case 'Do': { this.pushScope(); for (const s of stmt.body) this.compileStatement(s); this.popScope(); return; }
             case 'FunctionDecl': return this.compileFunctionDecl(stmt);
             case 'LocalFunction': return this.compileLocalFunction(stmt);
+            case 'RawScript': this.emit(BC.RAW, this.addConst(stmt.value)); return;
+            case 'Nop': return;
         }
     }
 
-    breakLabels = [];
     currentBreakLabel() { return this.breakLabels.length > 0 ? this.breakLabels[this.breakLabels.length - 1] : null; }
 
     compileLocal(stmt) {
@@ -808,8 +770,6 @@ class Compiler {
             if (i < stmt.values.length) { valReg = this.compileExpr(stmt.values[i]); }
             else { valReg = this.newReg(); this.emit(BC.LOADK, valReg, this.addConst(null)); }
             const name = stmt.names[i].name;
-            const exists = this.findLocal(name);
-            if (exists !== null && exists === valReg) { /* reuse */ }
             const newReg = this.newReg();
             this.emit(BC.MOVE, newReg, valReg);
             if (valReg >= 0 && !stmt.values[i]) this.freeRegs(0);
@@ -835,13 +795,8 @@ class Compiler {
             else { this.emit(BC.SETGLOBAL, srcReg, this.addConst(tgt.name)); }
         } else if (tgt.type === 'Index') {
             const objReg = this.compileExpr(tgt.obj);
-            if (tgt.isField) {
-                const keyConst = this.addConst(tgt.key.value);
-                this.emit(BC.SETFIELD, objReg, keyConst, srcReg);
-            } else {
-                const keyReg = this.compileExpr(tgt.key);
-                this.emit(BC.SETTABLE, objReg, keyReg, srcReg);
-            }
+            if (tgt.isField) { this.emit(BC.SETFIELD, objReg, this.addConst(tgt.key.value), srcReg); }
+            else { const keyReg = this.compileExpr(tgt.key); this.emit(BC.SETTABLE, objReg, keyReg, srcReg); }
         }
     }
 
@@ -857,38 +812,27 @@ class Compiler {
             this.emitJump(BC.JUMP, endLabel);
             this.placeLabel(nextLabel);
         }
-        if (stmt.elseBody) {
-            this.pushScope();
-            for (const s of stmt.elseBody) this.compileStatement(s);
-            this.popScope();
-        }
+        if (stmt.elseBody) { this.pushScope(); for (const s of stmt.elseBody) this.compileStatement(s); this.popScope(); }
         this.placeLabel(endLabel);
     }
 
     compileWhile(stmt) {
-        const startLabel = this.newLabel();
-        const endLabel = this.newLabel();
+        const startLabel = this.newLabel(); const endLabel = this.newLabel();
         this.placeLabel(startLabel);
         const condReg = this.compileExpr(stmt.cond);
         this.emitJumpCond(BC.JUMPIFNOT, condReg, endLabel);
         this.breakLabels.push(endLabel);
-        this.pushScope();
-        for (const s of stmt.body) this.compileStatement(s);
-        this.popScope();
+        this.pushScope(); for (const s of stmt.body) this.compileStatement(s); this.popScope();
         this.breakLabels.pop();
         this.emitJump(BC.JUMP, startLabel);
         this.placeLabel(endLabel);
     }
 
     compileRepeat(stmt) {
-        const startLabel = this.newLabel();
-        const endLabel = this.newLabel();
+        const startLabel = this.newLabel(); const endLabel = this.newLabel();
         this.placeLabel(startLabel);
         this.breakLabels.push(endLabel);
-        this.pushScope();
-        for (const s of stmt.body) this.compileStatement(s);
-        const condReg = this.compileExpr(stmt.cond);
-        this.popScope();
+        this.pushScope(); for (const s of stmt.body) this.compileStatement(s); const condReg = this.compileExpr(stmt.cond); this.popScope();
         this.breakLabels.pop();
         this.emitJumpCond(BC.JUMPIF, condReg, startLabel);
         this.placeLabel(endLabel);
@@ -897,16 +841,14 @@ class Compiler {
     compileNumericFor(stmt) {
         const varReg = this.newReg();
         const limitReg = this.compileExpr(stmt.limit);
-        let stepReg;
-        let stepVal = 1;
+        let stepReg; let stepVal = 1;
         if (stmt.step) {
             if (stmt.step.type === 'Number') { stepVal = stmt.step.value; stepReg = this.allocStepReg(stepVal); }
             else { stepReg = this.compileExpr(stmt.step); }
         } else { stepReg = this.allocStepReg(1); }
         const startReg = this.compileExpr(stmt.start);
         this.emit(BC.MOVE, varReg, startReg);
-        const startLabel = this.newLabel();
-        const endLabel = this.newLabel();
+        const startLabel = this.newLabel(); const endLabel = this.newLabel();
         this.placeLabel(startLabel);
         const cmpOp = stepVal > 0 ? BC.LE : BC.GE;
         const condReg = this.newReg();
@@ -932,16 +874,12 @@ class Compiler {
                 const tblReg = this.compileExpr(callExpr.args[0]);
                 const idxReg = this.newReg();
                 this.emit(BC.LOADK, idxReg, this.addConst(0));
-                const startLabel = this.newLabel();
-                const endLabel = this.newLabel();
+                const startLabel = this.newLabel(); const endLabel = this.newLabel();
                 this.placeLabel(startLabel);
                 this.emit(BC.ADD, idxReg, idxReg, this.allocStepReg(1));
-                const keyReg = this.newReg();
-                this.emit(BC.MOVE, keyReg, idxReg);
-                const valReg = this.newReg();
-                this.emit(BC.GETTABLE, valReg, tblReg, keyReg);
-                const condReg = this.newReg();
-                this.emit(BC.NEQ, condReg, valReg, this.allocNullReg());
+                const keyReg = this.newReg(); this.emit(BC.MOVE, keyReg, idxReg);
+                const valReg = this.newReg(); this.emit(BC.GETTABLE, valReg, tblReg, keyReg);
+                const condReg = this.newReg(); this.emit(BC.NEQ, condReg, valReg, this.allocNullReg());
                 this.emitJumpCond(BC.JUMPIFNOT, condReg, endLabel);
                 this.pushScope();
                 this.scopes[this.scopes.length - 1][stmt.names[0]] = keyReg;
@@ -955,12 +893,7 @@ class Compiler {
                 return;
             }
         }
-        const rawSrc = this.rawStatementSource(stmt);
-        this.emit(BC.RAW, this.addConst(rawSrc));
-    }
-
-    rawStatementSource(stmt) {
-        return '--[unsupported generic for]';
+        this.emit(BC.RAW, this.addConst('--[unsupported generic for]'));
     }
 
     compileReturn(stmt) {
@@ -969,12 +902,8 @@ class Compiler {
         this.emit(BC.RETURN, r);
     }
 
-    compileFunctionDecl(stmt) {
-        this.emit(BC.RAW, this.addConst('--[unsupported function declaration ' + stmt.name + ']'));
-    }
-    compileLocalFunction(stmt) {
-        this.emit(BC.RAW, this.addConst('--[unsupported local function ' + stmt.name + ']'));
-    }
+    compileFunctionDecl(stmt) { this.emit(BC.RAW, this.addConst('--[unsupported function declaration ' + stmt.name + ']')); }
+    compileLocalFunction(stmt) { this.emit(BC.RAW, this.addConst('--[unsupported local function ' + stmt.name + ']')); }
 
     compileExpr(expr) {
         switch (expr.type) {
@@ -1013,17 +942,10 @@ class Compiler {
             case 'Call': return this.compileCall(expr);
             case 'MethodCall': return this.compileMethodCall(expr);
             case 'Table': return this.compileTable(expr);
-            case 'Function': {
-                const raw = '--[anonymous function]';
-                const r = this.newReg();
-                this.emit(BC.RAW, this.addConst(raw));
-                return r;
-            }
+            case 'Function': { const r = this.newReg(); this.emit(BC.RAW, this.addConst('--[anonymous function]')); return r; }
             case 'Vararg': { const r = this.newReg(); this.emit(BC.LOADK, r, 0); return r; }
         }
-        const r = this.newReg();
-        this.emit(BC.LOADK, r, this.addConst(null));
-        return r;
+        const r = this.newReg(); this.emit(BC.LOADK, r, this.addConst(null)); return r;
     }
 
     compileBinary(expr) {
@@ -1049,12 +971,7 @@ class Compiler {
         return dst;
     }
 
-    peekSkip(expr) {
-        const lbl = this.newLabel();
-        this.pendingAndOrLabels = this.pendingAndOrLabels || [];
-        this.pendingAndOrLabels.push(lbl);
-        return lbl;
-    }
+    peekSkip(expr) { const lbl = this.newLabel(); return lbl; }
 
     compileCall(expr) {
         const funcReg = this.compileExpr(expr.func);
@@ -1100,15 +1017,10 @@ class Compiler {
     }
 }
 
-// ==========================================
-// OBFUSCATOR - Generate polymorphic VM
-// ==========================================
 function randIdent(len) { len = len || 8; let s = '_'; const chars = 'Il1i0Oo'; for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)]; return s; }
 
 function encodeStringScattered(str, useScatter) {
-    if (!useScatter) {
-        return JSON.stringify(str).replace(/\\u([0-9a-f]{4})/gi, (m, h) => '\\' + parseInt(h, 16));
-    }
+    if (!useScatter) return JSON.stringify(str).replace(/\\u([0-9a-f]{4})/gi, (m, h) => '\\' + parseInt(h, 16));
     if (str.length === 0) return '""';
     const parts = [];
     let k = Math.floor(Math.random() * 200) + 10;
@@ -1142,9 +1054,7 @@ function obfuscateVM(bytecode, constants, opts) {
             encrypted.push(enc);
             rolling = (rolling + enc * 13) % 256;
         }
-    } else {
-        for (const b of remappedBytecode) encrypted.push(b);
-    }
+    } else { for (const b of remappedBytecode) encrypted.push(b); }
 
     const encodedConstants = constants.map((c, i) => {
         if (i === 0) return 'nil';
@@ -1157,7 +1067,7 @@ function obfuscateVM(bytecode, constants, opts) {
 
     const vEnv = randIdent(6), vK = randIdent(6), vB = randIdent(6), vR = randIdent(6);
     const vPC = randIdent(5), vKey = randIdent(5), vOp = randIdent(5), vRaw = randIdent(6);
-    const vState = randIdent(6), vDispatch = randIdent(7);
+    const vState = randIdent(6);
 
     let antiHook = '';
     if (opts.antiHook) {
@@ -1180,7 +1090,6 @@ function obfuscateVM(bytecode, constants, opts) {
         metatableSandbox = `do local ${vMT} = getmetatable and getmetatable(${vEnv}) if ${vMT} and ${vMT}.__index then local _m = ${vMT}.__index setmetatable(${vEnv}, {__index = _m}) end end`;
     }
 
-    const loadFn = 'loadstring or load';
     const Kline = encodedConstants.join(', ');
 
     const output = `--[==============================================================[
@@ -1346,9 +1255,6 @@ end`;
     return output;
 }
 
-// ==========================================
-// DEOBFUSCATOR
-// ==========================================
 function deobfuscateVM(src) {
     const keyMatch = src.match(/local\s+_\w+\s*=\s*(\d+)\s*\n\s*local\s+_\w+\s*=\s*1/);
     let startKey = keyMatch ? parseInt(keyMatch[1]) : 0;
@@ -1356,7 +1262,6 @@ function deobfuscateVM(src) {
         const anyKey = src.match(/local\s+_\w+\s*=\s*(\d+)\s*$/m);
         if (anyKey) startKey = parseInt(anyKey[1]);
     }
-
     const bytesMatch = src.match(/local\s+_\w+\s*=\s*\{\s*(-?\d[\d,\s\-]*)\s*\}/g);
     let encryptedBytes = null;
     let constantsBlock = null;
@@ -1370,7 +1275,6 @@ function deobfuscateVM(src) {
         }
     }
     if (!encryptedBytes) throw new Error("Bytecode array not found");
-
     const constMatch = src.match(/local\s+_\w+\s*=\s*\{([\s\S]*?)\}\s*\n\s*local\s+_\w+\s*=\s*\{/);
     if (!constMatch) throw new Error("Constant table not found");
     constantsBlock = constMatch[1];
@@ -1421,9 +1325,7 @@ function deobfuscateVM(src) {
                 const expr = block.substring(startI, i);
                 const bxorRegex = /bxor\((\d+)\s*,\s*(\d+)\)/g;
                 let m, decoded = '';
-                while ((m = bxorRegex.exec(expr)) !== null) {
-                    decoded += String.fromCharCode(parseInt(m[1]) ^ parseInt(m[2]));
-                }
+                while ((m = bxorRegex.exec(expr)) !== null) decoded += String.fromCharCode(parseInt(m[1]) ^ parseInt(m[2]));
                 let j = i;
                 while (j < block.length && (block[j] === '.' || block[j] === ' ')) j++;
                 if (block.startsWith('..', j)) {
@@ -1436,9 +1338,7 @@ function deobfuscateVM(src) {
                     }
                     const expr2 = block.substring(i, j);
                     let m2;
-                    while ((m2 = bxorRegex.exec(expr2)) !== null) {
-                        decoded += String.fromCharCode(parseInt(m2[1]) ^ parseInt(m2[2]));
-                    }
+                    while ((m2 = bxorRegex.exec(expr2)) !== null) decoded += String.fromCharCode(parseInt(m2[1]) ^ parseInt(m2[2]));
                     i = j;
                 }
                 consts.push(decoded);
@@ -1446,17 +1346,13 @@ function deobfuscateVM(src) {
             }
             let numStart = i;
             while (i < block.length && /[\-\d\.eE]/.test(block[i])) i++;
-            if (i > numStart) {
-                consts.push(parseFloat(block.substring(numStart, i)));
-                continue;
-            }
+            if (i > numStart) { consts.push(parseFloat(block.substring(numStart, i))); continue; }
             i++;
         }
         return consts;
     };
 
     const consts = parseConstants(constantsBlock);
-
     const opcodeMap = {};
     const ifRegex = /if\s+_\w+\s*==\s*(\d+)\s+then\s*\n([\s\S]*?)(?=elseif\s+_\w+\s*==\s*\d+\s+then|else\s*$|end)/g;
     let m;
@@ -1499,18 +1395,11 @@ function deobfuscateVM(src) {
     }
 
     const opNums = {};
-    for (const [n, name] of Object.entries(opcodeMap)) {
-        opNums[name] = parseInt(n);
-    }
+    for (const [n, name] of Object.entries(opcodeMap)) opNums[name] = parseInt(n);
 
     let pc = 0;
     const regs = {};
     const out = [];
-    const callReg = (() => { const r = []; return r; })();
-    let lastFuncReg = null;
-    let lastArgStart = null;
-    let lastArgCount = 0;
-    let pendingFuncName = null;
 
     const readByte = () => decrypted[pc++];
     const constant = (i) => consts[i];
@@ -1539,9 +1428,7 @@ function deobfuscateVM(src) {
             const fnVal = regs[fnReg];
             const args = [];
             for (let i = 0; i < argCount; i++) args.push(regs[argBase + i]);
-            const fnName = renderValue(fnVal);
-            const argStr = args.map(renderValue).join(', ');
-            out.push(`${fnName}(${argStr})`);
+            out.push(`${renderValue(fnVal)}(${args.map(renderValue).join(', ')})`);
             regs[dst] = { type: 'val', value: { kind: 'result' } };
         } else if (op === opNums.RETURN) {
             const src = readByte();
@@ -1578,9 +1465,7 @@ function deobfuscateVM(src) {
             const srcConst = constant(ki);
             if (typeof srcConst === 'string' && srcConst.length > 3) out.push(srcConst);
         } else {
-            if (pc < decrypted.length && decrypted.length - pc > 3) {
-                // skip unknown operand
-            } else break;
+            if (pc < decrypted.length && decrypted.length - pc > 3) {} else break;
         }
     }
 
@@ -1612,23 +1497,26 @@ function deobfuscateVM(src) {
 -- ]==============================================================]\n\n`;
 
     final += out.join('\n');
-
     return final;
 }
 
-// ==========================================
-// UI GLUE
-// ==========================================
 function processObfuscation() {
     const src = srcCodeEl.value.trim();
     if (!src) { showToast('Please enter source code first.'); return; }
     obfStatusEl.innerText = 'Compiling...'; obfStatusEl.className = 'text-cyber-accent animate-pulse';
     setTimeout(() => {
         try {
-            const lexer = new Lexer(src);
-            const tokens = lexer.tokenize();
-            const parser = new Parser(tokens);
-            const ast = parser.parseChunk();
+            let ast;
+            try {
+                const lexer = new Lexer(src);
+                const tokens = lexer.tokenize();
+                const parser = new Parser(tokens);
+                ast = parser.parseChunk();
+            } catch (parseErr) {
+                console.warn("AST parsing failed, falling back to RAW script injection.");
+                ast = { type: 'Chunk', body: [{ type: 'RawScript', value: src }] };
+            }
+
             const compiler = new Compiler();
             const { bytecode, constants } = compiler.compileChunk(ast);
             const opts = {
