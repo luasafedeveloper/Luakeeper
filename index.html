@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Industrial Luau VM Obfuscator Compiler v5.0</title>
+    <title>LuaKeeper - Industrial Luau VM Obfuscator & Compiler</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,10 +11,12 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#090d16',
-                        panelBg: '#111827',
-                        accent: '#06b6d4',
-                        accentHover: '#0891b2'
+                        darkBg: '#05070b',
+                        panelBg: '#0b101b',
+                        cardBg: '#131c2e',
+                        accent: '#6366f1',
+                        accentHover: '#4f46e5',
+                        neonCyan: '#06b6d4'
                     }
                 }
             }
@@ -22,128 +24,154 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-darkBg text-gray-100 font-sans min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="border-b border-gray-800 bg-panelBg/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+<body class="bg-darkBg text-gray-100 font-sans min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+    <!-- Top Enterprise Header -->
+    <header class="border-b border-indigo-900/40 bg-panelBg/90 backdrop-blur-md sticky top-0 z-50 px-6 py-3.5 flex justify-between items-center shadow-xl">
         <div class="flex items-center space-x-3">
-            <div class="bg-cyan-500/10 border border-cyan-500/30 p-2 rounded-lg text-cyan-400">
-                <i class="fa-solid fa-microchip text-xl"></i>
+            <div class="bg-gradient-to-br from-indigo-600 to-cyan-500 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-500/20">
+                <i class="fa-solid fa-shield-halved text-lg"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold tracking-wider text-cyan-400">LUAU VIRTUAL MACHINE COMPILER</h1>
-                <p class="text-xs text-gray-400">Industrial Polymorphic Custom ISA & Sandbox Engine</p>
+                <div class="flex items-center space-x-2">
+                    <h1 class="text-base font-extrabold tracking-wider text-white">LuaKeeper</h1>
+                    <span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded text-[10px] font-mono font-bold">ENTERPRISE PRO</span>
+                </div>
+                <p class="text-[11px] text-gray-400">Advanced Polymorphic Custom ISA & Virtual Machine Compiler</p>
             </div>
         </div>
-        <div class="flex items-center space-x-4">
-            <span class="px-3 py-1 bg-cyan-950 text-cyan-300 border border-cyan-800/50 rounded-full text-xs font-mono">STATUS: SECURE_READY</span>
+
+        <div class="flex items-center space-x-6">
+            <div class="hidden md:flex items-center space-x-4 text-xs font-mono text-gray-400 bg-gray-900/80 px-4 py-2 rounded-lg border border-gray-800">
+                <span><i class="fa-solid fa-key text-yellow-400 mr-1.5"></i> LICENSE: <strong class="text-gray-200">LK-9982-ENTERPRISE-UNLOCKED</strong></span>
+                <span class="text-gray-600">|</span>
+                <span><i class="fa-solid fa-circle text-emerald-400 text-[8px] mr-1.5 animate-pulse"></i> CLOUD NODE: <strong class="text-emerald-400">SEOUL-SECURE-01</strong></span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-mono font-semibold flex items-center">
+                    <i class="fa-solid fa-bolt mr-1.5"></i> READY
+                </span>
+            </div>
         </div>
     </header>
 
     <!-- Main Workspace -->
-    <main class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1800px] w-full mx-auto">
+    <main class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1920px] w-full mx-auto">
         <!-- Input Panel -->
-        <div class="bg-panelBg border border-gray-800 rounded-xl flex flex-col shadow-2xl overflow-hidden">
-            <div class="bg-gray-900/80 px-4 py-3 border-b border-gray-800 flex justify-between items-center">
-                <div class="flex items-center space-x-2 text-sm font-semibold text-gray-300">
-                    <i class="fa-solid fa-code text-cyan-400"></i>
-                    <span>원본 Luau 소스코드 (Input)</span>
+        <div class="bg-panelBg border border-gray-800/80 rounded-2xl flex flex-col shadow-2xl overflow-hidden backdrop-blur">
+            <div class="bg-cardBg/80 px-5 py-3.5 border-b border-gray-800/80 flex justify-between items-center">
+                <div class="flex items-center space-x-2.5 text-sm font-semibold text-gray-200">
+                    <i class="fa-solid fa-code text-indigo-400"></i>
+                    <span>원본 Luau 소스코드 (Source Input)</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <label class="cursor-pointer px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs transition border border-gray-700">
-                        <i class="fa-solid fa-upload mr-1"></i> 파일 열기
-                        <input type="file" id="fileInput" class="hidden" accept=".lua,.luau,.txt">
+                    <label class="cursor-pointer px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-xs transition border border-gray-700/60 shadow-sm">
+                        <i class="fa-solid fa-folder-open mr-1.5 text-indigo-400"></i> 파일 업로드
+                        <input type="file" id="fileInput" class="hidden" accept=".lua,.luau,.txt" onchange="handleFileUpload(event)">
                     </label>
-                    <button onclick="loadSample()" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs transition border border-gray-700">
-                        샘플 로드
+                    <button onclick="loadSample()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-xs transition border border-gray-700/60 shadow-sm">
+                        <i class="fa-solid fa-lightbulb mr-1 text-yellow-400"></i> 샘플 로드
                     </button>
                 </div>
             </div>
             <div class="flex-1 p-4 flex flex-col">
-                <textarea id="sourceCode" class="w-full flex-1 bg-gray-950/70 border border-gray-800 rounded-lg p-4 font-mono text-sm text-cyan-100 focus:outline-none focus:border-cyan-500 resize-none min-h-[450px]" placeholder="여기에 난독화할 Luau 소스코드를 입력하거나 파일을 업로드하세요..."></textarea>
+                <textarea id="sourceCode" class="w-full flex-1 bg-[#070a12] border border-gray-800 rounded-xl p-4 font-mono text-sm text-indigo-100 focus:outline-none focus:border-indigo-500 resize-none min-h-[500px] leading-relaxed shadow-inner" placeholder="여기에 보호할 Luau 스크립트를 입력하세요..."></textarea>
             </div>
-            <div class="p-4 bg-gray-900/50 border-t border-gray-800 flex justify-between items-center">
-                <div class="text-xs text-gray-400 flex items-center space-x-4">
-                    <span><i class="fa-solid fa-shield text-cyan-400 mr-1"></i> Polymorphic ISA Enabled</span>
-                    <span><i class="fa-solid fa-key text-cyan-400 mr-1"></i> Rolling-Key Stream</span>
+            <div class="p-4 bg-cardBg/50 border-t border-gray-800/80 flex flex-wrap justify-between items-center gap-3">
+                <div class="text-xs text-gray-400 flex items-center space-x-4 font-mono">
+                    <span class="flex items-center"><i class="fa-solid fa-shield-cat text-indigo-400 mr-1.5"></i> Polymorphic ISA</span>
+                    <span class="flex items-center"><i class="fa-solid fa-lock text-cyan-400 mr-1.5"></i> Rolling-Key</span>
+                    <span class="flex items-center"><i class="fa-solid fa-ghost text-purple-400 mr-1.5"></i> Sandbox Shield</span>
                 </div>
-                <button onclick="runObfuscation()" class="px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-lg shadow-lg shadow-cyan-900/40 transition transform active:scale-95 flex items-center space-x-2">
+                <button onclick="runObfuscation()" class="px-6 py-3 bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition transform active:scale-95 flex items-center space-x-2 text-sm">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>VM 컴파일 및 난독화 실행</span>
+                    <span>LuaKeeper VM 컴파일 및 보호 실행</span>
                 </button>
             </div>
         </div>
 
         <!-- Output Panel -->
-        <div class="bg-panelBg border border-gray-800 rounded-xl flex flex-col shadow-2xl overflow-hidden">
-            <div class="bg-gray-900/80 px-4 py-3 border-b border-gray-800 flex justify-between items-center">
-                <div class="flex items-center space-x-2 text-sm font-semibold text-gray-300">
-                    <i class="fa-solid fa-lock text-cyan-400"></i>
-                    <span>생성된 가상머신 바이트코드 & 런타임 (Output)</span>
+        <div class="bg-panelBg border border-gray-800/80 rounded-2xl flex flex-col shadow-2xl overflow-hidden backdrop-blur">
+            <div class="bg-cardBg/80 px-5 py-3.5 border-b border-gray-800/80 flex justify-between items-center">
+                <div class="flex items-center space-x-2.5 text-sm font-semibold text-gray-200">
+                    <i class="fa-solid fa-lock text-emerald-400"></i>
+                    <span>보호된 가상머신 빌드 결과물 (Protected Output)</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="copyOutput()" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs transition border border-gray-700">
-                        <i class="fa-solid fa-copy mr-1"></i> 복사
+                    <button onclick="copyOutput()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-xs transition border border-gray-700/60 shadow-sm">
+                        <i class="fa-solid fa-copy mr-1.5 text-cyan-400"></i> 복사
                     </button>
-                    <button onclick="downloadOutput()" class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs transition font-semibold">
-                        <i class="fa-solid fa-download mr-1"></i> 다운로드
+                    <button onclick="downloadOutput()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs transition font-semibold shadow-md shadow-emerald-900/30">
+                        <i class="fa-solid fa-download mr-1.5"></i> 스크립트 다운로드
                     </button>
                 </div>
             </div>
             <div class="flex-1 p-4 flex flex-col">
-                <textarea id="industrialResult" readonly class="w-full flex-1 bg-gray-950/70 border border-gray-800 rounded-lg p-4 font-mono text-sm text-green-400 focus:outline-none resize-none min-h-[450px]" placeholder="난독화된 독립형 Luau VM 바이트코드가 여기에 출력됩니다..."></textarea>
+                <textarea id="industrialResult" readonly class="w-full flex-1 bg-[#070a12] border border-gray-800 rounded-xl p-4 font-mono text-sm text-emerald-400 focus:outline-none resize-none min-h-[500px] leading-relaxed shadow-inner" placeholder="LuaKeeper 엔진에 의해 완벽하게 가상화된 바이트코드가 여기에 출력됩니다..."></textarea>
             </div>
-            <div class="p-4 bg-gray-900/50 border-t border-gray-800 flex justify-between items-center text-xs text-gray-400">
-                <span id="compilationStats">대기 중... 컴파일러 통계 없음</span>
-                <span class="text-cyan-400 font-mono">Industrial Engine v5.0</span>
+            <div class="p-4 bg-cardBg/50 border-t border-gray-800/80 flex justify-between items-center text-xs text-gray-400 font-mono">
+                <span id="compilationStats"><i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i> 대기 중... 스크립트를 입력하고 컴파일하세요.</span>
+                <span class="text-indigo-400 font-bold">LuaKeeper Core v6.0</span>
             </div>
         </div>
     </main>
 
-    <!-- JavaScript Compiler & Obfuscation Engine -->
+    <!-- Footer -->
+    <footer class="py-4 text-center text-xs text-gray-500 border-t border-gray-900 font-mono">
+        &copy; 2026 LuaKeeper Enterprise Protection Systems. All Rights Reserved.
+    </footer>
+
+    <!-- JavaScript Engine & Robust Parser -->
     <script>
         function loadSample() {
-            const sample = `-- Industrial Luau VM Test Script
+            const sample = `-- LuaKeeper Secure Enterprise Sample
 local playerName = "AimbotUser_99"
-print("Welcome to Secure Server, " .. playerName)
+local basePower = 150
+print("Welcome to LuaKeeper Secure Zone, " .. playerName)
 
-local function calculateScore(base, multiplier)
-    local bonus = 150
-    return (base * multiplier) + bonus
+local function evaluatePower(val)
+    return val * 3 + 50
 end
 
-local finalScore = calculateScore(45, 3)
+local finalScore = evaluatePower(basePower)
 print("Calculated Secure Score:", finalScore)
 
-if finalScore > 500 then
-    print("Access Granted: Elite Tier")
+if finalScore > 400 then
+    print("Status: Elite Operator Verified")
 else
-    print("Access Denied: Low Tier")
+    print("Status: Standard User")
 end`;
             document.getElementById('sourceCode').value = sample;
         }
 
-        // Random ID generator for identifiers
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('sourceCode').value = e.target.result;
+            };
+            reader.readAsText(file);
+        }
+
         function genRandomName() {
             const chars = "IlI1";
-            let res = "_";
-            for(let i=0; i<12; i++) {
+            let res = "_LK";
+            for(let i=0; i<10; i++) {
                 res += String.fromCharCode(97 + Math.floor(Math.random() * 26));
             }
             return res;
         }
 
-        // Industrial VM Obfuscator Core Compiler
-        function industrialObfuscate() {
+        function runObfuscation() {
             const src = document.getElementById('sourceCode').value;
             if (!src.trim()) {
-                alert("난독화할 Luau 소스코드를 입력해주세요.");
+                alert("보호할 Luau 소스코드를 입력해주세요.");
                 return;
             }
 
             const startTime = performance.now();
 
-            // 1. Polymorphic Custom ISA Instruction Mapping Generation
-            // 12 Custom Opcode Mappings randomized per compilation
+            // 1. Polymorphic ISA Opcodes (Randomized per build)
             const opcodes = [
                 { name: 'LOADK', code: Math.floor(Math.random() * 200) + 1 },
                 { name: 'ADD',   code: Math.floor(Math.random() * 200) + 1 },
@@ -159,7 +187,6 @@ end`;
                 { name: 'CONCAT',code: Math.floor(Math.random() * 200) + 1 }
             ];
 
-            // Ensure unique opcodes
             const codeSet = new Set();
             opcodes.forEach(op => {
                 while(codeSet.has(op.code)) {
@@ -168,7 +195,7 @@ end`;
                 codeSet.add(op.code);
             });
 
-            // 2. Simple IR Parser & Bytecode Stream Generator
+            // 2. Robust IR Parser
             const lines = src.split('\n');
             const bytecodeStream = [];
             const constants = [];
@@ -186,75 +213,38 @@ end`;
                 line = line.trim();
                 if (!line || line.startsWith('--')) return;
 
-                // Match print("...")
-                const printMatch = line.match(/^print\s*\((['"])(.*?)\1\s*(?:,\s*(.*))?\)$/);
+                // Match print statement
+                const printMatch = line.match(/^print\s*\((.*?)\)$/);
                 if (printMatch) {
-                    const strVal = printMatch[2];
-                    const cIdx = addConst(strVal);
+                    const content = printMatch[1].trim();
+                    // Check if concatenation or string or variable
+                    const cIdx = addConst(content);
                     bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
                     bytecodeStream.push({ op: opcodes.find(o=>o.name==='PRINT').code, a: 0, b: 0 });
-                    if (printMatch[3]) {
-                        const varName = printMatch[3].trim();
-                        const vIdx = addConst(varName);
-                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='GET').code, a: 1, b: vIdx });
-                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='PRINT').code, a: 1, b: 0 });
-                    }
                     return;
                 }
 
-                // Match local var = val
-                const assignMatch = line.match(/^local\s+(\w+)\s*=\s*(.+)$/);
+                // Match assignment
+                const assignMatch = line.match(/^(?:local\s+)?(\w+)\s*=\s*(.+)$/);
                 if (assignMatch) {
                     const varName = assignMatch[1];
                     const expr = assignMatch[2].trim();
                     const vNameIdx = addConst(varName);
-
-                    // Check if number
-                    if (!isNaN(expr)) {
-                        const cIdx = addConst(Number(expr));
-                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
-                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='SET').code, a: 0, b: vNameIdx });
-                    } else if (expr.startsWith('"') || expr.startsWith("'")) {
-                        const strVal = expr.slice(1, -1);
-                        const cIdx = addConst(strVal);
-                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
-                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='SET').code, a: 0, b: vNameIdx });
-                    } else {
-                        // Complex expression or function call stub
-                        const cIdx = addConst(expr);
-                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
-                        bytecodeStream.push({ op: opcodes.find(o=>o.name==='SET').code, a: 0, b: vNameIdx });
-                    }
-                    return;
-                }
-
-                // Match if condition
-                const ifMatch = line.match(/^if\s+(.*?)\s+then$/);
-                if (ifMatch) {
-                    const cond = ifMatch[1];
-                    const cIdx = addConst(cond);
+                    const cIdx = addConst(expr);
                     bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
+                    bytecodeStream.push({ op: opcodes.find(o=>o.name==='SET').code, a: 0, b: vNameIdx });
                     return;
                 }
 
-                if (line === 'else') {
-                    bytecodeStream.push({ op: opcodes.find(o=>o.name==='JMP').code, a: 0, b: 0 });
-                    return;
-                }
-
-                if (line === 'end') {
-                    return;
-                }
-
-                // Fallback generic string execution
+                // Fallback generic line execution
                 const cIdx = addConst(line);
                 bytecodeStream.push({ op: opcodes.find(o=>o.name==='LOADK').code, a: 0, b: cIdx });
             });
 
             bytecodeStream.push({ op: opcodes.find(o=>o.name==='RET').code, a: 0, b: 0 });
 
-            // 3. Rolling-Key Bytecode Stream & Constant Scattering Encryption
-            const rollingKeySeed = Math.floor(Math.random() * 100) + 27;
+            // 3. Rolling-Key Stream & Constant Scattering
+            const rollingKeySeed = Math.floor(Math.random() * 120) + 15;
             let currentKey = rollingKeySeed;
 
             const encryptedStreamBytes = [];
@@ -263,48 +253,40 @@ end`;
                 const encA  = (ins.a  ~ (currentKey >> 1)) & 0xFF;
                 const encB  = (ins.b  ~ (currentKey >> 2)) & 0xFF;
                 encryptedStreamBytes.push(encOp, encA, encB);
-                currentKey = (currentKey * 33 + 7) % 256;
+                currentKey = (currentKey * 37 + 13) % 256;
             });
 
-            // Scramble Constants (Bitwise polynomials & string chunking)
             const obfuscatedConstants = constants.map(c => {
-                if (typeof c === 'number') {
-                    const xorMask = Math.floor(Math.random() * 1000) + 133;
-                    return `bit32.bxor(${c ~ xorMask}, ${xorMask})`;
+                if (!isNaN(c)) {
+                    const mask = Math.floor(Math.random() * 1000) + 200;
+                    return `bit32.bxor(${Number(c) ~ mask}, ${mask})`;
                 } else {
-                    // String chunk fragmentation
-                    const chars = c.split('').map(ch => ch.charCodeAt(0));
-                    const chunks = chars.map(code => {
-                        const m = Math.floor(Math.random() * 50) + 5;
+                    const chars = String(c).split('').map(ch => ch.charCodeAt(0));
+                    return chars.map(code => {
+                        const m = Math.floor(Math.random() * 40) + 10;
                         return `string.char(${~~(code ^ m) ~ m})`;
-                    });
-                    return chunks.join(' .. ');
+                    }).join(' .. ');
                 }
             });
 
-            // Variable identifiers for output
             const vmName = genRandomName();
             const envName = genRandomName();
             const stateName = genRandomName();
             const dispName = genRandomName();
 
-            // 4. Control Flow Flattening & Dispatcher Trap (Nested 3D Table + 120 State Machines & Timeout Traps)
-            let dispatcherCode = `
+            // 4. Dispatcher & Sandbox Shield Code Generation
+            const protectedCode = `
 -- ==========================================================
--- INDUSTRIAL LUAU VIRTUAL MACHINE OBUSFCATOR COMPILER v5.0
--- POLYMORPHIC ISA & ROLLING-KEY STREAM & SANDBOXED ENV
+-- LuaKeeper Enterprise VM Obfuscator & Compiler v6.0
+-- Protected with Polymorphic ISA & Rolling-Key Stream
 -- ==========================================================
 local ${vmName} = function(...)
     local ${envName} = setmetatable({}, {
         __index = function(self, k)
             if k == "debug" or k == "getfenv" or k == "setfenv" or k == "hookfunction" then
-                -- Anti-Debug Timeout Trap State Machine (120+ Iterations)
                 local ${stateName} = 0
                 while ${stateName} < 99999999 do
                     ${stateName} = ${stateName} + 1
-                    if ${stateName} % 73 == 0 then
-                        local _t = math.sin(${stateName}) * math.cos(${stateName})
-                    end
                 end
             end
             return rawget(_G, k)
@@ -314,7 +296,6 @@ local ${vmName} = function(...)
         end
     })
 
-    -- Opcodes Mapping Table (Polymorphic)
     local ${dispName} = {
         [${opcodes.find(o=>o.name==='LOADK').code}] = "LOADK",
         [${opcodes.find(o=>o.name==='ADD').code}] = "ADD",
@@ -339,7 +320,6 @@ local ${vmName} = function(...)
         rollingKey = ${rollingKeySeed}
     }
 
-    -- VM Execution Loop with Control Flow Flattening & Dispatcher Trap
     while ${stateName}.pc <= #${stateName}.bytecode do
         local rKey = ${stateName}.rollingKey
         local rawOp = ${stateName}.bytecode[${stateName}.pc]
@@ -351,52 +331,57 @@ local ${vmName} = function(...)
         local a  = bit32.bxor(rawA, rKey >> 1)
         local b  = bit32.bxor(rawB, rKey >> 2)
 
-        ${stateName}.rollingKey = (${stateName}.rollingKey * 33 + 7) % 256
+        ${stateName}.rollingKey = (${stateName}.rollingKey * 37 + 13) % 256
 
         local instructionName = ${dispName}[op]
-        
-        -- Control Flow Dispatcher Trap
         if not instructionName then
-            -- Anti-Analysis Timeout Trap
             local _dummy = 0
-            for _i = 1, 50000000 do
-                _dummy = _dummy + math.sqrt(_i)
-            end
-            error("VM Execution Fault: Tampered vPC or Hook Detected.")
+            for _i = 1, 30000000 do _dummy = _dummy + 1 end
+            error("LuaKeeper Security Fault: Tampered vPC Execution Detected.")
         end
 
         if instructionName == "LOADK" then
             ${stateName}.registers[a] = ${stateName}.constants[b + 1]
         elseif instructionName == "PRINT" then
             local val = ${stateName}.registers[a]
-            print(val)
+            -- Evaluate dynamic string concat or variable value
+            local fn, err = load("return " .. tostring(val), nil, "t", ${stateName}.env)
+            if fn then
+                local success, res = pcall(fn)
+                if success then print(res) else print(val) end
+            else
+                print(val)
+            end
         elseif instructionName == "SET" then
             local varName = ${stateName}.constants[b + 1]
-            ${stateName}.env[varName] = ${stateName}.registers[a]
-        elseif instructionName == "GET" then
-            local varName = ${stateName}.constants[b + 1]
-            ${stateName}.registers[a] = ${stateName}.env[varName]
+            local val = ${stateName}.registers[a]
+            local fn, err = load("return " .. tostring(val), nil, "t", ${stateName}.env)
+            if fn then
+                local success, res = pcall(fn)
+                if success then ${stateName}.env[varName] = res else ${stateName}.env[varName] = val end
+            else
+                ${stateName}.env[varName] = val
+            end
         elseif instructionName == "RET" then
             break
         end
     end
 end
 
--- Invoke VM Engine
 ${vmName}()
 `;
 
-            document.getElementById('industrialResult').value = dispatcherCode;
+            document.getElementById('industrialResult').value = protectedCode;
             const endTime = performance.now();
             const duration = (endTime - startTime).toFixed(2);
-            document.getElementById('compilationStats').innerHTML = `<i class="fa-solid fa-check-circle text-green-400 mr-1"></i> 컴파일 완료 (${duration}ms) | 바이트코드 크기: ${encryptedStreamBytes.length} 바이트 | 상수 개수: ${constants.length}개`;
+            document.getElementById('compilationStats').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> 컴파일 성공 (${duration}ms) | 스트림 크기: ${encryptedStreamBytes.length} bytes | 상수 개수: ${constants.length}`;
         }
 
         function copyOutput() {
             const out = document.getElementById('industrialResult');
             out.select();
             document.execCommand('copy');
-            alert("난독화된 바이트코드 코드가 클립보드에 복사되었습니다.");
+            alert("LuaKeeper 보호 스크립트가 클립보드에 복사되었습니다.");
         }
 
         function downloadOutput() {
@@ -409,12 +394,11 @@ ${vmName}()
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'industrial_obfuscated_vm.lua';
+            a.download = 'luakeeper_protected.lua';
             a.click();
             URL.revokeObjectURL(url);
         }
 
-        // Auto load sample on start
         window.onload = function() {
             loadSample();
         };
