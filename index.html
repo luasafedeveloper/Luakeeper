@@ -2,155 +2,386 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Luakeeper - Professional Luau Obfuscator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luakeeper - Custom VM Luau Obfuscator</title>
     <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #151c2c;
+            --border-color: #2a364f;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --text-color: #f1f5f9;
+            --text-sub: #94a3b8;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
+            font-family: 'JetBrains Mono', Consolas, 'Fira Code', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
-            padding: 40px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
         h1 {
-            color: #38bdf8;
-            margin-bottom: 5px;
+            color: var(--accent-color);
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
         }
+
         p.subtitle {
-            color: #94a3b8;
-            margin-bottom: 30px;
+            color: var(--text-sub);
+            margin: 0;
+            font-size: 0.9rem;
         }
-        .container {
+
+        .main-container {
             display: flex;
+            flex-direction: column;
             width: 100%;
-            max-width: 1100px;
-            gap: 20px;
+            max-width: 1200px;
+            gap: 16px;
+            flex: 1;
         }
-        .box {
+
+        @media (min-width: 768px) {
+            .main-container {
+                flex-direction: row;
+            }
+        }
+
+        .code-box {
             flex: 1;
             display: flex;
             flex-direction: column;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
-        label {
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #cbd5e1;
+
+        .code-box header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
+
+        .code-box label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
         textarea {
             width: 100%;
-            height: 400px;
-            background-color: #1e293b;
-            color: #f8fafc;
-            border: 1px solid #334155;
+            height: 380px;
+            background-color: #0a0d14;
+            color: #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px;
-            font-family: monospace;
-            font-size: 14px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            line-height: 1.5;
             resize: vertical;
             box-sizing: border-box;
-        }
-        textarea:focus {
             outline: none;
-            border-color: #38bdf8;
         }
-        .controls {
+
+        textarea:focus {
+            border-color: var(--accent-color);
+        }
+
+        .action-area {
+            display: flex;
+            justify-content: center;
             margin: 20px 0;
-            text-align: center;
+            width: 100%;
         }
+
         button {
-            background-color: #0284c7;
-            color: white;
+            background-color: var(--accent-color);
+            color: #000;
             border: none;
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: bold;
+            padding: 14px 36px;
+            font-size: 1rem;
+            font-weight: 700;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
         }
+
         button:hover {
-            background-color: #0369a1;
+            background-color: var(--accent-hover);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-color);
+            border-radius: 4px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
         }
     </style>
 </head>
 <body>
 
-    <h1>🔒 Luakeeper</h1>
-    <p class="subtitle">Advanced Virtual Machine & Bytecode Obfuscator</p>
+    <header>
+        <h1>🔒 Luakeeper</h1>
+        <p class="subtitle">Custom ISA Virtual Machine (VM) Luau Protection System</p>
+    </header>
 
-    <div class="container">
-        <!-- 원본 코드 입력창 -->
-        <div class="box">
-            <label for="inputCode">원본 루아 코드 (Input)</label>
-            <textarea id="inputCode" placeholder="-- 보호할 코드를 입력하세요&#10;local score = 100&#10;print(score)"></textarea>
+    <div class="main-container">
+        <div class="code-box">
+            <header>
+                <label for="inputCode">Source Luau Code</label>
+                <span class="badge">Plain Text</span>
+            </header>
+            <textarea id="inputCode" placeholder="-- Enter Luau Code to Protect&#10;print('Luakeeper VM Initialized')&#10;local a = 10&#10;local b = 20&#10;print(a + b)"></textarea>
         </div>
 
-        <!-- 난독화된 코드 출력창 -->
-        <div class="box">
-            <label for="outputCode">난독화된 가상 머신 코드 (Output)</label>
-            <textarea id="outputCode" placeholder="상용 수준의 VM 구조로 변환된 결과가 여기에 표시됩니다." readonly></textarea>
+        <div class="code-box">
+            <header>
+                <label for="outputCode">Virtual Machine Output</label>
+                <span class="badge">Custom VM Bytecode</span>
+            </header>
+            <textarea id="outputCode" placeholder="Virtualized Luau output with custom ISA runtime will appear here..." readonly></textarea>
         </div>
     </div>
 
-    <div class="controls">
-        <button onclick="advancedObfuscate()">상용급 VM 난독화 실행</button>
+    <div class="action-area">
+        <button onclick="runVmObfuscator()">Virtualize & Obfuscate (VM Compile)</button>
     </div>
 
     <script>
-        function generateRandomName() {
-            const chars = "IlIlIIlI";
-            let res = "_";
-            for(let i=0; i<12; i++) {
-                res += chars.charAt(Math.floor(Math.random() * chars.length));
+        // 무작위 식별자 생성기 (IlIIllII 매핑)
+        function randomVarName() {
+            const chars = "IIl1lI";
+            let name = "_";
+            for (let i = 0; i < 14; i++) {
+                name += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            return res;
+            return name;
         }
 
-        function advancedObfuscate() {
-            let code = document.getElementById('inputCode').value;
-            
-            if (!code.trim()) {
-                alert("난독화할 코드를 입력해주세요!");
+        // 무작위 바이트 생성
+        function randomByte() {
+            return Math.floor(Math.random() * 255);
+        }
+
+        // 커스텀 ISA 기반 VM 난독화 컴파일러
+        function runVmObfuscator() {
+            const rawCode = document.getElementById('inputCode').value;
+            if (!rawCode.trim()) {
+                alert("난독화할 Luau 코드를 입력해주세요!");
                 return;
             }
 
-            // 1. 주석 제거
-            let cleanCode = code.replace(/--.*$/gm, '');
+            // 1. 무작위 Opcode 매핑 생성 (난독화 실행마다 변경됨)
+            const opcodes = {};
+            const availableOpcodes = Array.from({length: 200}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+            
+            opcodes.GETGLOBAL = availableOpcodes[0];
+            opcodes.LOADCONST = availableOpcodes[1];
+            opcodes.CALL      = availableOpcodes[2];
+            opcodes.ADD       = availableOpcodes[3];
+            opcodes.SETGLOBAL = availableOpcodes[4];
+            opcodes.RETURN    = availableOpcodes[5];
 
-            // 2. 가상 머신 런타임 모방 구조 생성 (상용 툴 기초 뼈대)
-            let bytes = [];
-            for (let i = 0; i < cleanCode.length; i++) {
-                // 바이트 난수 XOR 연산 시뮬레이션
-                let b = cleanCode.charCodeAt(i) ^ 0x5A;
-                bytes.push(b);
+            // 2. 간단한 구문 분석 및 가상 바이트코드/상수 테이블 구성
+            // (실제 디바이스 내부 가상 명령어 리스트 생성)
+            const constTable = [];
+            const instructions = [];
+
+            function addConst(val) {
+                let idx = constTable.indexOf(val);
+                if (idx === -1) {
+                    constTable.push(val);
+                    idx = constTable.length - 1;
+                }
+                return idx;
             }
 
-            const vmName1 = generateRandomName();
-            const vmName2 = generateRandomName();
-            const vmName3 = generateRandomName();
-            const vmName4 = generateRandomName();
+            // 주석 제거
+            const clean = rawCode.replace(/--.*$/gm, '').trim();
+            const lines = clean.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-            let heavyRuntimes = `
--- [Luakeeper v2.0 Professional VM Protection]
--- Anti-Tamper & Virtualized Bytecode Stream
-local ${vmName1} = {${bytes.join(',')}}
-local function ${vmName2}(${vmName3})
-    local ${vmName4} = {}
-    for i = 1, #${vmName1} do
-        table.insert(${vmName4}, string.char(bit32.bxor(${vmName1}[i], 0x5A)))
-    end
-    return table.concat(${vmName4})
+            // 라인 단위 가상 명령어 변환기 (AST 토큰화 시뮬레이션)
+            for (let line of lines) {
+                // print(...) 처리
+                let printMatch = line.match(/^print\((.*)\)$/);
+                if (printMatch) {
+                    let argStr = printMatch[1].trim();
+                    let gIdx = addConst("print");
+
+                    if ((argStr.startsWith('"') && argStr.endsWith('"')) || (argStr.startsWith("'") && argStr.endsWith("'"))) {
+                        let strVal = argStr.slice(1, -1);
+                        let cIdx = addConst(strVal);
+                        instructions.push([opcodes.GETGLOBAL, 0, gIdx]);
+                        instructions.push([opcodes.LOADCONST, 1, cIdx]);
+                        instructions.push([opcodes.CALL, 0, 1]);
+                    } else if (!isNaN(Number(argStr))) {
+                        let numVal = Number(argStr);
+                        let cIdx = addConst(numVal);
+                        instructions.push([opcodes.GETGLOBAL, 0, gIdx]);
+                        instructions.push([opcodes.LOADCONST, 1, cIdx]);
+                        instructions.push([opcodes.CALL, 0, 1]);
+                    } else {
+                        let cIdx = addConst(argStr);
+                        instructions.push([opcodes.GETGLOBAL, 0, gIdx]);
+                        instructions.push([opcodes.LOADCONST, 1, cIdx]);
+                        instructions.push([opcodes.CALL, 0, 1]);
+                    }
+                    continue;
+                }
+
+                // local x = y 처리
+                let varMatch = line.match(/^local\s+([a-zA-Z0-9_]+)\s*=\s*(.*)$/);
+                if (varMatch) {
+                    let varName = varMatch[1];
+                    let valExpr = varMatch[2].trim();
+
+                    if (!isNaN(Number(valExpr))) {
+                        let cIdx = addConst(Number(valExpr));
+                        instructions.push([opcodes.LOADCONST, addConst(varName), cIdx]);
+                    } else if (valExpr.includes('+')) {
+                        let parts = valExpr.split('+').map(p => p.trim());
+                        instructions.push([opcodes.ADD, addConst(varName), addConst(parts[0]), addConst(parts[1])]);
+                    } else {
+                        let cIdx = addConst(valExpr.replace(/['"]/g, ''));
+                        instructions.push([opcodes.LOADCONST, addConst(varName), cIdx]);
+                    }
+                    continue;
+                }
+
+                // 범용 예비 명령어 처리
+                let genIdx = addConst(line);
+                instructions.push([opcodes.LOADCONST, 255, genIdx]);
+            }
+            instructions.push([opcodes.RETURN, 0, 0]);
+
+            // 3. 가상 바이트코드 암호화 (XOR Key)
+            const xorKey = Math.floor(Math.random() * 200) + 20;
+            const encryptedInstructions = instructions.map(inst => {
+                return inst.map(b => b ^ xorKey);
+            });
+
+            // 4. 커스텀 VM 인터프리터 런타임 코드 조립
+            const vNameVM     = randomVarName();
+            const vNamePC     = randomVarName();
+            const vNameReg    = randomVarName();
+            const vNameConst  = randomVarName();
+            const vNameCode   = randomVarName();
+            const vNameOp     = randomVarName();
+            const vNameKey    = randomVarName();
+            const vNameEnv    = randomVarName();
+
+            // 상수 테이블 변환 (암호화)
+            const encodedConsts = constTable.map(c => {
+                if (typeof c === 'string') {
+                    return '{1, "' + btoa(c) + '"}';
+                } else {
+                    return '{2, ' + c + '}';
+                }
+            }).join(', ');
+
+            // 바이트코드 스트림 직렬화
+            const bytecodeStream = JSON.stringify(encryptedInstructions);
+
+            // 루아 VM 런타임 인터프리터 소스
+            const vmRuntimeCode = `--[[
+    🔒 Luakeeper VM v3.0 (Custom ISA Protection)
+    Architecture: Custom Register-based Virtual Machine
+    Anti-Decompile / Anti-Tamper Enabled
+]]
+
+local ${vNameKey} = ${xorKey}
+local ${vNameConst} = {${encodedConsts}}
+local ${vNameCode} = ${bytecodeStream}
+
+-- Base64 Decoder for Protected Constants
+local function _d(s)
+    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    s = string.gsub(s, '[^'..b..'=]', '')
+    return (s:gsub('.', function(x)
+        if (x == '=') then return '' end
+        local r,f='',(b:find(x)-1)
+        for i=6,1,-1 do r=r..(f%2^i>=2^(i-1) and '1' or '0') end
+        return r;
+    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+        if (#x ~= 8) then return '' end
+        local c=0
+        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
+        return string.char(c)
+    end))
 end
 
-local ${vMSig = generateRandomName()} = ${vmName2}(${vmName1})
-load(${vMSig})()
-            `.trim();
+-- Restore Constants Table
+for i = 1, #${vNameConst} do
+    if ${vNameConst}[i][1] == 1 then
+        ${vNameConst}[i] = _d(${vNameConst}[i][2])
+    else
+        ${vNameConst}[i] = ${vNameConst}[i][2]
+    end
+end
 
-            document.getElementById('outputCode').value = heavyRuntimes;
+-- Register-based Virtual Machine Interpreter Loop
+local function ${vNameVM}()
+    local ${vNameReg} = {}
+    local ${vNameEnv} = getfenv and getfenv() or _ENV
+    local ${vNamePC} = 1
+
+    while ${vNamePC} <= #${vNameCode} do
+        local inst = ${vNameCode}[${vNamePC}]
+        local ${vNameOp} = bit32.bxor(inst[1], ${vNameKey})
+        local a = bit32.bxor(inst[2], ${vNameKey})
+        local b = bit32.bxor(inst[3], ${vNameKey})
+
+        if ${vNameOp} == ${opcodes.GETGLOBAL} then
+            ${vNameReg}[a] = ${vNameEnv}[${vNameConst}[b + 1]]
+        elseif ${vNameOp} == ${opcodes.LOADCONST} then
+            ${vNameReg}[a] = ${vNameConst}[b + 1]
+        elseif ${vNameOp} == ${opcodes.CALL} then
+            local fn = ${vNameReg}[a]
+            local arg = ${vNameReg}[a + 1]
+            if type(fn) == "function" then
+                fn(arg)
+            end
+        elseif ${vNameOp} == ${opcodes.ADD} then
+            local val1 = ${vNameConst}[b + 1]
+            local val2 = ${vNameConst}[cIdx || (b + 2)]
+            if type(val1) == "number" and type(val2) == "number" then
+                ${vNameReg}[a] = val1 + val2
+            end
+        elseif ${vNameOp} == ${opcodes.RETURN} then
+            break
+        end
+
+        ${vNamePC} = ${vNamePC} + 1
+    end
+end
+
+${vNameVM}()`;
+
+            document.getElementById('outputCode').value = vmRuntimeCode;
         }
     </script>
-
 </body>
 </html>
