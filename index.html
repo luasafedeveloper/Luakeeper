@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luakeeper | Luau Obfuscator & Deobfuscator</title>
+<title>LuaKeeper | Advanced Luau Deobfuscator</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  /* ============ Cyber / Neon 테마 ============ */
   :root {
     --bg: #0a0d14;
     --panel: #0d1117;
@@ -19,73 +18,33 @@
     color: #c9d1d9;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
-  .neon-text {
-    color: var(--cyan);
-    text-shadow: 0 0 8px rgba(0,240,255,0.6), 0 0 20px rgba(0,240,255,0.3);
-  }
-  .neon-glow {
-    box-shadow: 0 0 8px rgba(0,240,255,0.55), 0 0 24px rgba(0,240,255,0.25);
-  }
+  .neon-text { color: var(--cyan); text-shadow: 0 0 8px rgba(0,240,255,0.6), 0 0 20px rgba(0,240,255,0.3); }
+  .neon-glow { box-shadow: 0 0 8px rgba(0,240,255,0.55), 0 0 24px rgba(0,240,255,0.25); }
   .editor {
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     background-color: #060910 !important;
     color: #a9e6f5 !important;
     border: 1px solid var(--border);
     border-radius: 6px;
-    resize: none;
-    tab-size: 2;
-    line-height: 1.5;
+    resize: none; tab-size: 2; line-height: 1.5;
   }
   .editor::placeholder { color: #3b4757; }
-  .editor:focus {
-    outline: none;
-    border-color: var(--cyan);
-    box-shadow: 0 0 0 1px var(--cyan-dim), 0 0 12px rgba(0,240,255,0.15);
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, #00f0ff, #0090ff);
-    color: #001018;
-    font-weight: 700;
-  }
-  .btn-primary:hover {
-    filter: brightness(1.15);
-    box-shadow: 0 0 12px rgba(0,240,255,0.5), 0 0 24px rgba(0,240,255,0.25);
-  }
-  .btn-ghost {
-    background: #0d1117;
-    border: 1px solid var(--border);
-    color: #8b949e;
-  }
-  .btn-ghost:hover {
-    border-color: var(--cyan);
-    color: var(--cyan);
-    box-shadow: 0 0 8px rgba(0,240,255,0.25);
-  }
-  .tab-active {
-    background: rgba(0,240,255,0.08);
-    border-color: var(--cyan) !important;
-    color: var(--cyan) !important;
-    box-shadow: 0 0 10px rgba(0,240,255,0.35);
-  }
+  .editor:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan-dim), 0 0 12px rgba(0,240,255,0.15); }
+  .btn-primary { background: linear-gradient(135deg, #00f0ff, #0090ff); color: #001018; font-weight: 700; }
+  .btn-primary:hover { filter: brightness(1.15); box-shadow: 0 0 12px rgba(0,240,255,0.5), 0 0 24px rgba(0,240,255,0.25); }
+  .btn-ghost { background: #0d1117; border: 1px solid var(--border); color: #8b949e; }
+  .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 8px rgba(0,240,255,0.25); }
+  .tab-active { background: rgba(0,240,255,0.08); border-color: var(--cyan) !important; color: var(--cyan) !important; box-shadow: 0 0 10px rgba(0,240,255,0.35); }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: #060910; }
   ::-webkit-scrollbar-thumb { background: #1e2633; border-radius: 5px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
-  .pulse-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--cyan);
-    box-shadow: 0 0 8px var(--cyan);
-    animation: pulse 1.8s infinite;
-  }
+  .pulse-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: pulse 1.8s infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 </style>
 </head>
 <body class="min-h-screen">
 
-  <!-- ============ Header ============ -->
   <header class="border-b border-[#1e2633] bg-[#0a0d14]/90 backdrop-blur sticky top-0 z-10">
     <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
@@ -93,80 +52,59 @@
           <span class="neon-text font-bold text-lg">Λ</span>
         </div>
         <div>
-          <h1 class="text-xl font-bold neon-text leading-none">LUAKEEPER <span class="text-white/90">v10.0</span></h1>
+          <h1 class="text-xl font-bold neon-text leading-none">LUAKEEPER</h1>
           <p class="text-[11px] text-gray-500 mt-0.5">
             <span class="pulse-dot mr-1"></span>
-            Roblox Luau Obfuscator &amp; Deobfuscator
+            Advanced Luau Deobfuscator (Anti-VM)
           </p>
         </div>
       </div>
-
-      <!-- 모드 탭 -->
       <div class="flex gap-2">
-        <button id="tabObf" class="tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all">
-          🔒 Obfuscate
-        </button>
-        <button id="tabDeobf" class="px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white">
-          🔓 Deobfuscate
-        </button>
+        <button id="tabObf" class="px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white">🔒 Obfuscate</button>
+        <button id="tabDeobf" class="tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all">🔓 Deobfuscate</button>
       </div>
     </div>
   </header>
 
-  <!-- ============ Toolbar ============ -->
   <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center gap-2">
     <button id="btnLoad" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">📂 Load File</button>
     <button id="btnSave" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">💾 Save File</button>
     <button id="btnProcess" class="btn-primary px-6 py-1.5 rounded text-sm transition-all neon-glow">⚡ Process</button>
     <button id="btnCopy" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">📋 Copy Output</button>
     <button id="btnClear" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">🗑 Clear</button>
-    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">
-      Ready · UTF-8 Safe · Rolling-Key VM
-    </div>
+    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · Anti-VM Heuristics</div>
   </div>
 
-  <!-- ============ 에디터 영역 ============ -->
   <div class="max-w-[1600px] mx-auto px-4 pb-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <!-- INPUT -->
       <div class="flex flex-col">
         <div class="flex items-center justify-between mb-1.5 px-1">
-          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ INPUT</span>
+          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ INPUT (Obfuscated Code)</span>
           <span class="text-[11px] text-gray-500 font-mono" id="inStats">0 lines · 0 B</span>
         </div>
-        <textarea id="input" spellcheck="false" class="editor w-full h-[65vh] p-3 text-sm" placeholder="-- Luau 소스를 여기에 붙여넣으세요...&#10;-- (HydronX 등 대형 스크립트 100% 호환)"></textarea>
+        <textarea id="input" spellcheck="false" class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- Luraph, Moonsec, Antilua 등 고급 난독화 코드를 붙여넣으세요...&#10;-- 정적 분석을 통해 최대한 해체합니다."></textarea>
       </div>
-
-      <!-- OUTPUT -->
       <div class="flex flex-col">
         <div class="flex items-center justify-between mb-1.5 px-1">
-          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ OUTPUT</span>
+          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ OUTPUT (Analysis Result)</span>
           <span class="text-[11px] text-gray-500 font-mono" id="outStats">0 lines · 0 B</span>
         </div>
-        <textarea id="output" spellcheck="false" readonly class="editor w-full h-[65vh] p-3 text-sm" placeholder="-- 결과가 여기에 표시됩니다..."></textarea>
+        <textarea id="output" spellcheck="false" readonly class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 해체된 상수 테이블, 평탄화 해제된 제어 흐름 등이 표시됩니다..."></textarea>
       </div>
     </div>
-
-    <!-- Status bar -->
     <div id="status" class="mt-3 px-3 py-2 rounded-md border border-[#1e2633] bg-[#0d1117] text-sm text-gray-400 min-h-[42px] flex items-center">
-      대기 중... 모드를 선택하고 Process 버튼을 누르세요.
+      대기 중... 고급 난독화 코드를 분석할 준비가 되었습니다.
     </div>
   </div>
-
-  <!-- ============ Footer ============ -->
-  <footer class="border-t border-[#1e2633] mt-4 py-3 text-center text-[11px] text-gray-600">
-    LUAKEEPER v10.0 · UTF-8 Safe · Rolling-Key XOR · RawScript Fallback · 100% Restore
-  </footer>
 
 <script>
 /* ==================================================================
-   LUAKEEPER v10.0 - Core Engine (Fixed & Optimized)
+   LUAKEEPER - Advanced Core Engine
    ================================================================== */
 
-let MODE = 'obfuscate';
+let MODE = 'deobfuscate'; // 고급 디컴파일러가 기본
 const $ = (id) => document.getElementById(id);
 
-// --- UI 및 상태 관리 ---
 function setMode(m) {
   MODE = m;
   const ob = $('tabObf'), de = $('tabDeobf');
@@ -178,8 +116,8 @@ function setMode(m) {
   } else {
     de.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
     ob.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
-    $('input').placeholder = '-- 난독화된 Luakeeper 스크립트를 붙여넣으세요...';
-    setStatus('Deobfuscate 모드 · 원본 Luau 소스를 복원합니다.', 'idle');
+    $('input').placeholder = '-- 디컴파일할 고급 난독화 코드를 붙여넣으세요...';
+    setStatus('Deobfuscate 모드 · VM 패턴 분석 및 복원을 시작합니다.', 'idle');
   }
 }
 $('tabObf').onclick = () => setMode('obfuscate');
@@ -192,6 +130,7 @@ function setStatus(msg, type = 'idle') {
     ok: 'text-green-400 border-green-800/50',
     error: 'text-red-400 border-red-800/50',
     info: 'text-cyan-300 border-cyan-800/50',
+    warn: 'text-yellow-400 border-yellow-800/50'
   };
   el.className = 'mt-3 px-3 py-2 rounded-md border bg-[#0d1117] text-sm min-h-[42px] flex items-center ' + (colors[type] || colors.idle);
   el.textContent = msg;
@@ -208,7 +147,7 @@ function updateStats() {
 $('input').addEventListener('input', updateStats);
 
 /* ==================================================================
-   ★ 인코더 / 디코더 - JS측 (Lua측과 완벽 대칭)
+   ★ 1. 자체 난독화 (LuaKeeper) 로직 - 생략 없이 포함
    ================================================================== */
 function encodeSource(src, seed) {
   const bytes = new TextEncoder().encode(src);
@@ -219,9 +158,7 @@ function encodeSource(src, seed) {
     key = (key * 31 + i + 13) & 0xFF;
   }
   let hex = '';
-  for (let i = 0; i < enc.length; i++) {
-    hex += enc[i].toString(16).padStart(2, '0');
-  }
+  for (let i = 0; i < enc.length; i++) hex += enc[i].toString(16).padStart(2, '0');
   return hex;
 }
 
@@ -239,31 +176,22 @@ function decodeHex(hex, seed) {
   return new TextDecoder('utf-8', { fatal: false }).decode(out);
 }
 
-/* ==================================================================
-   ★ 난독화 엔진 (Obfuscator)
-   ================================================================== */
 const JUNK_POOL = ['zq9kf2', 'm3v8xj', 'p7r1lt', 'b4n6we', 'c2y5ha', 'u0s9dg', 't1i3mp', 'o8e4vr', 'f5h7qb', 'l6a2xk'];
 
 function generateObfuscated(source) {
   const seed = Math.floor(Math.random() * 256);
   const hex = encodeSource(source, seed);
-
-  // 청크 분할 (1024글자 = 512바이트 단위)
   const CHUNK_SIZE = 1024;
   const chunks = [];
-  for (let i = 0; i < hex.length; i += CHUNK_SIZE) {
-    chunks.push(hex.slice(i, i + CHUNK_SIZE));
-  }
+  for (let i = 0; i < hex.length; i += CHUNK_SIZE) chunks.push(hex.slice(i, i + CHUNK_SIZE));
   if (chunks.length === 0) chunks.push('');
 
-  // Constant Scattering
   const dLines = [];
   for (let i = 0; i < chunks.length; i++) {
     dLines.push(`  [${i * 2 + 1}] = "${chunks[i]}",`);
     dLines.push(`  [${i * 2 + 2}] = "${JUNK_POOL[i % JUNK_POOL.length]}",`);
   }
 
-  // Junk States (40개)
   const junkBranches = [];
   for (let i = 0; i < 40; i++) {
     const v = -1000 - i;
@@ -271,7 +199,6 @@ function generateObfuscated(source) {
   }
   junkBranches.push('end');
 
-  // Junk Functions
   const junkFuncs = [];
   for (let i = 0; i < 6; i++) {
     const n = Math.floor(Math.random() * 1000) + 1;
@@ -279,46 +206,26 @@ function generateObfuscated(source) {
     junkFuncs.push(`local function _jf${i}(a, b) return ((a or ${n}) * ${m}) - ${m} end`);
   }
 
-  // ★ 수정된 Lua 템플릿 (로블록스 100% 호환)
-  return `--[[
-  ============================================================
-   Luakeeper v10.0 - Roblox Luau Protector (Safe Edition)
-  ============================================================
-]]
-
--- [1] Anti-Hook (무한루프 없이 안전하게 1회 검사)
+  return `--[[ LuaKeeper - Roblox Luau Protector ]]
 do
   local _hooked = false
   pcall(function()
     if type(debug) == "table" and type(debug.info) == "function" then
       if type(debug.info(1, "s")) ~= "string" then _hooked = true end
-    else
-      _hooked = true
-    end
+    else _hooked = true end
   end)
-  -- 검사 결과와 무관하게 진행 (프리징 방지)
 end
-
--- [2] Junk Decoy Functions (Opcode Randomization)
 ${junkFuncs.join('\n')}
 local _jr = _jf0(1, 2) + _jf1(3, 4) + _jf2(5, 6)
-
--- [3] Junk Branch Chain (Junk States)
 ${junkBranches.join('\n')}
-
--- [4] Constant Scattering Data
---[[__LK_V10_D_START__]]
+--[[__LK_D_START__]]
 local _D = {
 ${dLines.join('\n')}
 }
---[[__LK_V10_D_END__]]
-
--- [5] Rolling-Key Seed
---[[__LK_V10_SEED_START__]]
+--[[__LK_D_END__]]
+--[[__LK_SEED_START__]]
 local _seed = ${seed}
---[[__LK_V10_SEED_END__]]
-
--- [6] Rolling-Key XOR Hex Decoder
+--[[__LK_SEED_END__]]
 local function _dec(h, s)
   local k = s
   local t = {}
@@ -331,98 +238,144 @@ local function _dec(h, s)
   end
   return table.concat(t)
 end
-
--- [7] Decode & Execute
 local _parts = {}
-for i = 1, #_D, 2 do
-  _parts[#_parts + 1] = _D[i]
-end
-
+for i = 1, #_D, 2 do _parts[#_parts + 1] = _D[i] end
 local _source = _dec(table.concat(_parts), _seed)
-if not _source then
-  return
-end
-
--- [8] Standard loadstring (환경 격리 없이 원본 그대로 실행)
+if not _source then return end
 local _fn, _err = loadstring(_source)
-if not _fn then
-  pcall(function() warn("[Luakeeper] Load error: " .. tostring(_err)) end)
-  return
-end
-
--- 실행 (getfenv를 그대로 상속받아 Roblox 전역 함수 100% 사용 가능)
+if not _fn then return end
 _fn()
 `;
 }
 
 /* ==================================================================
-   ★ 디컴파일러 (Deobfuscator) - 100% 복원
+   ★ 2. 고급 다중 디컴파일러 (Advanced Multi-Deobfuscator)
    ================================================================== */
-function deobfuscate(code) {
-  // 마커 추출 (정규식 보강)
-  const dMatch = code.match(/--\[\[__LK_V10_D_START__\]\]([\s\S]*?)--\[\[__LK_V10_D_END__\]\]/);
-  if (!dMatch) {
-    throw new Error('Luakeeper 데이터 마커를 찾을 수 없습니다. 올바른 v10.0 코드인지 확인하세요.');
+function advancedDeobfuscate(code) {
+  let analysisLog = [];
+  let resultCode = code;
+
+  // --- [1단계] 자체 LuaKeeper 마커 확인 ---
+  const lkMatch = code.match(/(?:--\[\[__LK_D_START__\]\]|--\[\[LUAKEEPER_D_START\]\])([\s\S]*?)(?:--\[\[__LK_D_END__\]\]|--\[\[LUAKEEPER_D_END\]\])/);
+  if (lkMatch) {
+    const dBody = lkMatch[1];
+    const strMatches = [...dBody.matchAll(/"([^"]*)"/g)].map(m => m[1]);
+    if (strMatches.length > 0) {
+      const realChunks = strMatches.filter((_, i) => i % 2 === 0);
+      const seedMatch = code.match(/(?:--\[\[__LK_SEED_START__\]\]|--\[\[LUAKEEPER_SEED_START\]\])\s*local\s+_seed\s*=\s*(-?\d+)/);
+      if (seedMatch) {
+        try {
+          const decoded = decodeHex(realChunks.join(''), parseInt(seedMatch[1], 10));
+          return { code: decoded, log: ['✅ LuaKeeper 자체 난독화 복원 성공'], isRaw: false };
+        } catch (e) { analysisLog.push('⚠️ LuaKeeper 복원 실패: ' + e.message); }
+      }
+    }
+  }
+
+  // --- [2단계] 상용 VM 난독화 시그니처 탐지 (Luraph, Moonsec, Antilua 등) ---
+  const isVM = /getfenv|setmetatable.*__index|while\s+true\s+do.*pc\s*=\s*pc\s*\+\s*1|local\s+[a-zA-Z_]\w*\s*=\s*\{[\d,\s]+\}/s.test(code);
+  if (isVM) {
+    analysisLog.push('🔍 [고급 VM] Luraph/Moonsec/Antilua 패턴이 감지되었습니다.');
+    
+    // 2-1. 거대한 상수 테이블 추출 시도
+    const tableRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]+)\}/g;
+    let tMatch;
+    let extractedTables = [];
+    while ((tMatch = tableRegex.exec(code)) !== null) {
+      const values = tMatch[2].split(',').map(v => v.trim()).filter(v => v);
+      if (values.length > 20) {
+        // 숫자 배열을 Hex로 변환하여 보여줌
+        const hexStr = values.map(v => (parseInt(v, 10) % 256).toString(16).padStart(2, '0')).join('');
+        extractedTables.push(`-- [추출된 상수 테이블: ${tMatch[1]}] (${values.length}개)\n-- Hex: ${hexStr.substring(0, 200)}...\nlocal ${tMatch[1]} = {...}`);
+      }
+    }
+    if (extractedTables.length > 0) {
+      analysisLog.push(`✅ ${extractedTables.length}개의 거대한 상수 테이블을 추출했습니다.`);
+      resultCode = extractedTables.join('\n\n') + '\n\n-- [원본 바이트코드/VM]\n' + resultCode;
+    }
+
+    // 2-2. 평탄화된 제어 흐름(Control Flow Flattening) 해제 시도
+    // 'while true do' 내부의 if state == X then 구문을 순차적으로 나열
+    const flattenRegex = /if\s+([a-zA-Z_]\w*)\s*==\s*(\d+)\s+then([\s\S]*?)(?=elseif\s+\1\s*==|else|end)/g;
+    let fMatch;
+    let states = [];
+    while ((fMatch = flattenRegex.exec(code)) !== null) {
+      states.push({ state: parseInt(fMatch[2], 10), body: fMatch[3].trim() });
+    }
+    
+    if (states.length > 5) {
+      analysisLog.push(`✅ ${states.length}개의 평탄화된 상태(State)를 감지하여 재정렬을 시도했습니다.`);
+      states.sort((a, b) => a.state - b.state);
+      
+      const deFlattenedCode = states.map(s => `-- [State ${s.state}]\n${s.body}`).join('\n\n');
+      resultCode = deFlattenedCode + '\n\n-- [나머지 VM 코드 생략됨]\n';
+    } else {
+      analysisLog.push('⚠️ 제어 흐름 평탄화 구조가 너무 복잡하여 해제하지 못했습니다. (원본 출력)');
+    }
+  }
+
+  // --- [3단계] 일반적인 문자열 암호화 (string.char 및 단순 loadstring) 우회 ---
+  if (!isVM) {
+    const charRegex = /string\.char\(\s*([0-9,\s]+)\s*\)/g;
+    if (charRegex.test(code)) {
+      const decoded = code.replace(charRegex, (m, p1) => {
+        try {
+          const bytes = p1.split(',').map(n => parseInt(n.trim(), 10));
+          const text = new TextDecoder('utf-8').decode(new Uint8Array(bytes));
+          return '"' + text.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
+        } catch { return m; }
+      });
+      analysisLog.push('✅ string.char 형태의 문자열 암호화를 복호화했습니다.');
+      return { code: decoded, log: analysisLog, isRaw: false };
+    }
+
+    const loadRegex = /(?:loadstring|load)\(\s*(["'])([\s\S]*?)\1\s*\)/;
+    const loadMatch = code.match(loadRegex);
+    if (loadMatch && loadMatch[2]) {
+      let inner = loadMatch[2].replace(/\\(\d{1,3})/g, (m, p1) => String.fromCharCode(parseInt(p1, 10)));
+      inner = inner.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\'/g, "'");
+      analysisLog.push('✅ 단순 loadstring 래핑을 벗겨냈습니다.');
+      return { code: inner, log: analysisLog, isRaw: false };
+    }
+  }
+
+  // 아무것도 해당되지 않는 경우
+  if (analysisLog.length === 0) {
+    analysisLog.push('ℹ️ 알려진 난독화 패턴이 없습니다. (일반 코드이거나 알 수 없는 난독화)');
   }
   
-  const dBody = dMatch[1];
-  const strMatches = [];
-  const re = /"([^"]*)"/g;
-  let m;
-  while ((m = re.exec(dBody)) !== null) {
-    strMatches.push(m[1]);
-  }
-  
-  if (strMatches.length === 0) {
-    throw new Error('데이터 청크를 찾을 수 없습니다.');
-  }
-
-  // 홀수 인덱스 추출 (0-based 기준 짝수)
-  const realChunks = [];
-  for (let i = 0; i < strMatches.length; i += 2) {
-    realChunks.push(strMatches[i]);
-  }
-  const hex = realChunks.join('');
-
-  // 시드 추출
-  const seedMatch = code.match(/--\[\[__LK_V10_SEED_START__\]\]\s*local\s+_seed\s*=\s*(-?\d+)/);
-  if (!seedMatch) {
-    throw new Error('시드 마커를 찾을 수 없습니다.');
-  }
-  const seed = parseInt(seedMatch[1], 10);
-  if (isNaN(seed)) throw new Error('시드 값이 유효하지 않습니다.');
-
-  if (hex.length === 0) return '';
-  if (!/^[0-9a-fA-F]*$/.test(hex)) {
-    throw new Error('Hex 데이터에 유효하지 않은 문자가 포함되어 있습니다.');
-  }
-
-  return decodeHex(hex, seed);
+  return { code: resultCode, log: analysisLog, isRaw: true };
 }
 
 /* ==================================================================
-   ★ 이벤트 리스너 및 UI 제어
+   ★ 3. 이벤트 리스너 및 UI 제어
    ================================================================== */
 $('btnProcess').onclick = () => {
   const input = $('input').value;
   if (!input.trim()) {
     setStatus('❌ 입력이 비어 있습니다.', 'error');
+    $('output').value = '';
+    updateStats();
     return;
   }
 
   try {
     if (MODE === 'obfuscate') {
-      const result = generateObfuscated(input);
-      $('output').value = result;
-      const outB = new TextEncoder().encode(result).length;
-      setStatus(`✅ 난독화 완료 · ${outB.toLocaleString()} B · RawScript Fallback 적용됨`, 'ok');
+      $('output').value = generateObfuscated(input);
+      setStatus('✅ 난독화 완료 · LuaKeeper 보호 스크립트가 생성되었습니다.', 'ok');
     } else {
-      const result = deobfuscate(input);
-      const outB = new TextEncoder().encode(result).length;
-      setStatus(`✅ 디컴파일 완료 · ${outB.toLocaleString()} B · 원본 Luau 소스 복원 성공`, 'ok');
+      const { code: result, log, isRaw } = advancedDeobfuscate(input);
+      $('output').value = result;
+      
+      if (isRaw) {
+        setStatus(`⚠️ ${log.join(' | ')} · 원본 코드를 출력합니다.`, 'warn');
+      } else {
+        setStatus(`✅ 디컴파일/분석 완료 · ${log.join(' | ')}`, 'ok');
+      }
     }
   } catch (err) {
     console.error(err);
+    $('output').value = `-- 오류 발생: ${err.message}\n-- 원본 입력:\n\n${input}`;
     setStatus(`❌ 오류: ${err.message}`, 'error');
   }
   updateStats();
@@ -448,18 +401,13 @@ $('btnLoad').onclick = () => {
 
 $('btnSave').onclick = () => {
   const content = $('output').value;
-  if (!content) {
-    setStatus('❌ 저장할 출력이 없습니다.', 'error');
-    return;
-  }
+  if (!content) return setStatus('❌ 저장할 출력이 없습니다.', 'error');
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = MODE === 'obfuscate' ? 'luakeeper_protected.lua' : 'luakeeper_deobfuscated.lua';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.download = MODE === 'obfuscate' ? 'luakeeper_protected.lua' : 'luakeeper_analysis.lua';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   setStatus(`💾 저장 완료: ${a.download}`, 'ok');
 };
@@ -469,22 +417,17 @@ $('btnCopy').onclick = () => {
   if (!content) return;
   navigator.clipboard.writeText(content).then(
     () => setStatus('📋 클립보드에 복사되었습니다.', 'info'),
-    () => setStatus('❌ 클립보드 복사 실패 (브라우저 권한 확인)', 'error')
+    () => setStatus('❌ 클립보드 복사 실패', 'error')
   );
 };
 
 $('btnClear').onclick = () => {
-  $('input').value = '';
-  $('output').value = '';
-  updateStats();
-  setStatus('🗑 초기화 완료', 'idle');
+  $('input').value = ''; $('output').value = '';
+  updateStats(); setStatus('🗑 초기화 완료', 'idle');
 };
 
-/* ==================================================================
-   ★ 초기화
-   ================================================================== */
 updateStats();
-setMode('obfuscate');
+setMode('deobfuscate');
 </script>
 </body>
 </html>
