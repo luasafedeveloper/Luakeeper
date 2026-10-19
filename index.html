@@ -7,11 +7,8 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   :root {
-    --bg: #0a0d14;
-    --panel: #0d1117;
-    --border: #1e2633;
-    --cyan: #00f0ff;
-    --cyan-dim: #00f0ff44;
+    --bg: #0a0d14; --panel: #0d1117; --border: #1e2633;
+    --cyan: #00f0ff; --cyan-dim: #00f0ff44;
   }
   html, body { background-color: var(--bg); color: #c9d1d9; font-family: 'Inter', system-ui, sans-serif; }
   .neon-text { color: var(--cyan); text-shadow: 0 0 8px rgba(0,240,255,0.6), 0 0 20px rgba(0,240,255,0.3); }
@@ -47,7 +44,7 @@
         </div>
         <div>
           <h1 class="text-xl font-bold neon-text leading-none">LUAKEEPER</h1>
-          <p class="text-[11px] text-gray-500 mt-0.5"><span class="pulse-dot mr-1"></span>Universal Luau Deobfuscator & Analyzer</p>
+          <p class="text-[11px] text-gray-500 mt-0.5"><span class="pulse-dot mr-1"></span>Universal Luau Deobfuscator · VM Edition</p>
         </div>
       </div>
       <div class="flex gap-2">
@@ -63,28 +60,28 @@
     <button id="btnProcess" class="btn-primary px-6 py-1.5 rounded text-sm neon-glow">Process</button>
     <button id="btnCopy" class="btn-ghost px-3 py-1.5 rounded text-sm">Copy Output</button>
     <button id="btnClear" class="btn-ghost px-3 py-1.5 rounded text-sm">Clear</button>
-    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · Stable Mode</div>
+    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · VM Dispatcher</div>
   </div>
 
   <div class="max-w-[1600px] mx-auto px-4 pb-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div class="flex flex-col">
         <div class="flex items-center justify-between mb-1.5 px-1">
-          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">INPUT (Obfuscated Code)</span>
+          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">INPUT</span>
           <span class="text-[11px] text-gray-500 font-mono" id="inStats">0 lines · 0 B</span>
         </div>
         <textarea id="input" spellcheck="false" class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 분석할 난독화 코드를 붙여넣으세요..."></textarea>
       </div>
       <div class="flex flex-col">
         <div class="flex items-center justify-between mb-1.5 px-1">
-          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">OUTPUT (Analysis Result)</span>
+          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">OUTPUT</span>
           <span class="text-[11px] text-gray-500 font-mono" id="outStats">0 lines · 0 B</span>
         </div>
-        <textarea id="output" spellcheck="false" readonly class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 복원된 코드 또는 추출된 문자열이 표시됩니다..."></textarea>
+        <textarea id="output" spellcheck="false" readonly class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 결과가 표시됩니다..."></textarea>
       </div>
     </div>
     <div id="status" class="mt-3 px-3 py-2 rounded-md border border-[#1e2633] bg-[#0d1117] text-sm text-gray-400 min-h-[42px] flex items-center">
-      대기 중... 난독화 코드를 분석할 준비가 되었습니다.
+      대기 중...
     </div>
   </div>
 
@@ -99,12 +96,12 @@ function setMode(m) {
     ob.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
     de.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
     $('input').placeholder = '-- Luau 소스를 여기에 붙여넣으세요...';
-    setStatus('Obfuscate 모드 · 원본 Luau를 보호된 스크립트로 변환합니다.', 'idle');
+    setStatus('Obfuscate 모드 · VM 난독화를 적용합니다.', 'idle');
   } else {
     de.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
     ob.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
     $('input').placeholder = '-- 디컴파일할 난독화 코드를 붙여넣으세요...';
-    setStatus('Deobfuscate 모드 · 모든 난독화 패턴을 분석합니다.', 'idle');
+    setStatus('Deobfuscate 모드 · VM 패턴을 분석합니다.', 'idle');
   }
 }
 $('tabObf').onclick = () => setMode('obfuscate');
@@ -161,96 +158,157 @@ function decodeHex(hex, seed) {
   return new TextDecoder('utf-8', { fatal: false }).decode(out);
 }
 
-/* ============ 난독화 엔진 (Luau 안정성 최우선) ============ */
+/* ============ VM 스타일 난독화 엔진 ============ */
 function generateObfuscated(source) {
   const rawSeed = Math.floor(Math.random() * 255) + 1;
   const fakeSeedA = Math.floor(Math.random() * 100) + 10;
   const fakeSeedB = rawSeed ^ fakeSeedA;
-  
+
   const hex = encodeSource(source, rawSeed);
-  
-  // 청크 크기 2048글자 (1024바이트) → 테이블 항목 수 200개 미만으로 대폭 감소
+
+  // 청크 크기 2048글자 → 테이블 오버플로 방지
   const CHUNK_SIZE = 2048;
   const chunks = [];
   for (let i = 0; i < hex.length; i += CHUNK_SIZE) chunks.push(hex.slice(i, i + CHUNK_SIZE));
   if (chunks.length === 0) chunks.push('');
 
-  // 테이블 크기 감소를 위해 쓰레기 데이터 삽입 비율 대폭 축소 (10개 중 1개)
-  const dLines = [];
+  // 진짜 데이터는 "D_"로 시작, 쓰레기 데이터는 "J_"로 시작 → 런타임 필터링 안전
+  const dataLines = [];
   for (let i = 0; i < chunks.length; i++) {
-    dLines.push(`"${chunks[i]}"`);
-    // 10% 확률로만 가짜 데이터 삽입
-    if (i % 10 === 0 && i < chunks.length - 1) {
-      dLines.push(`"JUNK_${i}"`);
-    }
+    dataLines.push(`"${chunks[i]}"`);
+    if (i % 8 === 0) dataLines.push(`"J_${i}_${Math.random().toString(36).substring(2, 6)}"`);
   }
 
-  return `-- [Luakeeper v8 - Stable]
-local _x = 1
-local _d = {}
-local _k = 0
-local _c = ""
-local _ls
+  // VM 상수 (분리 저장, 동적 조합)
+  const constTable = [];
+  const fakeKeys = [Math.floor(Math.random()*1000)+1, Math.floor(Math.random()*1000)+1, Math.floor(Math.random()*1000)+1];
+  const total = chunks.length;
+  constTable.push(`[1] = ${fakeSeedA}`);
+  constTable.push(`[2] = ${fakeSeedB}`);
+  constTable.push(`[3] = ${fakeKeys[0]}`);
+  constTable.push(`[4] = ${fakeKeys[1]}`);
+  constTable.push(`[5] = ${fakeKeys[2]}`);
+  constTable.push(`[6] = ${total}`);
 
+  // 점진적 처리를 위한 배치 사이즈
+  const CHUNK_BATCH = 60;      // 프레임당 처리할 데이터 청크 수
+  const DECODE_BATCH = 800;    // 프레임당 디코딩할 바이트 수
+
+  return `-- [Luakeeper VM v9 - Zero Freeze Edition]
+-- ★ VM 디스패처 + 점진적 디코딩 + task.wait() 프레임 양보 ★
+
+local _VM = {
+    STATE = 0,
+    STACK = {},
+    CONST = {},
+    DATA = {},
+    PARTS = {},
+    DECODED = {},
+    KEY = 0,
+    PC = 1,
+    TOTAL = 0,
+    HALT = false,
+    LOADER = nil,
+    DEBUG_ERR = nil,
+}
+
+-- 안전한 로더 탐색
 pcall(function()
-    _ls = rawget(getfenv(), "loadstring") or rawget(getfenv(), "load")
+    _VM.LOADER = rawget(getfenv(), "loadstring") or rawget(getfenv(), "load")
 end)
 
-if type(_ls) ~= "function" then
-    pcall(function() warn("[LuaKeeper] loadstring not found") end)
+if type(_VM.LOADER) ~= "function" then
     return
 end
 
-while _x ~= 0 do
-    if _x == 1 then
-        _x = 2
-    elseif _x == 2 then
-        _k = bit32.bxor(${fakeSeedB}, ${fakeSeedA})
-        _x = 3
-    elseif _x == 3 then
-        _d = {
-${dLines.join(',\n')}
-        }
-        _x = 4
-    elseif _x == 4 then
-        local _p = {}
-        -- 정확히 홀수 인덱스이면서 'J'로 시작하지 않는 데이터만 필터링
-        for i = 1, #_d do
-            if i % 2 == 1 and string.sub(_d[i], 1, 1) ~= "J" then
-                _p[#_p + 1] = _d[i]
+-- 상수 테이블 (분리 보관)
+_VM.CONST = {
+${constTable.join(',\n')}
+}
+
+-- 암호화된 데이터 (진짜/가짜 혼합)
+_VM.DATA = {
+${dataLines.join(',\n')}
+}
+
+-- ============================================
+-- VM 메인 디스패처 루프
+-- ============================================
+while not _VM.HALT do
+
+    -- [STATE 0] 부트: 시드 복원
+    if _VM.STATE == 0 then
+        _VM.KEY = bit32.bxor(_VM.CONST[1], _VM.CONST[2])
+        _VM.TOTAL = _VM.CONST[6]
+        _VM.PC = 1
+        _VM.STATE = 1
+        task.wait()
+
+    -- [STATE 1] 점진적 데이터 수집 (프레임 양보)
+    elseif _VM.STATE == 1 then
+        local _cnt = 0
+        while _cnt < ${CHUNK_BATCH} and _VM.PC <= #_VM.DATA do
+            local _v = _VM.DATA[_VM.PC]
+            -- "J_"로 시작하지 않는 진짜 데이터만
+            if string.sub(_v, 1, 2) ~= "J_" then
+                _VM.PARTS[#_VM.PARTS + 1] = _v
             end
+            _VM.PC = _VM.PC + 1
+            _cnt = _cnt + 1
         end
-        local _h = table.concat(_p)
-        local _o = {}
-        local _kk = _k
-        for i = 1, #_h, 2 do
-            local b = tonumber(string.sub(_h, i, i + 1), 16)
-            if b then
-                local idx = math.floor((i - 1) / 2)
-                _o[#_o + 1] = string.char(bit32.bxor(b, _kk))
-                _kk = (_kk * 31 + idx + 13) % 256
+        if _VM.PC > #_VM.DATA then
+            _VM.STATE = 2
+            _VM.PC = 1
+        end
+        task.wait()  -- ★ 프리징 방지
+
+    -- [STATE 2] 점진적 Hex 디코딩 (프레임 양보)
+    elseif _VM.STATE == 2 then
+        local _h = _VM.STACK.HEX
+        if not _h then
+            _h = table.concat(_VM.PARTS)
+            _VM.PARTS = nil
+            _VM.STACK.HEX = _h
+            _VM.STACK.HLEN = #_h
+        end
+        local _bytes_done = 0
+        while _bytes_done < ${DECODE_BATCH} and _VM.PC < _VM.STACK.HLEN do
+            local _b = tonumber(string.sub(_h, _VM.PC, _VM.PC + 1), 16)
+            if _b then
+                local _idx = math.floor((_VM.PC - 1) / 2)
+                _VM.DECODED[#_VM.DECODED + 1] = string.char(bit32.bxor(_b, _VM.KEY))
+                _VM.KEY = (_VM.KEY * 31 + _idx + 13) % 256
             end
+            _VM.PC = _VM.PC + 2
+            _bytes_done = _bytes_done + 1
         end
-        _c = table.concat(_o)
-        _x = 5
-    elseif _x == 5 then
-        local code = _c
-        _c = nil
-        _d = nil
-        local ok, f = pcall(_ls, code)
-        code = nil
-        if not ok or not f then
-            pcall(function() warn("[LuaKeeper] loadstring failed: " .. tostring(f)) end)
-            return
+        if _VM.PC >= _VM.STACK.HLEN then
+            _VM.STATE = 3
         end
-        -- 환경 격리 없이 원래 전역 환경에서 실행
-        task.spawn(function()
-            local runOk, err = pcall(f)
-            if not runOk then
-                pcall(function() warn("[LuaKeeper] runtime error: " .. tostring(err)) end)
-            end
-        end)
-        _x = 0
+        task.wait()  -- ★ 프리징 방지
+
+    -- [STATE 3] 컴파일 & 실행
+    elseif _VM.STATE == 3 then
+        local _src = table.concat(_VM.DECODED)
+        _VM.DECODED = nil
+        _VM.DATA = nil
+        _VM.STACK = nil
+
+        local _ok, _f = pcall(_VM.LOADER, _src)
+        _src = nil
+
+        if _ok and _f then
+            task.spawn(function()
+                local _runOk, _err = pcall(_f)
+                if not _runOk then
+                    pcall(function() warn("[LuaKeeper] runtime: " .. tostring(_err)) end)
+                end
+            end)
+        else
+            pcall(function() warn("[LuaKeeper] load failed") end)
+        end
+
+        _VM.HALT = true
     end
 end
 `;
@@ -279,8 +337,38 @@ function extractLuaStrings(str) {
 
 function universalDeobfuscate(code) {
   let log = [], out = '';
-  
-  // [1] 자체 난독화 복원
+
+  // [1] VM v9 복원
+  if (code.includes('Luakeeper VM v9') || code.includes('_VM.STATE')) {
+    try {
+      // 시드 추출
+      const seedMatch = code.match(/_VM\.CONST\s*=\s*\{[\s\S]*?\[1\]\s*=\s*(\d+)\s*,[\s\S]*?\[2\]\s*=\s*(\d+)/);
+      if (!seedMatch) throw new Error('시드 없음');
+      const seedA = parseInt(seedMatch[1], 10);
+      const seedB = parseInt(seedMatch[2], 10);
+      const realSeed = seedA ^ seedB;
+
+      // 데이터 배열 블록 추출
+      const dataMatch = code.match(/_VM\.DATA\s*=\s*\{([\s\S]*?)\n\s*\}\s*\n\s*--\s*====/);
+      if (!dataMatch) throw new Error('데이터 없음');
+
+      // 문자열 리터럴 추출
+      const dataBody = dataMatch[1];
+      const strMatches = [...dataBody.matchAll(/"([^"]*)"/g)].map(m => m[1]);
+
+      // "J_"로 시작하지 않는 것만 진짜 데이터
+      const realChunks = strMatches.filter(s => !s.startsWith('J_') && /^[a-fA-F0-9]+$/.test(s));
+
+      if (realChunks.length === 0) throw new Error('진짜 데이터 없음');
+
+      const decoded = decodeHex(realChunks.join(''), realSeed);
+      return { code: decoded, log: ['[성공] Luakeeper VM v9 복원'], isRaw: false };
+    } catch (e) {
+      log.push('[실패] VM v9: ' + e.message);
+    }
+  }
+
+  // [2] 구버전 Luakeeper v7/v8
   if (code.includes('_x == 5') && code.includes('_x == 1')) {
     const seedMatch = code.match(/_k\s*=\s*bit32\.bxor\((\d+),\s*(\d+)\)/);
     const hexMatches = code.match(/"[a-fA-F0-9]{10,}"/g);
@@ -288,12 +376,12 @@ function universalDeobfuscate(code) {
       const realSeed = parseInt(seedMatch[1], 10) ^ parseInt(seedMatch[2], 10);
       const chunks = hexMatches.map(h => h.replace(/"/g, ''));
       try {
-        return { code: decodeHex(chunks.join(''), realSeed), log: ['[성공] Luakeeper v8 복원'], isRaw: false };
-      } catch (e) { log.push('[실패] ' + e.message); }
+        return { code: decodeHex(chunks.join(''), realSeed), log: ['[성공] Luakeeper v7/v8 복원'], isRaw: false };
+      } catch (e) { log.push('[실패] v7/v8: ' + e.message); }
     }
   }
 
-  // [2] Chanhyuk
+  // [3] Chanhyuk
   if (code.includes('chanhyuk lua') || (code.includes('local n=') && code.includes('local o=') && code.includes('local k='))) {
     try {
       const nMatch = code.match(/local\s+n\s*=\s*\{([\s\S]*?)\}\s*local\s+o/);
@@ -327,7 +415,7 @@ function universalDeobfuscate(code) {
     } catch (e) { log.push('[실패] Chanhyuk'); }
   }
 
-  // [3] 휴리스틱
+  // [4] 휴리스틱
   const charRegex = /string\.char\s*\(\s*([0-9,\s]+)\s*\)/g;
   if (charRegex.test(code)) {
     code = code.replace(charRegex, (m, p1) => {
@@ -367,7 +455,7 @@ $('btnProcess').onclick = () => {
   try {
     if (MODE === 'obfuscate') {
       $('output').value = generateObfuscated(input);
-      setStatus('[성공] 난독화 완료', 'ok');
+      setStatus('[성공] VM v9 난독화 완료 · 프리징 방지 task.wait() 적용됨', 'ok');
     } else {
       const { code: r, log, isRaw } = universalDeobfuscate(input);
       $('output').value = r;
@@ -387,7 +475,7 @@ $('btnLoad').onclick = () => {
   inp.onchange = (e) => {
     const f = e.target.files[0]; if (!f) return;
     const r = new FileReader();
-    r.onload = () => { $('input').value = r.result; updateStats(); setStatus(`[파일] ${f.name} 로드`, 'info'); };
+    r.onload = () => { $('input').value = r.result; updateStats(); setStatus(`[파일] ${f.name}`, 'info'); };
     r.readAsText(f, 'UTF-8');
   };
   inp.click();
@@ -395,7 +483,7 @@ $('btnLoad').onclick = () => {
 
 $('btnSave').onclick = () => {
   const c = $('output').value;
-  if (!c) return setStatus('[오류] 저장할 출력 없음', 'error');
+  if (!c) return setStatus('[오류] 출력 없음', 'error');
   const b = new Blob([c], { type: 'text/plain;charset=utf-8' });
   const u = URL.createObjectURL(b);
   const a = document.createElement('a');
@@ -408,7 +496,7 @@ $('btnSave').onclick = () => {
 $('btnCopy').onclick = () => {
   const c = $('output').value; if (!c) return;
   navigator.clipboard.writeText(c).then(
-    () => setStatus('[복사] 클립보드', 'info'),
+    () => setStatus('[복사] 완료', 'info'),
     () => setStatus('[오류] 복사 실패', 'error')
   );
 };
