@@ -6,24 +6,24 @@
 <title>LuaKeeper | Universal Luau Deobfuscator</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  :root { --bg: #0a0d14; --border: #1e2633; --cyan: #00f0ff; --cyan-dim: #00f0ff44; }
-  html, body { background-color: var(--bg); color: #c9d1d9; font-family: 'Inter', system-ui, sans-serif; }
-  .neon-text { color: var(--cyan); text-shadow: 0 0 8px rgba(0,240,255,0.6), 0 0 20px rgba(0,240,255,0.3); }
-  .neon-glow { box-shadow: 0 0 8px rgba(0,240,255,0.55), 0 0 24px rgba(0,240,255,0.25); }
-  .editor { font-family: 'Consolas', monospace; background-color: #060910 !important; color: #a9e6f5 !important; border: 1px solid var(--border); border-radius: 6px; resize: none; tab-size: 2; line-height: 1.5; }
-  .editor::placeholder { color: #3b4757; }
-  .editor:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan-dim), 0 0 12px rgba(0,240,255,0.15); }
-  .btn-primary { background: linear-gradient(135deg, #00f0ff, #0090ff); color: #001018; font-weight: 700; }
-  .btn-primary:hover { filter: brightness(1.15); box-shadow: 0 0 12px rgba(0,240,255,0.5); }
-  .btn-ghost { background: #0d1117; border: 1px solid var(--border); color: #8b949e; }
-  .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
-  .tab-active { background: rgba(0,240,255,0.08); border-color: var(--cyan) !important; color: var(--cyan) !important; box-shadow: 0 0 10px rgba(0,240,255,0.35); }
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: #060910; }
-  ::-webkit-scrollbar-thumb { background: #1e2633; border-radius: 5px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
-  .pulse-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: pulse 1.8s infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  :root { --bg:#0a0d14; --border:#1e2633; --cyan:#00f0ff; --cyan-dim:#00f0ff44; }
+  html,body{background-color:var(--bg);color:#c9d1d9;font-family:'Inter',system-ui,sans-serif;}
+  .neon-text{color:var(--cyan);text-shadow:0 0 8px rgba(0,240,255,0.6),0 0 20px rgba(0,240,255,0.3);}
+  .neon-glow{box-shadow:0 0 8px rgba(0,240,255,0.55),0 0 24px rgba(0,240,255,0.25);}
+  .editor{font-family:'Consolas','Monaco','Courier New',monospace;background-color:#060910 !important;color:#a9e6f5 !important;border:1px solid var(--border);border-radius:6px;resize:none;tab-size:2;line-height:1.5;}
+  .editor::placeholder{color:#3b4757;}
+  .editor:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan-dim),0 0 12px rgba(0,240,255,0.15);}
+  .btn-primary{background:linear-gradient(135deg,#00f0ff,#0090ff);color:#001018;font-weight:700;}
+  .btn-primary:hover{filter:brightness(1.15);box-shadow:0 0 12px rgba(0,240,255,0.5);}
+  .btn-ghost{background:#0d1117;border:1px solid var(--border);color:#8b949e;}
+  .btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);}
+  .tab-active{background:rgba(0,240,255,0.08);border-color:var(--cyan) !important;color:var(--cyan) !important;box-shadow:0 0 10px rgba(0,240,255,0.35);}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-track{background:#060910;}
+  ::-webkit-scrollbar-thumb{background:#1e2633;border-radius:5px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--cyan);}
+  .pulse-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
 </style>
 </head>
 <body class="min-h-screen">
@@ -36,7 +36,7 @@
         </div>
         <div>
           <h1 class="text-xl font-bold neon-text leading-none">LUAKEEPER</h1>
-          <p class="text-[11px] text-gray-500 mt-0.5"><span class="pulse-dot mr-1"></span>Universal Luau Deobfuscator · VM Edition</p>
+          <p class="text-[11px] text-gray-500 mt-0.5"><span class="pulse-dot mr-1"></span>Universal Luau Obfuscator · Deobfuscator</p>
         </div>
       </div>
       <div class="flex gap-2">
@@ -52,7 +52,7 @@
     <button id="btnProcess" class="btn-primary px-6 py-1.5 rounded text-sm neon-glow">Process</button>
     <button id="btnCopy" class="btn-ghost px-3 py-1.5 rounded text-sm">Copy Output</button>
     <button id="btnClear" class="btn-ghost px-3 py-1.5 rounded text-sm">Clear</button>
-    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · Dual XOR VM</div>
+    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · Dual XOR v11</div>
   </div>
 
   <div class="max-w-[1600px] mx-auto px-4 pb-6">
@@ -93,7 +93,7 @@ function setMode(m) {
     de.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
     ob.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
     $('input').placeholder = '-- 디컴파일할 난독화 코드를 붙여넣으세요...';
-    setStatus('Deobfuscate 모드 · VM 패턴을 분석합니다.', 'idle');
+    setStatus('Deobfuscate 모드 · 모든 난독화 패턴을 분석합니다.', 'idle');
   }
 }
 $('tabObf').onclick = () => setMode('obfuscate');
@@ -129,10 +129,8 @@ function encodeSource(src, seed1, seed2) {
   let k1 = seed1 & 0xFF;
   let k2 = seed2 & 0xFF;
   for (let i = 0; i < bytes.length; i++) {
-    // 1차 XOR (Rolling Key A)
     let v = bytes[i] ^ k1;
     k1 = (k1 * 31 + i + 13) & 0xFF;
-    // 2차 XOR (Rolling Key B)
     let v2 = v ^ k2;
     k2 = (k2 * 17 + i + 7) & 0xFF;
     enc[i] = v2;
@@ -142,293 +140,227 @@ function encodeSource(src, seed1, seed2) {
   return hex;
 }
 
-function decodeHex(hex, seed1, seed2) {
-  if (hex.length % 2 !== 0) throw new Error('Hex 길이 홀수');
+function decodeDualXOR(hex, seed1, seed2) {
+  if (hex.length % 2 !== 0) throw new Error('Hex 홀수');
   const byteLen = hex.length / 2;
   const out = new Uint8Array(byteLen);
   let k1 = seed1 & 0xFF;
   let k2 = seed2 & 0xFF;
   for (let i = 0; i < byteLen; i++) {
     const b = parseInt(hex.substr(i * 2, 2), 16);
-    if (isNaN(b)) throw new Error(`Hex 오류 @${i*2}`);
-    // 2차 역
-    let v = b ^ k2;
-    k2 = (k2 * 17 + i + 7) & 0xFF;
-    // 1차 역
-    let v2 = v ^ k1;
-    k1 = (k1 * 31 + i + 13) & 0xFF;
+    if (isNaN(b)) throw new Error(`bad hex @${i*2}`);
+    let v = b ^ k2; k2 = (k2 * 17 + i + 7) & 0xFF;
+    let v2 = v ^ k1; k1 = (k1 * 31 + i + 13) & 0xFF;
     out[i] = v2;
   }
   return new TextDecoder('utf-8', { fatal: false }).decode(out);
 }
 
-/* ============ VM 난독화 엔진 (Dual XOR) ============ */
+/* ============ VM 난독화 엔진 (Dual XOR · 코드 최적화) ============ */
 function generateObfuscated(source) {
-  // 키 4개 생성 (2중 XOR)
-  const realSeed1 = Math.floor(Math.random() * 255) + 1;
-  const realSeed2 = Math.floor(Math.random() * 255) + 1;
+  const seed1 = Math.floor(Math.random() * 255) + 1;
+  const seed2 = Math.floor(Math.random() * 255) + 1;
   const fakeA1 = Math.floor(Math.random() * 200) + 10;
-  const fakeB1 = realSeed1 ^ fakeA1;
+  const fakeB1 = seed1 ^ fakeA1;
   const fakeA2 = Math.floor(Math.random() * 200) + 10;
-  const fakeB2 = realSeed2 ^ fakeA2;
+  const fakeB2 = seed2 ^ fakeA2;
 
-  const hex = encodeSource(source, realSeed1, realSeed2);
+  const hex = encodeSource(source, seed1, seed2);
 
-  // 청크 2048글자 (1024바이트)
-  const CHUNK_SIZE = 2048;
+  // 청크 8192글자 (4096바이트) → 오버헤드 대폭 감소
+  const CHUNK_SIZE = 8192;
   const chunks = [];
   for (let i = 0; i < hex.length; i += CHUNK_SIZE) chunks.push(hex.slice(i, i + CHUNK_SIZE));
   if (chunks.length === 0) chunks.push('');
 
-  // 진짜 데이터는 "D_"로 시작, 쓰레기는 "J_"로 시작 (마커 명확화)
+  // 진짜 데이터는 "D" 접두사, 쓰레기는 "J" 접두사
   const dataLines = [];
   for (let i = 0; i < chunks.length; i++) {
-    dataLines.push(`"D${chunks[i]}"`);  // 진짜 데이터는 D로 시작
-    if (i % 6 === 0) {
+    dataLines.push(`"D${chunks[i]}"`);
+    if (i % 5 === 0) {
       dataLines.push(`"J${i}_${Math.random().toString(36).substring(2, 8)}"`);
     }
   }
 
-  // Decoy 함수들
-  const funcNames = [];
-  const junkFuncs = [];
-  for (let i = 0; i < 80; i++) {
+  // Decoy 함수 (30개 - 코드 크기 절감)
+  const decoyFuncs = [];
+  for (let i = 0; i < 30; i++) {
     const name = `_z${i}_${Math.floor(Math.random() * 10000)}`;
-    funcNames.push(name);
-    const r1 = Math.floor(Math.random() * 1000);
-    junkFuncs.push(`local function ${name}(a, b) return ((a or 1) * ${r1}) - ${r1} end`);
+    const r = Math.floor(Math.random() * 1000);
+    decoyFuncs.push(`local function ${name}(a,b)return((a or 1)*${r})-${r}end`);
   }
 
-  // Dead code branches
+  // Dead branches (30개)
   const deadBranches = [];
-  for (let i = 0; i < 60; i++) {
-    deadBranches.push(`elseif _S == ${-100 - i} then return`);
+  for (let i = 0; i < 30; i++) {
+    deadBranches.push(`elseif _S==${-100 - i} then return`);
   }
 
-  return `-- [Luakeeper VM v10 - Dual XOR · Debug Mode]
--- F9 콘솔에 [LuaKeeper] 로그가 표시됩니다.
-
-local _LOG = true
-local function _W(m)
-    if _LOG then pcall(function() warn("[LuaKeeper] " .. tostring(m)) end) end
-end
-
-_W("boot")
-
--- [Decoy 함수 80개 - Opcode Randomization]
-${junkFuncs.join('\n')}
-
--- [상수 테이블 (Constant Scattering)]
--- 진짜 시드: [1]^[2] = 1차 키, [3]^[4] = 2차 키
-local _C = {
-    [1] = ${fakeA1},
-    [2] = ${fakeB1},
-    [3] = ${fakeA2},
-    [4] = ${fakeB2},
-    [5] = ${chunks.length},
-}
-
--- [암호화 데이터 (D=진짜, J=가짜)]
-local _D = {
+  return `-- Obfuscated by LuaKeeper
+local _S,_L,_P,_K1,_K2,_R=1,nil,{},0,0,nil
+pcall(function()_L=rawget(getfenv(),"loadstring")or rawget(getfenv(),"load")end)
+if type(_L)~="function"then return end
+${decoyFuncs.join('\n')}
+local _C={[1]=${fakeA1},[2]=${fakeB1},[3]=${fakeA2},[4]=${fakeB2},[99]=${Math.floor(Math.random()*99999)}}
+local _D={
 ${dataLines.join(',\n')}
 }
-
-_W("const+data loaded: " .. tostring(#_D))
-
--- [VM 상태]
-local _PC = 1
-local _S = 1
-local _P = {}      -- parts
-local _SRC = nil
-local _K1 = 0
-local _K2 = 0
-
--- [VM 디스패처 - State Machine]
-while _S ~= 0 do
-    if _S == 1 then
-        -- Phase 1: 진짜 청크 수집 (점진적, 60개씩)
-        local _end = math.min(_PC + 59, #_D)
-        local _cnt = 0
-        for i = _PC, _end do
-            local _v = _D[i]
-            if type(_v) == "string" and string.sub(_v, 1, 1) == "D" then
-                -- 첫 글자 'D' 제거하고 나머지 저장
-                _P[#_P + 1] = string.sub(_v, 2)
-                _cnt = _cnt + 1
-            end
-        end
-        _PC = _end + 1
-        if _PC > #_D then
-            _W("phase1 done: " .. tostring(_cnt) .. " chunks collected")
-            _S = 2
-        end
-        task.wait()
-
-    elseif _S == 2 then
-        -- Phase 2: 이중 XOR 디코딩
-        _K1 = bit32.bxor(_C[1], _C[2])
-        _K2 = bit32.bxor(_C[3], _C[4])
-        local _hex = table.concat(_P)
-        _P = nil
-        _W("phase2: hex len=" .. tostring(#_hex) .. " k1=" .. tostring(_K1) .. " k2=" .. tostring(_K2))
-        local _out = {}
-        local _bad = 0
-        for i = 1, #_hex, 2 do
-            local _b = tonumber(string.sub(_hex, i, i + 1), 16)
-            if not _b then _bad = _bad + 1; _b = 0 end
-            local _idx = math.floor((i - 1) / 2)
-            -- 2차 역
-            local _v = bit32.bxor(_b, _K2)
-            _K2 = (_K2 * 17 + _idx + 7) % 256
-            -- 1차 역
-            local _v2 = bit32.bxor(_v, _K1)
-            _K1 = (_K1 * 31 + _idx + 13) % 256
-            _out[#_out + 1] = string.char(_v2)
-        end
-        if _bad > 0 then _W("WARN: bad hex count=" .. tostring(_bad)) end
-        _SRC = table.concat(_out)
-        _out = nil
-        _hex = nil
-        _W("phase2 done: src len=" .. tostring(#_SRC))
-        _S = 3
-
-    elseif _S == 3 then
-        -- Phase 3: 컴파일
-        local _len = #_SRC
-        local _f, _err = loadstring(_SRC)
-        _SRC = nil
-        if not _f then
-            _W("COMPILE FAIL: " .. tostring(_err))
-            return
-        end
-        _W("compiled ok (len=" .. tostring(_len) .. "), executing...")
-        _S = 0
-        -- 실행 (pcall로 감싸서 에러 추적)
-        local _ok, _runErr = pcall(_f)
-        if not _ok then
-            _W("RUNTIME ERR: " .. tostring(_runErr))
-        else
-            _W("SUCCESS")
-        end
-${deadBranches.join('\n    ')}
-    end
+while _S~=0 do
+if _S==1 then
+_K1=bit32.bxor(_C[1],_C[2])
+_K2=bit32.bxor(_C[3],_C[4])
+_S=2
+elseif _S==2 then
+local _h={}
+for i=1,#_D do
+local _v=_D[i]
+if string.sub(_v,1,1)=="D"then _h[#_h+1]=string.sub(_v,2)end
+end
+_P=_h
+_S=3
+elseif _S==3 then
+local _H=table.concat(_P)_P=nil
+local _n=math.floor(#_H/2)
+local _O=table.create(_n)
+local _a=_K1 local _b=_K2
+for i=1,#_H,2 do
+local _x=tonumber(string.sub(_H,i,i+1),16)or 0
+local _j=math.floor((i-1)/2)
+local _v=bit32.bxor(_x,_b)_b=(_b*17+_j+7)%256
+local _v2=bit32.bxor(_v,_a)_a=(_a*31+_j+13)%256
+_O[_j+1]=string.char(_v2)
+end
+_R=table.concat(_O)_O=nil _H=nil
+_S=4
+elseif _S==4 then
+local _f=loadstring(_R)_R=nil
+if _f then task.spawn(function()pcall(_f)end)end
+_S=0
+${deadBranches.join('\n')}
+end
 end
 `;
 }
 
-/* ============ 디컴파일러 ============ */
+/* ============ 디컴파일러 (Universal · 8 패턴 지원) ============ */
 function extractLuaStrings(str) {
-    const result = [];
-    let i = 0;
-    while (i < str.length) {
-        if (str[i] === '"') {
-            let j = i + 1, current = "";
-            while (j < str.length && str[j] !== '"') {
-                if (str[j] === '\\') {
-                    if (str[j+1] === '"') { current += '"'; j += 2; }
-                    else if (str[j+1] === '\\') { current += '\\'; j += 2; }
-                    else { current += str[j+1]; j += 2; }
-                } else { current += str[j]; j++; }
-            }
-            result.push(current);
-            i = j + 1;
-        } else i++;
-    }
-    return result;
+  const result = [];
+  let i = 0;
+  while (i < str.length) {
+    if (str[i] === '"') {
+      let j = i + 1, current = "";
+      while (j < str.length && str[j] !== '"') {
+        if (str[j] === '\\') {
+          if (str[j+1] === '"') { current += '"'; j += 2; }
+          else if (str[j+1] === '\\') { current += '\\'; j += 2; }
+          else { current += str[j+1]; j += 2; }
+        } else { current += str[j]; j++; }
+      }
+      result.push(current);
+      i = j + 1;
+    } else i++;
+  }
+  return result;
 }
 
 function universalDeobfuscate(code) {
   let log = [], out = '';
 
-  // [1] VM v10 (Dual XOR)
-  if (code.includes('Luakeeper VM v10') || code.includes('Dual XOR')) {
+  // [1] LuaKeeper v11 (Dual XOR) — 새 버전
+  if (code.includes('Obfuscated by LuaKeeper') && code.includes('bit32.bxor')) {
     try {
-      // 시드 4개 추출
-      const constMatch = code.match(/local\s+_C\s*=\s*\{([\s\S]*?)\n\s*\}/);
-      if (!constMatch) throw new Error('_C 테이블 없음');
-      const cBody = constMatch[1];
-      const cNums = [...cBody.matchAll(/\[(\d+)\]\s*=\s*(\d+)/g)].map(m => ({ idx: parseInt(m[1], 10), val: parseInt(m[2], 10) }));
-      const cMap = {};
-      cNums.forEach(({idx, val}) => cMap[idx] = val);
-      
-      const realSeed1 = cMap[1] ^ cMap[2];
-      const realSeed2 = cMap[3] ^ cMap[4];
-
-      // 데이터 테이블 추출
-      const dataMatch = code.match(/local\s+_D\s*=\s*\{([\s\S]*?)\n\s*\}/);
-      if (!dataMatch) throw new Error('_D 테이블 없음');
-      const dBody = dataMatch[1];
-      const strMatches = [...dBody.matchAll(/"([^"]*)"/g)].map(m => m[1]);
-      
-      // 'D'로 시작하는 진짜 청크만
-      const realChunks = strMatches
-        .filter(s => s.startsWith('D'))
-        .map(s => s.substring(1));
-      
-      if (realChunks.length === 0) throw new Error('진짜 데이터 없음');
-      
-      const decoded = decodeHex(realChunks.join(''), realSeed1, realSeed2);
-      return { code: decoded, log: ['[성공] Luakeeper VM v10 (Dual XOR) 복원'], isRaw: false };
-    } catch (e) {
-      log.push('[실패] VM v10: ' + e.message);
-    }
+      const cMatch = code.match(/_C\s*=\s*\{([^}]+)\}/);
+      if (cMatch) {
+        const nums = {};
+        [...cMatch[1].matchAll(/\[(\d+)\]\s*=\s*(\d+)/g)].forEach(m => nums[+m[1]] = +m[2]);
+        if (nums[1] && nums[2] && nums[3] && nums[4]) {
+          const seed1 = nums[1] ^ nums[2];
+          const seed2 = nums[3] ^ nums[4];
+          
+          const dMatch = code.match(/_D\s*=\s*\{([\s\S]*?)\n\s*\}/);
+          if (dMatch) {
+            const strArr = [...dMatch[1].matchAll(/"([^"]*)"/g)].map(m => m[1]);
+            const real = strArr.filter(s => s.startsWith('D')).map(s => s.substr(1));
+            if (real.length > 0) {
+              const decoded = decodeDualXOR(real.join(''), seed1, seed2);
+              return { code: decoded, log: ['[성공] LuaKeeper v11 (Dual XOR)'], isRaw: false };
+            }
+          }
+        }
+      }
+    } catch (e) { log.push('[실패] v11: ' + e.message); }
   }
 
-  // [2] VM v9 (Single XOR, 이전 버전)
+  // [2] Luakeeper VM v10 (Dual XOR · 이전 버전 마커)
+  if (code.includes('Luakeeper VM v10') || code.includes('Dual XOR')) {
+    try {
+      const cMatch = code.match(/local\s+_C\s*=\s*\{([\s\S]*?)\n\s*\}/);
+      if (cMatch) {
+        const nums = {};
+        [...cMatch[1].matchAll(/\[(\d+)\]\s*=\s*(\d+)/g)].forEach(m => nums[+m[1]] = +m[2]);
+        if (nums[1] && nums[2] && nums[3] && nums[4]) {
+          const seed1 = nums[1] ^ nums[2];
+          const seed2 = nums[3] ^ nums[4];
+          const dMatch = code.match(/local\s+_D\s*=\s*\{([\s\S]*?)\n\s*\}/);
+          if (dMatch) {
+            const strArr = [...dMatch[1].matchAll(/"([^"]*)"/g)].map(m => m[1]);
+            const real = strArr.filter(s => s.startsWith('D')).map(s => s.substr(1));
+            if (real.length > 0) {
+              return { code: decodeDualXOR(real.join(''), seed1, seed2), log: ['[성공] Luakeeper VM v10'], isRaw: false };
+            }
+          }
+        }
+      }
+    } catch (e) { log.push('[실패] v10: ' + e.message); }
+  }
+
+  // [3] Luakeeper VM v9 (Single XOR)
   if (code.includes('Luakeeper VM v9') || code.includes('_VM.STATE')) {
     try {
       const seedMatch = code.match(/_VM\.CONST\s*=\s*\{[\s\S]*?\[1\]\s*=\s*(\d+)\s*,[\s\S]*?\[2\]\s*=\s*(\d+)/);
-      if (!seedMatch) throw new Error('시드 없음');
-      const realSeed = parseInt(seedMatch[1], 10) ^ parseInt(seedMatch[2], 10);
-      
-      const dataMatch = code.match(/_VM\.DATA\s*=\s*\{([\s\S]*?)\n\s*\}/);
-      if (!dataMatch) throw new Error('데이터 없음');
-      const strMatches = [...dataMatch[1].matchAll(/"([^"]*)"/g)].map(m => m[1]);
-      const realChunks = strMatches.filter(s => !s.startsWith('J_') && /^[a-fA-F0-9]+$/.test(s));
-      
-      if (realChunks.length === 0) throw new Error('진짜 데이터 없음');
-      
-      // 구버전은 single XOR이라 이 함수로 복호화 (seed2 = 0 처리 필요)
-      // 이전 v9 형식으로 디코딩 시도
-      const byteLen = realChunks.join('').length / 2;
-      const hex = realChunks.join('');
-      const outBytes = new Uint8Array(byteLen);
-      let k = realSeed;
-      for (let i = 0; i < byteLen; i++) {
-        const b = parseInt(hex.substr(i*2, 2), 16);
-        outBytes[i] = b ^ k;
-        k = (k * 31 + i + 13) & 0xFF;
+      if (seedMatch) {
+        const realSeed = parseInt(seedMatch[1], 10) ^ parseInt(seedMatch[2], 10);
+        const dataMatch = code.match(/_VM\.DATA\s*=\s*\{([\s\S]*?)\n\s*\}/);
+        if (dataMatch) {
+          const strMatches = [...dataMatch[1].matchAll(/"([^"]*)"/g)].map(m => m[1]);
+          const realChunks = strMatches.filter(s => !s.startsWith('J_') && /^[a-fA-F0-9]+$/.test(s));
+          if (realChunks.length > 0) {
+            const hex = realChunks.join('');
+            const byteLen = hex.length / 2;
+            const outBytes = new Uint8Array(byteLen);
+            let k = realSeed;
+            for (let i = 0; i < byteLen; i++) {
+              outBytes[i] = parseInt(hex.substr(i*2,2),16) ^ k;
+              k = (k * 31 + i + 13) & 0xFF;
+            }
+            return { code: new TextDecoder('utf-8',{fatal:false}).decode(outBytes), log: ['[성공] Luakeeper VM v9'], isRaw: false };
+          }
+        }
       }
-      const decoded = new TextDecoder('utf-8', { fatal: false }).decode(outBytes);
-      return { code: decoded, log: ['[성공] Luakeeper VM v9 복원'], isRaw: false };
     } catch (e) { log.push('[실패] v9: ' + e.message); }
   }
 
-  // [3] Luakeeper v7/v8
+  // [4] Luakeeper v7/v8 (Single XOR)
   if (code.includes('_x == 5') && code.includes('_x == 1')) {
     const seedMatch = code.match(/_k\s*=\s*bit32\.bxor\((\d+),\s*(\d+)\)/);
     const hexMatches = code.match(/"[a-fA-F0-9]{10,}"/g);
     if (seedMatch && hexMatches) {
-      const realSeed = parseInt(seedMatch[1], 10) ^ parseInt(seedMatch[2], 10);
-      const chunks = hexMatches.map(h => h.replace(/"/g, ''));
+      const realSeed = parseInt(seedMatch[1],10) ^ parseInt(seedMatch[2],10);
+      const hex = hexMatches.map(h => h.replace(/"/g,'')).join('');
       try {
-        // v7/v8은 single XOR
-        const hex = chunks.join('');
-        const byteLen = hex.length / 2;
+        const byteLen = hex.length/2;
         const outBytes = new Uint8Array(byteLen);
         let k = realSeed;
         for (let i = 0; i < byteLen; i++) {
-          const b = parseInt(hex.substr(i*2, 2), 16);
-          outBytes[i] = b ^ k;
+          outBytes[i] = parseInt(hex.substr(i*2,2),16) ^ k;
           k = (k * 31 + i + 13) & 0xFF;
         }
-        const decoded = new TextDecoder('utf-8', { fatal: false }).decode(outBytes);
-        return { code: decoded, log: ['[성공] Luakeeper v7/v8 복원'], isRaw: false };
-      } catch (e) { log.push('[실패] v7/v8: ' + e.message); }
+        return { code: new TextDecoder('utf-8',{fatal:false}).decode(outBytes), log: ['[성공] Luakeeper v7/v8'], isRaw: false };
+      } catch (e) { log.push('[실패] v7/v8: '+e.message); }
     }
   }
 
-  // [4] Chanhyuk
+  // [5] Chanhyuk lua (Base95 커스텀)
   if (code.includes('chanhyuk lua') || (code.includes('local n=') && code.includes('local o=') && code.includes('local k='))) {
     try {
       const nMatch = code.match(/local\s+n\s*=\s*\{([\s\S]*?)\}\s*local\s+o/);
@@ -438,14 +370,14 @@ function universalDeobfuscate(code) {
       const aMatch = code.match(/local\s+a\s*=\s*\{([\s\S]*?)\}\s*local\s+g/);
       if (nMatch && oMatch && kMatch && qMatch && aMatch) {
         const nStrings = extractLuaStrings(nMatch[1]);
-        const oArr = [...oMatch[1].matchAll(/\d+/g)].map(m => parseInt(m[0], 10));
-        const k = parseInt(kMatch[1], 10), q = parseInt(qMatch[1], 10);
-        const aArr = [...aMatch[1].matchAll(/\d+/g)].map(m => parseInt(m[0], 10));
-        function decCH(s, k, q, a) {
+        const oArr = [...oMatch[1].matchAll(/\d+/g)].map(m => parseInt(m[0],10));
+        const k = parseInt(kMatch[1],10), q = parseInt(qMatch[1],10);
+        const aArr = [...aMatch[1].matchAll(/\d+/g)].map(m => parseInt(m[0],10));
+        function decCH(s,k,q,a) {
           let r = "", j = 1;
           for (let i = 0; i < s.length; i += 2) {
-            const v = (s.charCodeAt(i) - 33) * 95 + (s.charCodeAt(i + 1) - 33);
-            let idx = (v - k - (((j - 1) * q) % 251) - a[((j - 1) % a.length)] + 512) % 256;
+            const v = (s.charCodeAt(i)-33)*95 + (s.charCodeAt(i+1)-33);
+            let idx = (v - k - (((j-1)*q)%251) - a[((j-1)%a.length)] + 512) % 256;
             if (idx < 0) idx += 256;
             r += String.fromCharCode(idx);
             j++;
@@ -455,41 +387,104 @@ function universalDeobfuscate(code) {
         let decoded = "";
         for (let i = 0; i < oArr.length; i++) {
           const idx = oArr[i] - 1;
-          if (nStrings[idx]) decoded += decCH(nStrings[idx], k, q, aArr);
+          if (nStrings[idx]) decoded += decCH(nStrings[idx],k,q,aArr);
         }
-        return { code: decoded, log: ['[성공] Chanhyuk 복원'], isRaw: false };
+        return { code: decoded, log: ['[성공] Chanhyuk lua'], isRaw: false };
       }
     } catch (e) { log.push('[실패] Chanhyuk'); }
   }
 
-  // [5] 휴리스틱
+  // [6] 다중 loadstring 래퍼 재귀 해제
+  let loadMatch;
+  const loadRegex = /(?:loadstring|load)\(\s*(["'])([\s\S]*?)\1\s*\)/;
+  let iter = 0;
+  while ((loadMatch = code.match(loadRegex)) && iter < 5) {
+    let inner = loadMatch[2].replace(/\\(\d{1,3})/g, (m,p1) => String.fromCharCode(parseInt(p1,10)));
+    inner = inner.replace(/\\n/g,'\n').replace(/\\"/g,'"').replace(/\\'/g,"'");
+    if (inner === loadMatch[2]) break;
+    code = inner;
+    iter++;
+  }
+  if (iter > 0) {
+    out += `-- [loadstring 해제 (${iter}회)]\n${code}\n`;
+    log.push(`[성공] loadstring x${iter}`);
+  }
+
+  // [7] base64
+  const b64Regex = /base64,([A-Za-z0-9+\/=]+)/g;
+  if (b64Regex.test(code)) {
+    code = code.replace(b64Regex, (m, b64) => {
+      try {
+        const dec = atob(b64);
+        return '"' + dec.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n') + '"';
+      } catch { return m; }
+    });
+    log.push('[성공] base64');
+  }
+
+  // [8] string.char
   const charRegex = /string\.char\s*\(\s*([0-9,\s]+)\s*\)/g;
   if (charRegex.test(code)) {
     code = code.replace(charRegex, (m, p1) => {
       try {
-        const bytes = p1.split(',').map(n => parseInt(n.trim(), 10));
+        const bytes = p1.split(',').map(n => parseInt(n.trim(),10));
         const text = new TextDecoder('utf-8').decode(new Uint8Array(bytes));
-        return '"' + text.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
+        return '"' + text.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n') + '"';
       } catch { return m; }
     });
     log.push('[성공] string.char');
   }
 
-  const loadRegex = /(?:loadstring|load)\(\s*(["'])([\s\S]*?)\1\s*\)/;
-  const loadMatch = code.match(loadRegex);
-  if (loadMatch && loadMatch[2]) {
-    let inner = loadMatch[2].replace(/\\(\d{1,3})/g, (m, p1) => String.fromCharCode(parseInt(p1, 10)));
-    inner = inner.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\'/g, "'");
-    out += `-- ==========================================\n-- [loadstring 내부]\n-- ==========================================\n${inner}\n`;
-    log.push('[성공] loadstring');
+  // [9] string.reverse
+  const revRegex = /string\.reverse\s*\(\s*(["'])([\s\S]*?)\1\s*\)/g;
+  if (revRegex.test(code)) {
+    code = code.replace(revRegex, (m, q, s) => {
+      const rev = s.split('').reverse().join('');
+      return '"' + rev.replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
+    });
+    log.push('[성공] string.reverse');
   }
 
+  // [10] string.rep
+  const repRegex = /string\.rep\s*\(\s*(["'])([\s\S]*?)\1\s*,\s*(\d+)\s*\)/g;
+  if (repRegex.test(code)) {
+    code = code.replace(repRegex, (m, q, s, n) => {
+      const rep = s.repeat(parseInt(n,10));
+      return '"' + rep.replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
+    });
+    log.push('[성공] string.rep');
+  }
+
+  // [11] table.concat({...})
+  const tcRegex = /table\.concat\s*\(\s*\{([^}]+)\}\s*\)/g;
+  if (tcRegex.test(code)) {
+    code = code.replace(tcRegex, (m, inner) => {
+      const strs = [...inner.matchAll(/"([^"]*)"/g)].map(mm => mm[1]);
+      if (strs.length > 0) {
+        return '"' + strs.join('').replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
+      }
+      return m;
+    });
+    log.push('[성공] table.concat');
+  }
+
+  // [12] 숫자 배열 (Constant Dump)
+  const numTableRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]{30,})\}/g;
+  let tMatch, extracted = false;
+  while ((tMatch = numTableRegex.exec(code)) !== null) {
+    const values = tMatch[2].split(',').map(v => parseInt(v.trim(),10)).filter(v => !isNaN(v));
+    let text = '';
+    for (let v of values) if (v >= 32 && v <= 126) text += String.fromCharCode(v);
+    if (text.length > 10) { out += `-- [문자열 배열 ${tMatch[1]}]: ${text}\n`; extracted = true; }
+  }
+  if (extracted) log.push('[성공] 상수 배열 추출');
+
+  // 결과 조합
   if (log.length === 0) {
-    log.push('[정보] 알 수 없는 패턴');
+    log.push('[정보] 알려진 패턴 없음');
     return { code: code, log, isRaw: true };
   }
-  if (out.length > 0) {
-    out += `-- ==========================================\n-- [원본]\n-- ==========================================\n${code}`;
+  if (out.length > 0 && iter > 0) {
     return { code: out, log, isRaw: false };
   }
   return { code: code, log, isRaw: false };
@@ -502,7 +497,7 @@ $('btnProcess').onclick = () => {
   try {
     if (MODE === 'obfuscate') {
       $('output').value = generateObfuscated(input);
-      setStatus('[성공] Dual XOR VM 난독화 완료 · F9 콘솔에 로그 표시됨', 'ok');
+      setStatus('[성공] Dual XOR VM v11 난독화 완료 · 코드 크기 최적화 · 주석 최소화', 'ok');
     } else {
       const { code: r, log, isRaw } = universalDeobfuscate(input);
       $('output').value = r;
