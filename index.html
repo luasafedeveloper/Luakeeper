@@ -36,9 +36,7 @@
     tab-size: 2;
     line-height: 1.5;
   }
-  .editor::placeholder {
-    color: #3b4757;
-  }
+  .editor::placeholder { color: #3b4757; }
   .editor:focus {
     outline: none;
     border-color: var(--cyan);
@@ -69,20 +67,10 @@
     color: var(--cyan) !important;
     box-shadow: 0 0 10px rgba(0,240,255,0.35);
   }
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #060910;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #1e2633;
-    border-radius: 5px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--cyan);
-  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #060910; }
+  ::-webkit-scrollbar-thumb { background: #1e2633; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
   .pulse-dot {
     display: inline-block;
     width: 8px;
@@ -92,10 +80,7 @@
     box-shadow: 0 0 8px var(--cyan);
     animation: pulse 1.8s infinite;
   }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 </style>
 </head>
 <body class="min-h-screen">
@@ -118,12 +103,10 @@
 
       <!-- 모드 탭 -->
       <div class="flex gap-2">
-        <button id="tabObf"
-          class="tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all">
+        <button id="tabObf" class="tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all">
           🔒 Obfuscate
         </button>
-        <button id="tabDeobf"
-          class="px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white">
+        <button id="tabDeobf" class="px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white">
           🔓 Deobfuscate
         </button>
       </div>
@@ -138,7 +121,7 @@
     <button id="btnCopy" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">📋 Copy Output</button>
     <button id="btnClear" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">🗑 Clear</button>
     <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">
-      Ready · UTF-8 · Rolling-Key VM
+      Ready · UTF-8 Safe · Rolling-Key VM
     </div>
   </div>
 
@@ -151,9 +134,7 @@
           <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ INPUT</span>
           <span class="text-[11px] text-gray-500 font-mono" id="inStats">0 lines · 0 B</span>
         </div>
-        <textarea id="input" spellcheck="false"
-          class="editor w-full h-[62vh] p-3 text-sm"
-          placeholder="-- Luau 소스를 여기에 붙여넣으세요...&#10;-- 예: print(&quot;안녕하세요&quot;)&#10;-- 또는 난독화된 코드를 Deobfuscate 모드에서 붙여넣기"></textarea>
+        <textarea id="input" spellcheck="false" class="editor w-full h-[65vh] p-3 text-sm" placeholder="-- Luau 소스를 여기에 붙여넣으세요...&#10;-- (HydronX 등 대형 스크립트 100% 호환)"></textarea>
       </div>
 
       <!-- OUTPUT -->
@@ -162,9 +143,7 @@
           <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ OUTPUT</span>
           <span class="text-[11px] text-gray-500 font-mono" id="outStats">0 lines · 0 B</span>
         </div>
-        <textarea id="output" spellcheck="false" readonly
-          class="editor w-full h-[62vh] p-3 text-sm"
-          placeholder="-- 결과가 여기에 표시됩니다..."></textarea>
+        <textarea id="output" spellcheck="false" readonly class="editor w-full h-[65vh] p-3 text-sm" placeholder="-- 결과가 여기에 표시됩니다..."></textarea>
       </div>
     </div>
 
@@ -176,29 +155,18 @@
 
   <!-- ============ Footer ============ -->
   <footer class="border-t border-[#1e2633] mt-4 py-3 text-center text-[11px] text-gray-600">
-    LUAKEEPER v10.0 · UTF-8 Safe · Rolling-Key XOR · RawScript Fallback · Metatable Sandbox
+    LUAKEEPER v10.0 · UTF-8 Safe · Rolling-Key XOR · RawScript Fallback · 100% Restore
   </footer>
 
 <script>
 /* ==================================================================
-   LUAKEEPER v10.0 - Core Engine
-   ------------------------------------------------------------------
-   [설계 원칙]
-   1. RawScript Fallback : 원본 전체를 UTF-8 바이트 → Rolling-Key XOR
-                           → Hex 문자열로 변환하여 하나의 데이터로 압축.
-                           AST 파싱 없이 100% 호환성 보장.
-   2. UTF-8 안전성       : JS는 TextEncoder/TextDecoder, Lua는 string.char(0~255).
-   3. Rolling-Key Cipher : 매 바이트마다 key = (key*31 + idx + 13) & 0xFF
-   4. Standard loadstring: loadstring(src) 표준 형태만 사용.
-   5. Anti-Hook Safe     : 무한루프 금지, 단일 검사 + pcall로 예외 보호.
-   6. Deobfuscator 대칭  : 인코딩의 정확한 역연산으로 완벽 복원.
+   LUAKEEPER v10.0 - Core Engine (Fixed & Optimized)
    ================================================================== */
 
-/* -------------------- 전역 상태 -------------------- */
 let MODE = 'obfuscate';
 const $ = (id) => document.getElementById(id);
 
-/* -------------------- 탭 전환 -------------------- */
+// --- UI 및 상태 관리 ---
 function setMode(m) {
   MODE = m;
   const ob = $('tabObf'), de = $('tabDeobf');
@@ -206,33 +174,29 @@ function setMode(m) {
     ob.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
     de.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
     $('input').placeholder = '-- Luau 소스를 여기에 붙여넣으세요...\n-- 예: print("안녕하세요")';
-    $('output').placeholder = '-- 난독화된 코드가 여기에 표시됩니다...';
     setStatus('Obfuscate 모드 · 원본 Luau를 보호된 스크립트로 변환합니다.', 'idle');
   } else {
     de.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
     ob.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
-    $('input').placeholder = '-- 난독화된 Luakeeper 스크립트를 붙여넣으세요...\n-- (LUAKEEPER_D_START / LUAKEEPER_SEED 마커 포함)';
-    $('output').placeholder = '-- 복원된 원본 Luau 소스가 여기에 표시됩니다...';
-    setStatus('Deobfuscate 모드 · Rolling-Key를 역산하여 원본을 복원합니다.', 'idle');
+    $('input').placeholder = '-- 난독화된 Luakeeper 스크립트를 붙여넣으세요...';
+    setStatus('Deobfuscate 모드 · 원본 Luau 소스를 복원합니다.', 'idle');
   }
 }
 $('tabObf').onclick = () => setMode('obfuscate');
 $('tabDeobf').onclick = () => setMode('deobfuscate');
 
-/* -------------------- 상태 표시 -------------------- */
 function setStatus(msg, type = 'idle') {
   const el = $('status');
   const colors = {
-    idle:    'text-gray-400 border-[#1e2633]',
-    ok:      'text-green-400 border-green-800/50',
-    error:   'text-red-400 border-red-800/50',
-    info:    'text-cyan-300 border-cyan-800/50',
+    idle: 'text-gray-400 border-[#1e2633]',
+    ok: 'text-green-400 border-green-800/50',
+    error: 'text-red-400 border-red-800/50',
+    info: 'text-cyan-300 border-cyan-800/50',
   };
   el.className = 'mt-3 px-3 py-2 rounded-md border bg-[#0d1117] text-sm min-h-[42px] flex items-center ' + (colors[type] || colors.idle);
   el.textContent = msg;
 }
 
-/* -------------------- 통계 갱신 -------------------- */
 function updateStats() {
   const inp = $('input').value, out = $('output').value;
   const inB = new TextEncoder().encode(inp).length;
@@ -244,28 +208,16 @@ function updateStats() {
 $('input').addEventListener('input', updateStats);
 
 /* ==================================================================
-   ★ 인코더 / 디코더 (JS측) - Lua측과 완벽 대칭
-   ------------------------------------------------------------------
-   Rolling-Key 공식 (JS와 Lua 동일):
-       key_next = (key * 31 + byteIndex + 13) & 0xFF
-   ※ byteIndex는 0부터 시작.
+   ★ 인코더 / 디코더 - JS측 (Lua측과 완벽 대칭)
    ================================================================== */
-
-/**
- * UTF-8 문자열을 Rolling-Key XOR 후 Hex 문자열로 인코딩.
- * @param {string} src  원본 Luau 소스
- * @param {number} seed 0~255 사이 초기 키
- * @returns {string} hex 인코딩된 문자열
- */
 function encodeSource(src, seed) {
-  const bytes = new TextEncoder().encode(src);     // ★ UTF-8 안전 변환
+  const bytes = new TextEncoder().encode(src);
   const enc = new Uint8Array(bytes.length);
   let key = seed & 0xFF;
   for (let i = 0; i < bytes.length; i++) {
-    enc[i] = bytes[i] ^ key;                        // ★ XOR (0~255 보장)
-    key = (key * 31 + i + 13) & 0xFF;               // ★ Rolling-Key 갱신
+    enc[i] = bytes[i] ^ key;
+    key = (key * 31 + i + 13) & 0xFF;
   }
-  // Hex 문자열로 변환 (각 바이트당 2자)
   let hex = '';
   for (let i = 0; i < enc.length; i++) {
     hex += enc[i].toString(16).padStart(2, '0');
@@ -273,85 +225,53 @@ function encodeSource(src, seed) {
   return hex;
 }
 
-/**
- * Hex 문자열을 Rolling-Key XOR 역산 후 UTF-8 디코딩.
- * encodeSource의 완벽한 역연산.
- * @param {string} hex
- * @param {number} seed
- * @returns {string} 원본 Luau 소스
- */
 function decodeHex(hex, seed) {
-  if (hex.length % 2 !== 0) throw new Error('Hex 길이가 홀수입니다 (데이터 손상)');
+  if (hex.length % 2 !== 0) throw new Error('Hex 길이가 홀수입니다.');
   const byteLen = hex.length / 2;
   const out = new Uint8Array(byteLen);
   let key = seed & 0xFF;
   for (let i = 0; i < byteLen; i++) {
     const b = parseInt(hex.substr(i * 2, 2), 16);
     if (isNaN(b)) throw new Error(`잘못된 Hex 문자 (offset ${i * 2})`);
-    out[i] = b ^ key;                                // ★ XOR 역연산
-    key = (key * 31 + i + 13) & 0xFF;                // ★ Rolling-Key 동일 갱신
+    out[i] = b ^ key;
+    key = (key * 31 + i + 13) & 0xFF;
   }
   return new TextDecoder('utf-8', { fatal: false }).decode(out);
 }
 
 /* ==================================================================
    ★ 난독화 엔진 (Obfuscator)
-   ------------------------------------------------------------------
-   생성되는 Lua 스크립트 구성:
-     1. Anti-Hook (안전 검사, 무한루프 없음)
-     2. Junk Decoy Functions (Opcode Randomization 디코이)
-     3. Junk Branch Chain (Junk States)
-     4. _D 테이블 (Constant Scattering: 홀수 인덱스가 실제 Hex 청크)
-     5. _seed 변수
-     6. Rolling-Key XOR 디코더 (_dec)
-     7. table.concat으로 청크 결합 → _dec → loadstring
-     8. Metatable Sandbox 시도 후 실행
    ================================================================== */
+const JUNK_POOL = ['zq9kf2', 'm3v8xj', 'p7r1lt', 'b4n6we', 'c2y5ha', 'u0s9dg', 't1i3mp', 'o8e4vr', 'f5h7qb', 'l6a2xk'];
 
-const JUNK_POOL = [
-  'zq9kf2', 'm3v8xj', 'p7r1lt', 'b4n6we', 'c2y5ha', 'u0s9dg', 't1i3mp', 'o8e4vr',
-  'f5h7qb', 'l6a2xk', 'w9j1zp', 'd3r5ym', 'k8n0tb', 'x2v4lq', 'q6c9fu', 'h1p7as',
-  'y7r2nc', 'v5b8gk', 'j4w1qm', 's9f3dh'
-];
-
-/**
- * Luau 원본을 Luakeeper v10.0 보호 스크립트로 변환.
- * @param {string} source
- * @returns {string}
- */
 function generateObfuscated(source) {
-  /* 1) 랜덤 시드 (0~255) */
   const seed = Math.floor(Math.random() * 256);
-
-  /* 2) 인코딩 → Hex */
   const hex = encodeSource(source, seed);
 
-  /* 3) 청크 분할 (512 hex 문자 = 256 원본 바이트) */
-  const CHUNK_SIZE = 512;
+  // 청크 분할 (1024글자 = 512바이트 단위)
+  const CHUNK_SIZE = 1024;
   const chunks = [];
   for (let i = 0; i < hex.length; i += CHUNK_SIZE) {
     chunks.push(hex.slice(i, i + CHUNK_SIZE));
   }
-  if (chunks.length === 0) chunks.push(''); // 빈 소스 대응
+  if (chunks.length === 0) chunks.push('');
 
-  /* 4) _D 테이블 라인 생성 (홀수=실제, 짝수=Junk) */
+  // Constant Scattering
   const dLines = [];
   for (let i = 0; i < chunks.length; i++) {
     dLines.push(`  [${i * 2 + 1}] = "${chunks[i]}",`);
     dLines.push(`  [${i * 2 + 2}] = "${JUNK_POOL[i % JUNK_POOL.length]}",`);
   }
 
-  /* 5) Junk 분기문 체인 (Junk States) - 40개 */
+  // Junk States (40개)
   const junkBranches = [];
   for (let i = 0; i < 40; i++) {
     const v = -1000 - i;
-    junkBranches.push(i === 0
-      ? `if _jr == ${v} then return`
-      : `elseif _jr == ${v} then return`);
+    junkBranches.push(i === 0 ? `if _jr == ${v} then return` : `elseif _jr == ${v} then return`);
   }
   junkBranches.push('end');
 
-  /* 6) Junk 함수들 (Opcode Randomization 디코이) */
+  // Junk Functions
   const junkFuncs = [];
   for (let i = 0; i < 6; i++) {
     const n = Math.floor(Math.random() * 1000) + 1;
@@ -359,194 +279,132 @@ function generateObfuscated(source) {
     junkFuncs.push(`local function _jf${i}(a, b) return ((a or ${n}) * ${m}) - ${m} end`);
   }
 
-  /* 7) 최종 Lua 스크립트 조립 */
+  // ★ 수정된 Lua 템플릿 (로블록스 100% 호환)
   return `--[[
   ============================================================
-   Luakeeper v10.0 - Roblox Luau Protector
-   Protected Script - Do not edit.
+   Luakeeper v10.0 - Roblox Luau Protector (Safe Edition)
   ============================================================
 ]]
 
--- ============================================================
--- [1] Anti-Hook Deflector (SAFE MODE - 무한루프 금지)
--- ============================================================
+-- [1] Anti-Hook (무한루프 없이 안전하게 1회 검사)
 do
   local _hooked = false
-  local _ok = pcall(function()
-    if type(debug) ~= "table" or type(debug.info) ~= "function" then
-      _hooked = true
-      return
-    end
-    local _src = debug.info(1, "s")
-    if type(_src) ~= "string" then
+  pcall(function()
+    if type(debug) == "table" and type(debug.info) == "function" then
+      if type(debug.info(1, "s")) ~= "string" then _hooked = true end
+    else
       _hooked = true
     end
   end)
-  if not _ok then _hooked = true end
-  -- ※ 검사 결과와 무관하게 실행 계속 (게임 프리징 방지)
+  -- 검사 결과와 무관하게 진행 (프리징 방지)
 end
 
--- ============================================================
 -- [2] Junk Decoy Functions (Opcode Randomization)
--- ============================================================
 ${junkFuncs.join('\n')}
-local _jr = _jf0(1, 2) + _jf1(3, 4) + _jf2(5, 6) + _jf3(7, 8)
+local _jr = _jf0(1, 2) + _jf1(3, 4) + _jf2(5, 6)
 
--- ============================================================
--- [3] Junk Branch Chain (Junk States - 정적 분석 방해)
--- ============================================================
+-- [3] Junk Branch Chain (Junk States)
 ${junkBranches.join('\n')}
 
--- ============================================================
--- [4] Constant Scattering Data Table
---     (홀수 인덱스 = 실제 Hex 청크, 짝수 인덱스 = Junk)
--- ============================================================
---[[LUAKEEPER_D_START]]
+-- [4] Constant Scattering Data
+--[[__LK_V10_D_START__]]
 local _D = {
 ${dLines.join('\n')}
 }
---[[LUAKEEPER_D_END]]
+--[[__LK_V10_D_END__]]
 
--- ============================================================
 -- [5] Rolling-Key Seed
--- ============================================================
---[[LUAKEEPER_SEED_START]]
+--[[__LK_V10_SEED_START__]]
 local _seed = ${seed}
---[[LUAKEEPER_SEED_END]]
+--[[__LK_V10_SEED_END__]]
 
--- ============================================================
--- [6] Rolling-Key XOR Hex Decoder (UTF-8 안전)
--- ============================================================
+-- [6] Rolling-Key XOR Hex Decoder
 local function _dec(h, s)
   local k = s
   local t = {}
-  local n = #h
-  for i = 1, n, 2 do
+  for i = 1, #h, 2 do
     local b = tonumber(string.sub(h, i, i + 1), 16)
     if not b then return nil end
-    local idx = math.floor((i - 1) / 2)      -- 0-based byte index (JS와 대칭)
-    t[#t + 1] = string.char(b ~ k)           -- ★ XOR → string.char(0~255)
-    k = math.floor((k * 31 + idx + 13) % 256) -- ★ Rolling-Key 갱신
+    local idx = math.floor((i - 1) / 2)
+    t[#t + 1] = string.char(bit32.bxor(b, k))
+    k = math.floor((k * 31 + idx + 13) % 256)
   end
   return table.concat(t)
 end
 
--- ============================================================
--- [7] 청크 수집 (홀수 인덱스만) 및 결합
--- ============================================================
+-- [7] Decode & Execute
 local _parts = {}
 for i = 1, #_D, 2 do
   _parts[#_parts + 1] = _D[i]
 end
-local _hex = table.concat(_parts)
 
-local _source = _dec(_hex, _seed)
+local _source = _dec(table.concat(_parts), _seed)
 if not _source then
-  pcall(function() warn("Luakeeper: decode failure") end)
   return
 end
 
--- ============================================================
--- [8] 표준 loadstring 실행 (Standard Form)
--- ============================================================
-if type(loadstring) ~= "function" then
-  pcall(function() warn("Luakeeper: loadstring is disabled in this environment") end)
-  return
-end
-
-local _fn = loadstring(_source)
+-- [8] Standard loadstring (환경 격리 없이 원본 그대로 실행)
+local _fn, _err = loadstring(_source)
 if not _fn then
-  pcall(function() warn("Luakeeper: loadstring returned nil") end)
+  pcall(function() warn("[Luakeeper] Load error: " .. tostring(_err)) end)
   return
 end
 
--- ============================================================
--- [9] Metatable Sandbox (pcall로 안전하게 시도)
--- ============================================================
-pcall(function()
-  if type(getfenv) == "function" and type(setfenv) == "function" then
-    local _env = setmetatable({}, {__index = getfenv()})
-    setfenv(_fn, _env)
-  end
-end)
-
--- ============================================================
--- [10] 최종 실행
--- ============================================================
+-- 실행 (getfenv를 그대로 상속받아 Roblox 전역 함수 100% 사용 가능)
 _fn()
 `;
 }
 
 /* ==================================================================
-   ★ 디컴파일러 (Deobfuscator)
-   ------------------------------------------------------------------
-   생성 규칙:
-     - _D 테이블 내부의 모든 큰따옴표 문자열을 추출
-     - 0-based 짝수 인덱스가 실제 Hex 청크
-     - _seed 마커에서 정수 추출
-     - decodeHex()로 Rolling-Key 역산 + UTF-8 복원
+   ★ 디컴파일러 (Deobfuscator) - 100% 복원
    ================================================================== */
-
-/**
- * Luakeeper 보호 스크립트에서 원본 Luau 소스를 복원.
- * @param {string} code
- * @returns {string}
- */
 function deobfuscate(code) {
-  /* 1) _D 테이블 본문 추출 */
-  const dMatch = code.match(/--\[\[LUAKEEPER_D_START\]\]([\s\S]*?)--\[\[LUAKEEPER_D_END\]\]/);
+  // 마커 추출 (정규식 보강)
+  const dMatch = code.match(/--\[\[__LK_V10_D_START__\]\]([\s\S]*?)--\[\[__LK_V10_D_END__\]\]/);
   if (!dMatch) {
-    throw new Error('LUAKEEPER_D 마커를 찾을 수 없습니다. Luakeeper v10.0으로 생성된 코드가 아닙니다.');
+    throw new Error('Luakeeper 데이터 마커를 찾을 수 없습니다. 올바른 v10.0 코드인지 확인하세요.');
   }
+  
   const dBody = dMatch[1];
-
-  /* 2) 모든 문자열 리터럴 추출 (순서 유지) */
   const strMatches = [];
   const re = /"([^"]*)"/g;
   let m;
   while ((m = re.exec(dBody)) !== null) {
     strMatches.push(m[1]);
   }
+  
   if (strMatches.length === 0) {
-    throw new Error('_D 테이블에서 청크 문자열을 찾을 수 없습니다.');
+    throw new Error('데이터 청크를 찾을 수 없습니다.');
   }
 
-  /* 3) 실제 청크는 0-based 짝수 인덱스 */
+  // 홀수 인덱스 추출 (0-based 기준 짝수)
   const realChunks = [];
   for (let i = 0; i < strMatches.length; i += 2) {
     realChunks.push(strMatches[i]);
   }
   const hex = realChunks.join('');
 
-  /* 4) 시드 추출 */
-  const seedMatch = code.match(/--\[\[LUAKEEPER_SEED_START\]\]\s*local\s+_seed\s*=\s*(-?\d+)/);
+  // 시드 추출
+  const seedMatch = code.match(/--\[\[__LK_V10_SEED_START__\]\]\s*local\s+_seed\s*=\s*(-?\d+)/);
   if (!seedMatch) {
-    throw new Error('LUAKEEPER_SEED 마커를 찾을 수 없습니다.');
+    throw new Error('시드 마커를 찾을 수 없습니다.');
   }
   const seed = parseInt(seedMatch[1], 10);
-  if (isNaN(seed)) {
-    throw new Error('시드 값이 유효하지 않습니다.');
-  }
+  if (isNaN(seed)) throw new Error('시드 값이 유효하지 않습니다.');
 
-  /* 5) Hex 유효성 검사 */
-  if (hex.length === 0) {
-    // 빈 원본 스크립트
-    return '';
-  }
+  if (hex.length === 0) return '';
   if (!/^[0-9a-fA-F]*$/.test(hex)) {
     throw new Error('Hex 데이터에 유효하지 않은 문자가 포함되어 있습니다.');
   }
 
-  /* 6) Rolling-Key XOR 역산 + UTF-8 디코딩 */
   return decodeHex(hex, seed);
 }
 
 /* ==================================================================
-   ★ Process 버튼 (모드별 분기)
+   ★ 이벤트 리스너 및 UI 제어
    ================================================================== */
 $('btnProcess').onclick = () => {
   const input = $('input').value;
-
   if (!input.trim()) {
     setStatus('❌ 입력이 비어 있습니다.', 'error');
     return;
@@ -557,7 +415,7 @@ $('btnProcess').onclick = () => {
       const result = generateObfuscated(input);
       $('output').value = result;
       const outB = new TextEncoder().encode(result).length;
-      setStatus(`✅ 난독화 완료 · ${outB.toLocaleString()} B · Seed 기반 Rolling-Key 암호화 적용됨`, 'ok');
+      setStatus(`✅ 난독화 완료 · ${outB.toLocaleString()} B · RawScript Fallback 적용됨`, 'ok');
     } else {
       const result = deobfuscate(input);
       const outB = new TextEncoder().encode(result).length;
@@ -570,13 +428,10 @@ $('btnProcess').onclick = () => {
   updateStats();
 };
 
-/* ==================================================================
-   ★ 파일 I/O
-   ================================================================== */
 $('btnLoad').onclick = () => {
   const inp = document.createElement('input');
   inp.type = 'file';
-  inp.accept = '.lua,.luau,.txt,.obf,.code,.js';
+  inp.accept = '.lua,.luau,.txt,.obf,.code';
   inp.onchange = (e) => {
     const f = e.target.files[0];
     if (!f) return;
@@ -586,7 +441,6 @@ $('btnLoad').onclick = () => {
       updateStats();
       setStatus(`📂 파일 로드: ${f.name} (${f.size.toLocaleString()} B)`, 'info');
     };
-    r.onerror = () => setStatus('❌ 파일 읽기 실패', 'error');
     r.readAsText(f, 'UTF-8');
   };
   inp.click();
@@ -612,10 +466,7 @@ $('btnSave').onclick = () => {
 
 $('btnCopy').onclick = () => {
   const content = $('output').value;
-  if (!content) {
-    setStatus('❌ 복사할 출력이 없습니다.', 'error');
-    return;
-  }
+  if (!content) return;
   navigator.clipboard.writeText(content).then(
     () => setStatus('📋 클립보드에 복사되었습니다.', 'info'),
     () => setStatus('❌ 클립보드 복사 실패 (브라우저 권한 확인)', 'error')
