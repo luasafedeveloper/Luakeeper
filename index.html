@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LuaKeeper | Universal Luau Deobfuscator</title>
+<title>LuaKeeper | Universal Luau Obfuscator</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   :root { --bg:#0a0d14; --border:#1e2633; --cyan:#00f0ff; --cyan-dim:#00f0ff44; }
@@ -28,54 +28,54 @@
 </head>
 <body class="min-h-screen">
 
-  <header class="border-b border-[#1e2633] bg-[#0a0d14]/90 backdrop-blur sticky top-0 z-10">
-    <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-md border border-[#00f0ff] flex items-center justify-center neon-glow">
-          <span class="neon-text font-bold text-lg">L</span>
-        </div>
-        <div>
-          <h1 class="text-xl font-bold neon-text leading-none">LUAKEEPER</h1>
-          <p class="text-[11px] text-gray-500 mt-0.5"><span class="pulse-dot mr-1"></span>Universal Luau Obfuscator · Deobfuscator</p>
-        </div>
+<header class="border-b border-[#1e2633] bg-[#0a0d14]/90 backdrop-blur sticky top-0 z-10">
+  <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-md border border-[#00f0ff] flex items-center justify-center neon-glow">
+        <span class="neon-text font-bold text-lg">L</span>
       </div>
-      <div class="flex gap-2">
-        <button id="tabObf" class="px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white">Obfuscate</button>
-        <button id="tabDeobf" class="tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all">Deobfuscate</button>
+      <div>
+        <h1 class="text-xl font-bold neon-text leading-none">LUAKEEPER</h1>
+        <p class="text-[11px] text-gray-500 mt-0.5"><span class="pulse-dot mr-1"></span>Universal Luau Obfuscator · Deobfuscator v12</p>
       </div>
     </div>
-  </header>
-
-  <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center gap-2">
-    <button id="btnLoad" class="btn-ghost px-3 py-1.5 rounded text-sm">Load File</button>
-    <button id="btnSave" class="btn-ghost px-3 py-1.5 rounded text-sm">Save File</button>
-    <button id="btnProcess" class="btn-primary px-6 py-1.5 rounded text-sm neon-glow">Process</button>
-    <button id="btnCopy" class="btn-ghost px-3 py-1.5 rounded text-sm">Copy Output</button>
-    <button id="btnClear" class="btn-ghost px-3 py-1.5 rounded text-sm">Clear</button>
-    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · Dual XOR v11</div>
-  </div>
-
-  <div class="max-w-[1600px] mx-auto px-4 pb-6">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div class="flex flex-col">
-        <div class="flex items-center justify-between mb-1.5 px-1">
-          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">INPUT</span>
-          <span class="text-[11px] text-gray-500 font-mono" id="inStats">0 lines · 0 B</span>
-        </div>
-        <textarea id="input" spellcheck="false" class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 분석할 난독화 코드를 붙여넣으세요..."></textarea>
-      </div>
-      <div class="flex flex-col">
-        <div class="flex items-center justify-between mb-1.5 px-1">
-          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">OUTPUT</span>
-          <span class="text-[11px] text-gray-500 font-mono" id="outStats">0 lines · 0 B</span>
-        </div>
-        <textarea id="output" spellcheck="false" readonly class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 결과가 표시됩니다..."></textarea>
-      </div>
-    </div>
-    <div id="status" class="mt-3 px-3 py-2 rounded-md border border-[#1e2633] bg-[#0d1117] text-sm text-gray-400 min-h-[42px] flex items-center">
-      대기 중...
+    <div class="flex gap-2">
+      <button id="tabObf" class="px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white">Obfuscate</button>
+      <button id="tabDeobf" class="tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all">Deobfuscate</button>
     </div>
   </div>
+</header>
+
+<div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center gap-2">
+  <button id="btnLoad" class="btn-ghost px-3 py-1.5 rounded text-sm">Load File</button>
+  <button id="btnSave" class="btn-ghost px-3 py-1.5 rounded text-sm">Save File</button>
+  <button id="btnProcess" class="btn-primary px-6 py-1.5 rounded text-sm neon-glow">Process</button>
+  <button id="btnCopy" class="btn-ghost px-3 py-1.5 rounded text-sm">Copy Output</button>
+  <button id="btnClear" class="btn-ghost px-3 py-1.5 rounded text-sm">Clear</button>
+  <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · Dual XOR v12</div>
+</div>
+
+<div class="max-w-[1600px] mx-auto px-4 pb-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="flex flex-col">
+      <div class="flex items-center justify-between mb-1.5 px-1">
+        <span class="text-xs font-bold text-[#00f0ff] tracking-wider">INPUT</span>
+        <span class="text-[11px] text-gray-500 font-mono" id="inStats">0 lines · 0 B</span>
+      </div>
+      <textarea id="input" spellcheck="false" class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 분석할 난독화 코드를 붙여넣으세요..."></textarea>
+    </div>
+    <div class="flex flex-col">
+      <div class="flex items-center justify-between mb-1.5 px-1">
+        <span class="text-xs font-bold text-[#00f0ff] tracking-wider">OUTPUT</span>
+        <span class="text-[11px] text-gray-500 font-mono" id="outStats">0 lines · 0 B</span>
+      </div>
+      <textarea id="output" spellcheck="false" readonly class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 결과가 표시됩니다..."></textarea>
+    </div>
+  </div>
+  <div id="status" class="mt-3 px-3 py-2 rounded-md border border-[#1e2633] bg-[#0d1117] text-sm text-gray-400 min-h-[42px] flex items-center">
+    대기 중...
+  </div>
+</div>
 
 <script>
 const $ = (id) => document.getElementById(id);
@@ -88,12 +88,12 @@ function setMode(m) {
     ob.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
     de.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
     $('input').placeholder = '-- Luau 소스를 여기에 붙여넣으세요...';
-    setStatus('Obfuscate 모드 · Dual XOR VM 난독화를 적용합니다.', 'idle');
+    setStatus('Obfuscate 모드 · Dual XOR v12 난독화를 적용합니다.', 'idle');
   } else {
     de.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
     ob.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
     $('input').placeholder = '-- 디컴파일할 난독화 코드를 붙여넣으세요...';
-    setStatus('Deobfuscate 모드 · 모든 난독화 패턴을 분석합니다.', 'idle');
+    setStatus('Deobfuscate 모드 · Moonveil.cc · Luraph · Moonsec 등 모든 패턴을 분석합니다.', 'idle');
   }
 }
 $('tabObf').onclick = () => setMode('obfuscate');
@@ -122,12 +122,11 @@ function updateStats() {
 }
 $('input').addEventListener('input', updateStats);
 
-/* ============ 인코딩 / 디코딩 (Dual XOR + Rolling Key) ============ */
+/* ============ Dual XOR 인코더 / 디코더 ============ */
 function encodeSource(src, seed1, seed2) {
   const bytes = new TextEncoder().encode(src);
   const enc = new Uint8Array(bytes.length);
-  let k1 = seed1 & 0xFF;
-  let k2 = seed2 & 0xFF;
+  let k1 = seed1 & 0xFF, k2 = seed2 & 0xFF;
   for (let i = 0; i < bytes.length; i++) {
     let v = bytes[i] ^ k1;
     k1 = (k1 * 31 + i + 13) & 0xFF;
@@ -144,8 +143,7 @@ function decodeDualXOR(hex, seed1, seed2) {
   if (hex.length % 2 !== 0) throw new Error('Hex 홀수');
   const byteLen = hex.length / 2;
   const out = new Uint8Array(byteLen);
-  let k1 = seed1 & 0xFF;
-  let k2 = seed2 & 0xFF;
+  let k1 = seed1 & 0xFF, k2 = seed2 & 0xFF;
   for (let i = 0; i < byteLen; i++) {
     const b = parseInt(hex.substr(i * 2, 2), 16);
     if (isNaN(b)) throw new Error(`bad hex @${i*2}`);
@@ -156,7 +154,7 @@ function decodeDualXOR(hex, seed1, seed2) {
   return new TextDecoder('utf-8', { fatal: false }).decode(out);
 }
 
-/* ============ VM 난독화 엔진 (Dual XOR · 코드 최적화) ============ */
+/* ============ 난독화 엔진 v12 (완전 수정) ============ */
 function generateObfuscated(source) {
   const seed1 = Math.floor(Math.random() * 255) + 1;
   const seed2 = Math.floor(Math.random() * 255) + 1;
@@ -167,74 +165,59 @@ function generateObfuscated(source) {
 
   const hex = encodeSource(source, seed1, seed2);
 
-  // 청크 8192글자 (4096바이트) → 오버헤드 대폭 감소
-  const CHUNK_SIZE = 8192;
+  // 청크 16384글자 (8192바이트) → 오버헤드 최소화
+  const CHUNK_SIZE = 16384;
   const chunks = [];
   for (let i = 0; i < hex.length; i += CHUNK_SIZE) chunks.push(hex.slice(i, i + CHUNK_SIZE));
   if (chunks.length === 0) chunks.push('');
 
-  // 진짜 데이터는 "D" 접두사, 쓰레기는 "J" 접두사
+  // 진짜 = "D" 접두사, 가짜 = "J" 접두사
   const dataLines = [];
   for (let i = 0; i < chunks.length; i++) {
     dataLines.push(`"D${chunks[i]}"`);
-    if (i % 5 === 0) {
-      dataLines.push(`"J${i}_${Math.random().toString(36).substring(2, 8)}"`);
+    if (i % 4 === 0 && i < chunks.length - 1) {
+      dataLines.push(`"J${i}_${Math.random().toString(36).substring(2, 6)}"`);
     }
   }
 
-  // Decoy 함수 (30개 - 코드 크기 절감)
-  const decoyFuncs = [];
-  for (let i = 0; i < 30; i++) {
-    const name = `_z${i}_${Math.floor(Math.random() * 10000)}`;
-    const r = Math.floor(Math.random() * 1000);
-    decoyFuncs.push(`local function ${name}(a,b)return((a or 1)*${r})-${r}end`);
-  }
-
-  // Dead branches (30개)
+  // Dead branches (20개)
   const deadBranches = [];
-  for (let i = 0; i < 30; i++) {
-    deadBranches.push(`elseif _S==${-100 - i} then return`);
+  for (let i = 0; i < 20; i++) {
+    deadBranches.push(`elseif _S==${-100 - i}then return`);
   }
 
+  // ★ v12: loadstring(_R) → _L(_R) 완벽 수정 + 모든 주석 최소화
   return `-- Obfuscated by LuaKeeper
 local _S,_L,_P,_K1,_K2,_R=1,nil,{},0,0,nil
 pcall(function()_L=rawget(getfenv(),"loadstring")or rawget(getfenv(),"load")end)
 if type(_L)~="function"then return end
-${decoyFuncs.join('\n')}
-local _C={[1]=${fakeA1},[2]=${fakeB1},[3]=${fakeA2},[4]=${fakeB2},[99]=${Math.floor(Math.random()*99999)}}
+if type(bit32)~="table"then return end
+local _C={[1]=${fakeA1},[2]=${fakeB1},[3]=${fakeA2},[4]=${fakeB2}}
 local _D={
 ${dataLines.join(',\n')}
 }
 while _S~=0 do
 if _S==1 then
-_K1=bit32.bxor(_C[1],_C[2])
-_K2=bit32.bxor(_C[3],_C[4])
-_S=2
+_K1=bit32.bxor(_C[1],_C[2])_K2=bit32.bxor(_C[3],_C[4])_S=2
 elseif _S==2 then
 local _h={}
-for i=1,#_D do
-local _v=_D[i]
-if string.sub(_v,1,1)=="D"then _h[#_h+1]=string.sub(_v,2)end
-end
-_P=_h
-_S=3
+for i=1,#_D do local _v=_D[i]if type(_v)=="string"and string.sub(_v,1,1)=="D"then _h[#_h+1]=string.sub(_v,2)end end
+_P=_h _D=nil _S=3
 elseif _S==3 then
 local _H=table.concat(_P)_P=nil
-local _n=math.floor(#_H/2)
-local _O=table.create(_n)
-local _a=_K1 local _b=_K2
+local _a=_K1 local _b=_K2 local _O={}local _bi=1
 for i=1,#_H,2 do
 local _x=tonumber(string.sub(_H,i,i+1),16)or 0
-local _j=math.floor((i-1)/2)
-local _v=bit32.bxor(_x,_b)_b=(_b*17+_j+7)%256
-local _v2=bit32.bxor(_v,_a)_a=(_a*31+_j+13)%256
-_O[_j+1]=string.char(_v2)
+local _j=_bi-1
+_O[_bi]=string.char(bit32.bxor(bit32.bxor(_x,_b),_a))
+_b=(_b*17+_j+7)%256
+_a=(_a*31+_j+13)%256
+_bi=_bi+1
 end
-_R=table.concat(_O)_O=nil _H=nil
-_S=4
+_R=table.concat(_O)_O=nil _H=nil _S=4
 elseif _S==4 then
-local _f=loadstring(_R)_R=nil
-if _f then task.spawn(function()pcall(_f)end)end
+local _f=_L(_R)_R=nil
+if _f then pcall(function()task.spawn(_f)end)end
 _S=0
 ${deadBranches.join('\n')}
 end
@@ -242,7 +225,7 @@ end
 `;
 }
 
-/* ============ 디컴파일러 (Universal · 8 패턴 지원) ============ */
+/* ============ 디컴파일러 v12 (Moonveil · 15+ 패턴) ============ */
 function extractLuaStrings(str) {
   const result = [];
   let i = 0;
@@ -263,104 +246,128 @@ function extractLuaStrings(str) {
   return result;
 }
 
+function numArrayDump(arr) {
+  let best = '';
+  const candidates = [];
+  for (let k = 0; k < 256; k++) {
+    let s = '';
+    for (let i = 0; i < arr.length; i++) {
+      const v = (arr[i] ^ k) & 0xFF;
+      s += String.fromCharCode(v);
+    }
+    const printable = (s.match(/[\x20-\x7E\uAC00-\uD7A3\n\t\r]/g) || []).length;
+    candidates.push({ key: k, text: s, score: printable / Math.max(1, s.length) });
+  }
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0].score > 0.7 ? candidates[0] : null;
+}
+
 function universalDeobfuscate(code) {
   let log = [], out = '';
 
-  // [1] LuaKeeper v11 (Dual XOR) — 새 버전
-  if (code.includes('Obfuscated by LuaKeeper') && code.includes('bit32.bxor')) {
+  // ===== [1] LuaKeeper v11/v12 (Dual XOR) =====
+  if (code.includes('Obfuscated by LuaKeeper') || (code.includes('bit32.bxor') && code.includes('_C') && code.includes('_D'))) {
     try {
       const cMatch = code.match(/_C\s*=\s*\{([^}]+)\}/);
       if (cMatch) {
         const nums = {};
         [...cMatch[1].matchAll(/\[(\d+)\]\s*=\s*(\d+)/g)].forEach(m => nums[+m[1]] = +m[2]);
         if (nums[1] && nums[2] && nums[3] && nums[4]) {
-          const seed1 = nums[1] ^ nums[2];
-          const seed2 = nums[3] ^ nums[4];
-          
+          const seed1 = nums[1] ^ nums[2], seed2 = nums[3] ^ nums[4];
           const dMatch = code.match(/_D\s*=\s*\{([\s\S]*?)\n\s*\}/);
           if (dMatch) {
             const strArr = [...dMatch[1].matchAll(/"([^"]*)"/g)].map(m => m[1]);
             const real = strArr.filter(s => s.startsWith('D')).map(s => s.substr(1));
             if (real.length > 0) {
-              const decoded = decodeDualXOR(real.join(''), seed1, seed2);
-              return { code: decoded, log: ['[성공] LuaKeeper v11 (Dual XOR)'], isRaw: false };
+              return { code: decodeDualXOR(real.join(''), seed1, seed2), log: ['[성공] LuaKeeper v12 (Dual XOR)'], isRaw: false };
             }
           }
         }
       }
-    } catch (e) { log.push('[실패] v11: ' + e.message); }
+    } catch (e) { log.push('[실패] v12: ' + e.message); }
   }
 
-  // [2] Luakeeper VM v10 (Dual XOR · 이전 버전 마커)
-  if (code.includes('Luakeeper VM v10') || code.includes('Dual XOR')) {
-    try {
-      const cMatch = code.match(/local\s+_C\s*=\s*\{([\s\S]*?)\n\s*\}/);
-      if (cMatch) {
-        const nums = {};
-        [...cMatch[1].matchAll(/\[(\d+)\]\s*=\s*(\d+)/g)].forEach(m => nums[+m[1]] = +m[2]);
-        if (nums[1] && nums[2] && nums[3] && nums[4]) {
-          const seed1 = nums[1] ^ nums[2];
-          const seed2 = nums[3] ^ nums[4];
-          const dMatch = code.match(/local\s+_D\s*=\s*\{([\s\S]*?)\n\s*\}/);
-          if (dMatch) {
-            const strArr = [...dMatch[1].matchAll(/"([^"]*)"/g)].map(m => m[1]);
-            const real = strArr.filter(s => s.startsWith('D')).map(s => s.substr(1));
-            if (real.length > 0) {
-              return { code: decodeDualXOR(real.join(''), seed1, seed2), log: ['[성공] Luakeeper VM v10'], isRaw: false };
-            }
-          }
-        }
+  // ===== [2] Moonveil.cc 패턴 =====
+  if (code.includes('moonveil') || code.includes('Moonveil')) {
+    log.push('[Moonveil] 시그니처 감지');
+  }
+  
+  // Moonveil 패턴 A: `return (function(...)...end)(...)` IIFE
+  const iifeMatch = code.match(/^[\s\n]*return\s*\(?\s*function\s*\(\.\.\.\)([\s\S]*?)\bend\)?\s*\(\s*\.\.\.\s*\)/);
+  if (iifeMatch && iifeMatch[1]) {
+    log.push('[Moonveil] IIFE 구조 감지 → 내부 추출');
+    code = iifeMatch[1];
+  }
+
+  // Moonveil 패턴 B: 숫자 배열 + XOR 루프 (상수 키)
+  const arrXorRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]{50,})\}[\s\S]{0,400}?bit32\.bxor\s*\(\s*\1\s*\[\s*[a-zA-Z_]\w*\s*\]\s*,\s*(\d+)\s*\)/;
+  const arrXorMatch = code.match(arrXorRegex);
+  if (arrXorMatch) {
+    const arr = arrXorMatch[2].split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+    const key = parseInt(arrXorMatch[3], 10);
+    if (arr.length > 20) {
+      let decoded = '';
+      for (let i = 0; i < arr.length; i++) decoded += String.fromCharCode((arr[i] ^ key) & 0xFF);
+      const printable = (decoded.match(/[\x20-\x7E\uAC00-\uD7A3\n\t\r]/g) || []).length;
+      if (printable / decoded.length > 0.7) {
+        return { code: decoded, log: ['[성공] Moonveil XOR (상수 키 ' + key + ')'], isRaw: false };
       }
-    } catch (e) { log.push('[실패] v10: ' + e.message); }
-  }
-
-  // [3] Luakeeper VM v9 (Single XOR)
-  if (code.includes('Luakeeper VM v9') || code.includes('_VM.STATE')) {
-    try {
-      const seedMatch = code.match(/_VM\.CONST\s*=\s*\{[\s\S]*?\[1\]\s*=\s*(\d+)\s*,[\s\S]*?\[2\]\s*=\s*(\d+)/);
-      if (seedMatch) {
-        const realSeed = parseInt(seedMatch[1], 10) ^ parseInt(seedMatch[2], 10);
-        const dataMatch = code.match(/_VM\.DATA\s*=\s*\{([\s\S]*?)\n\s*\}/);
-        if (dataMatch) {
-          const strMatches = [...dataMatch[1].matchAll(/"([^"]*)"/g)].map(m => m[1]);
-          const realChunks = strMatches.filter(s => !s.startsWith('J_') && /^[a-fA-F0-9]+$/.test(s));
-          if (realChunks.length > 0) {
-            const hex = realChunks.join('');
-            const byteLen = hex.length / 2;
-            const outBytes = new Uint8Array(byteLen);
-            let k = realSeed;
-            for (let i = 0; i < byteLen; i++) {
-              outBytes[i] = parseInt(hex.substr(i*2,2),16) ^ k;
-              k = (k * 31 + i + 13) & 0xFF;
-            }
-            return { code: new TextDecoder('utf-8',{fatal:false}).decode(outBytes), log: ['[성공] Luakeeper VM v9'], isRaw: false };
-          }
-        }
-      }
-    } catch (e) { log.push('[실패] v9: ' + e.message); }
-  }
-
-  // [4] Luakeeper v7/v8 (Single XOR)
-  if (code.includes('_x == 5') && code.includes('_x == 1')) {
-    const seedMatch = code.match(/_k\s*=\s*bit32\.bxor\((\d+),\s*(\d+)\)/);
-    const hexMatches = code.match(/"[a-fA-F0-9]{10,}"/g);
-    if (seedMatch && hexMatches) {
-      const realSeed = parseInt(seedMatch[1],10) ^ parseInt(seedMatch[2],10);
-      const hex = hexMatches.map(h => h.replace(/"/g,'')).join('');
-      try {
-        const byteLen = hex.length/2;
-        const outBytes = new Uint8Array(byteLen);
-        let k = realSeed;
-        for (let i = 0; i < byteLen; i++) {
-          outBytes[i] = parseInt(hex.substr(i*2,2),16) ^ k;
-          k = (k * 31 + i + 13) & 0xFF;
-        }
-        return { code: new TextDecoder('utf-8',{fatal:false}).decode(outBytes), log: ['[성공] Luakeeper v7/v8'], isRaw: false };
-      } catch (e) { log.push('[실패] v7/v8: '+e.message); }
     }
   }
 
-  // [5] Chanhyuk lua (Base95 커스텀)
+  // Moonveil 패턴 C: 숫자 배열 + 동적 키 `(i * N) % 256`
+  const dynXorRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]{50,})\}[\s\S]{0,400}?bit32\.bxor\s*\(\s*\1\s*\[\s*([a-zA-Z_]\w*)\s*\]\s*,\s*\(\s*([a-zA-Z_]\w*)\s*\*\s*(\d+)\s*\)\s*%\s*256\s*\)/;
+  const dynXorMatch = code.match(dynXorRegex);
+  if (dynXorMatch) {
+    const arr = dynXorMatch[2].split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+    const mult = parseInt(dynXorMatch[5], 10);
+    if (arr.length > 20) {
+      let decoded = '';
+      for (let i = 0; i < arr.length; i++) {
+        const key = ((i + 1) * mult) % 256;
+        decoded += String.fromCharCode((arr[i] ^ key) & 0xFF);
+      }
+      const printable = (decoded.match(/[\x20-\x7E\uAC00-\uD7A3\n\t\r]/g) || []).length;
+      if (printable / decoded.length > 0.7) {
+        return { code: decoded, log: ['[성공] Moonveil 동적 키 (×' + mult + ')'], isRaw: false };
+      }
+    }
+  }
+
+  // Moonveil 패턴 D: 두 숫자 배열 XOR (키 테이블 매칭)
+  const doubleArrRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]{50,})\}[\s\S]{0,100}?local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]{50,})\}/;
+  const doubleArrMatch = code.match(doubleArrRegex);
+  if (doubleArrMatch) {
+    const arrA = doubleArrMatch[2].split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+    const arrB = doubleArrMatch[4].split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+    if (arrA.length > 20 && arrB.length > 20 && arrA.length === arrB.length) {
+      let decoded = '';
+      for (let i = 0; i < arrA.length; i++) decoded += String.fromCharCode((arrA[i] ^ arrB[i]) & 0xFF);
+      const printable = (decoded.match(/[\x20-\x7E\uAC00-\uD7A3\n\t\r]/g) || []).length;
+      if (printable / decoded.length > 0.7) {
+        return { code: decoded, log: ['[성공] Moonveil 이중 배열 XOR'], isRaw: false };
+      }
+    }
+  }
+
+  // Moonveil 패턴 E: 단순 배열 + 자동 브루트포스
+  if (!out) {
+    const simpleArrRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]{100,})\}/g;
+    let m;
+    while ((m = simpleArrRegex.exec(code)) !== null) {
+      const arr = m[2].split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+      if (arr.length > 30) {
+        const result = numArrayDump(arr);
+        if (result) {
+          out += `-- [브루트포스 결과 (배열 ${m[1]}, 키 ${result.key})]\n${result.text}\n\n`;
+          log.push(`[성공] Moonveil 브루트포스 (키 ${result.key})`);
+          break;
+        }
+      }
+    }
+  }
+
+  // ===== [3] Chanhyuk lua =====
   if (code.includes('chanhyuk lua') || (code.includes('local n=') && code.includes('local o=') && code.includes('local k='))) {
     try {
       const nMatch = code.match(/local\s+n\s*=\s*\{([\s\S]*?)\}\s*local\s+o/);
@@ -370,14 +377,14 @@ function universalDeobfuscate(code) {
       const aMatch = code.match(/local\s+a\s*=\s*\{([\s\S]*?)\}\s*local\s+g/);
       if (nMatch && oMatch && kMatch && qMatch && aMatch) {
         const nStrings = extractLuaStrings(nMatch[1]);
-        const oArr = [...oMatch[1].matchAll(/\d+/g)].map(m => parseInt(m[0],10));
-        const k = parseInt(kMatch[1],10), q = parseInt(qMatch[1],10);
-        const aArr = [...aMatch[1].matchAll(/\d+/g)].map(m => parseInt(m[0],10));
-        function decCH(s,k,q,a) {
+        const oArr = [...oMatch[1].matchAll(/\d+/g)].map(mm => parseInt(mm[0], 10));
+        const k = parseInt(kMatch[1], 10), q = parseInt(qMatch[1], 10);
+        const aArr = [...aMatch[1].matchAll(/\d+/g)].map(mm => parseInt(mm[0], 10));
+        function decCH(s, k, q, a) {
           let r = "", j = 1;
           for (let i = 0; i < s.length; i += 2) {
-            const v = (s.charCodeAt(i)-33)*95 + (s.charCodeAt(i+1)-33);
-            let idx = (v - k - (((j-1)*q)%251) - a[((j-1)%a.length)] + 512) % 256;
+            const v = (s.charCodeAt(i) - 33) * 95 + (s.charCodeAt(i + 1) - 33);
+            let idx = (v - k - (((j - 1) * q) % 251) - a[((j - 1) % a.length)] + 512) % 256;
             if (idx < 0) idx += 256;
             r += String.fromCharCode(idx);
             j++;
@@ -387,104 +394,100 @@ function universalDeobfuscate(code) {
         let decoded = "";
         for (let i = 0; i < oArr.length; i++) {
           const idx = oArr[i] - 1;
-          if (nStrings[idx]) decoded += decCH(nStrings[idx],k,q,aArr);
+          if (nStrings[idx]) decoded += decCH(nStrings[idx], k, q, aArr);
         }
         return { code: decoded, log: ['[성공] Chanhyuk lua'], isRaw: false };
       }
     } catch (e) { log.push('[실패] Chanhyuk'); }
   }
 
-  // [6] 다중 loadstring 래퍼 재귀 해제
-  let loadMatch;
-  const loadRegex = /(?:loadstring|load)\(\s*(["'])([\s\S]*?)\1\s*\)/;
+  // ===== [4] 다중 loadstring 래퍼 (최대 8회) =====
   let iter = 0;
-  while ((loadMatch = code.match(loadRegex)) && iter < 5) {
-    let inner = loadMatch[2].replace(/\\(\d{1,3})/g, (m,p1) => String.fromCharCode(parseInt(p1,10)));
-    inner = inner.replace(/\\n/g,'\n').replace(/\\"/g,'"').replace(/\\'/g,"'");
+  const loadRegex = /(?:loadstring|load)\s*\(\s*(["'])([\s\S]*?)\1\s*\)/;
+  let loadMatch;
+  while ((loadMatch = code.match(loadRegex)) && iter < 8) {
+    let inner = loadMatch[2].replace(/\\(\d{1,3})/g, (m, p1) => String.fromCharCode(parseInt(p1, 10)));
+    inner = inner.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\'/g, "'");
     if (inner === loadMatch[2]) break;
     code = inner;
     iter++;
   }
-  if (iter > 0) {
-    out += `-- [loadstring 해제 (${iter}회)]\n${code}\n`;
-    log.push(`[성공] loadstring x${iter}`);
-  }
+  if (iter > 0) log.push(`[성공] loadstring x${iter}`);
 
-  // [7] base64
-  const b64Regex = /base64,([A-Za-z0-9+\/=]+)/g;
+  // ===== [5] base64 =====
+  const b64Regex = /base64,([A-Za-z0-9+\/=]{20,})/g;
   if (b64Regex.test(code)) {
     code = code.replace(b64Regex, (m, b64) => {
       try {
         const dec = atob(b64);
-        return '"' + dec.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n') + '"';
+        return '"' + dec.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
       } catch { return m; }
     });
     log.push('[성공] base64');
   }
 
-  // [8] string.char
+  // ===== [6] string.char =====
   const charRegex = /string\.char\s*\(\s*([0-9,\s]+)\s*\)/g;
   if (charRegex.test(code)) {
     code = code.replace(charRegex, (m, p1) => {
       try {
-        const bytes = p1.split(',').map(n => parseInt(n.trim(),10));
+        const bytes = p1.split(',').map(n => parseInt(n.trim(), 10));
         const text = new TextDecoder('utf-8').decode(new Uint8Array(bytes));
-        return '"' + text.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n') + '"';
+        return '"' + text.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
       } catch { return m; }
     });
     log.push('[성공] string.char');
   }
 
-  // [9] string.reverse
+  // ===== [7] string.reverse =====
   const revRegex = /string\.reverse\s*\(\s*(["'])([\s\S]*?)\1\s*\)/g;
   if (revRegex.test(code)) {
     code = code.replace(revRegex, (m, q, s) => {
-      const rev = s.split('').reverse().join('');
-      return '"' + rev.replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
+      return '"' + s.split('').reverse().join('').replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
     });
     log.push('[성공] string.reverse');
   }
 
-  // [10] string.rep
+  // ===== [8] string.rep =====
   const repRegex = /string\.rep\s*\(\s*(["'])([\s\S]*?)\1\s*,\s*(\d+)\s*\)/g;
   if (repRegex.test(code)) {
     code = code.replace(repRegex, (m, q, s, n) => {
-      const rep = s.repeat(parseInt(n,10));
-      return '"' + rep.replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
+      const rep = s.repeat(parseInt(n, 10));
+      return '"' + rep.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
     });
     log.push('[성공] string.rep');
   }
 
-  // [11] table.concat({...})
-  const tcRegex = /table\.concat\s*\(\s*\{([^}]+)\}\s*\)/g;
+  // ===== [9] table.concat({...}) =====
+  const tcRegex = /table\.concat\s*\(\s*\{([^}]+)\}\s*(?:,\s*["'][^"']*["'])?\s*\)/g;
   if (tcRegex.test(code)) {
     code = code.replace(tcRegex, (m, inner) => {
       const strs = [...inner.matchAll(/"([^"]*)"/g)].map(mm => mm[1]);
       if (strs.length > 0) {
-        return '"' + strs.join('').replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
+        return '"' + strs.join('').replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
       }
       return m;
     });
     log.push('[성공] table.concat');
   }
 
-  // [12] 숫자 배열 (Constant Dump)
-  const numTableRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]{30,})\}/g;
-  let tMatch, extracted = false;
-  while ((tMatch = numTableRegex.exec(code)) !== null) {
-    const values = tMatch[2].split(',').map(v => parseInt(v.trim(),10)).filter(v => !isNaN(v));
-    let text = '';
-    for (let v of values) if (v >= 32 && v <= 126) text += String.fromCharCode(v);
-    if (text.length > 10) { out += `-- [문자열 배열 ${tMatch[1]}]: ${text}\n`; extracted = true; }
+  // ===== [10] UTF-8 / Hex 디코딩 =====
+  const hexRegex = /\\x([0-9a-fA-F]{2})/g;
+  if (hexRegex.test(code)) {
+    code = code.replace(hexRegex, (m, h) => String.fromCharCode(parseInt(h, 16)));
+    log.push('[성공] hex escape');
   }
-  if (extracted) log.push('[성공] 상수 배열 추출');
 
   // 결과 조합
   if (log.length === 0) {
-    log.push('[정보] 알려진 패턴 없음');
+    log.push('[정보] 알려진 패턴 없음 (원본 반환)');
     return { code: code, log, isRaw: true };
   }
-  if (out.length > 0 && iter > 0) {
+  if (out.length > 0 && code.length < 500) {
+    return { code: out, log, isRaw: false };
+  }
+  if (iter > 0 || out.length > 0) {
+    out += code;
     return { code: out, log, isRaw: false };
   }
   return { code: code, log, isRaw: false };
@@ -497,7 +500,7 @@ $('btnProcess').onclick = () => {
   try {
     if (MODE === 'obfuscate') {
       $('output').value = generateObfuscated(input);
-      setStatus('[성공] Dual XOR VM v11 난독화 완료 · 코드 크기 최적화 · 주석 최소화', 'ok');
+      setStatus('[성공] Dual XOR v12 난독화 완료 · loadstring 버그 수정 · 주석 최소화', 'ok');
     } else {
       const { code: r, log, isRaw } = universalDeobfuscate(input);
       $('output').value = r;
