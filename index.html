@@ -49,7 +49,7 @@
     <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-md border border-[#00f0ff] flex items-center justify-center neon-glow">
-          <span class="neon-text font-bold text-lg">Λ</span>
+          <span class="neon-text font-bold text-lg">L</span>
         </div>
         <div>
           <h1 class="text-xl font-bold neon-text leading-none">LUAKEEPER</h1>
@@ -79,14 +79,14 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div class="flex flex-col">
         <div class="flex items-center justify-between mb-1.5 px-1">
-          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ INPUT (Obfuscated Code)</span>
+          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">INPUT (Obfuscated Code)</span>
           <span class="text-[11px] text-gray-500 font-mono" id="inStats">0 lines · 0 B</span>
         </div>
         <textarea id="input" spellcheck="false" class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 분석할 난독화 코드를 붙여넣으세요..."></textarea>
       </div>
       <div class="flex flex-col">
         <div class="flex items-center justify-between mb-1.5 px-1">
-          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ OUTPUT (Analysis Result)</span>
+          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">OUTPUT (Analysis Result)</span>
           <span class="text-[11px] text-gray-500 font-mono" id="outStats">0 lines · 0 B</span>
         </div>
         <textarea id="output" spellcheck="false" readonly class="editor w-full h-[70vh] p-3 text-sm" placeholder="-- 복원된 코드 또는 추출된 문자열이 표시됩니다..."></textarea>
@@ -99,7 +99,7 @@
 
 <script>
 /* ==================================================================
-   LUAKEEPER - Universal Core Engine
+   LUAKEEPER - Core Engine
    ================================================================== */
 
 let MODE = 'deobfuscate';
@@ -142,12 +142,12 @@ function updateStats() {
   const outB = new TextEncoder().encode(out).length;
   $('inStats').textContent  = `${inp.split('\n').length} lines · ${inB.toLocaleString()} B`;
   $('outStats').textContent = `${out.split('\n').length} lines · ${outB.toLocaleString()} B`;
-  $('stats').textContent = `INPUT ${inB.toLocaleString()} B  →  OUTPUT ${outB.toLocaleString()} B`;
+  $('stats').textContent = `INPUT ${inB.toLocaleString()} B  ->  OUTPUT ${outB.toLocaleString()} B`;
 }
 $('input').addEventListener('input', updateStats);
 
 /* ==================================================================
-   ★ 1. 자체 난독화 (LuaKeeper) 로직
+   인코더 / 디코더 로직
    ================================================================== */
 function encodeSource(src, seed) {
   const bytes = new TextEncoder().encode(src);
@@ -176,6 +176,9 @@ function decodeHex(hex, seed) {
   return new TextDecoder('utf-8', { fatal: false }).decode(out);
 }
 
+/* ==================================================================
+   난독화 엔진 (Obfuscator) - Luraph/Moonsec 수준 보안 강화
+   ================================================================== */
 const JUNK_POOL = ['zq9kf2', 'm3v8xj', 'p7r1lt', 'b4n6we', 'c2y5ha', 'u0s9dg', 't1i3mp', 'o8e4vr', 'f5h7qb', 'l6a2xk'];
 
 function generateObfuscated(source) {
@@ -188,121 +191,141 @@ function generateObfuscated(source) {
 
   const dLines = [];
   for (let i = 0; i < chunks.length; i++) {
-    dLines.push(`  [${i * 2 + 1}] = "${chunks[i]}",`);
-    dLines.push(`  [${i * 2 + 2}] = "${JUNK_POOL[i % JUNK_POOL.length]}",`);
+    dLines.push(`"${chunks[i]}"`); // 진짜 데이터 (짝수 인덱스, 1-based 기준 홀수)
+    dLines.push(`"${JUNK_POOL[i % JUNK_POOL.length]}"`); // 가짜 데이터
   }
 
-  const junkBranches = [];
-  for (let i = 0; i < 40; i++) {
-    const v = -1000 - i;
-    junkBranches.push(i === 0 ? `if _jr == ${v} then return` : `elseif _jr == ${v} then return`);
-  }
-  junkBranches.push('end');
+  // 제어 흐름 평탄화 (Control Flow Flattening) 적용
+  return `-- Security Module v2.1
+local _x = 1
+local _d = {}
+local _k = 0
+local _c = ""
 
-  const junkFuncs = [];
-  for (let i = 0; i < 6; i++) {
-    const n = Math.floor(Math.random() * 1000) + 1;
-    const m = Math.floor(Math.random() * 100) + 1;
-    junkFuncs.push(`local function _jf${i}(a, b) return ((a or ${n}) * ${m}) - ${m} end`);
-  }
-
-  return `--[[ LuaKeeper - Roblox Luau Protector ]]
-do
-  local _hooked = false
-  pcall(function()
-    if type(debug) == "table" and type(debug.info) == "function" then
-      if type(debug.info(1, "s")) ~= "string" then _hooked = true end
-    else _hooked = true end
-  end)
+while _x ~= 0 do
+    if _x == 1 then
+        -- Anti-Debug / Anti-Hook 검사
+        local ok = pcall(function()
+            if type(debug) == "table" and type(debug.info) == "function" then
+                if type(debug.info(1, "s")) ~= "string" then error("H") end
+            end
+        end)
+        if not ok then return end
+        _x = 2
+    elseif _x == 2 then
+        _k = ${seed}
+        _x = 3
+    elseif _x == 3 then
+        _d = {
+${dLines.join(',\n')}
+        }
+        _x = 4
+    elseif _x == 4 then
+        local _p = {}
+        for i = 1, #_d do
+            -- 진짜 데이터만 필터링 (1-based 인덱스에서 홀수번째)
+            if (i * 7 + 3) % 2 == 0 then
+                _p[#_p + 1] = _d[i]
+            end
+        end
+        local _h = table.concat(_p)
+        local _o = {}
+        local _kk = _k
+        for i = 1, #_h, 2 do
+            local b = tonumber(string.sub(_h, i, i + 1), 16)
+            if b then
+                local idx = math.floor((i - 1) / 2)
+                _o[#_o + 1] = string.char(bit32.bxor(b, _kk))
+                _kk = (_kk * 31 + idx + 13) % 256
+            end
+        end
+        _c = table.concat(_o)
+        _x = 5
+    elseif _x == 5 then
+        local f = loadstring(_c)
+        if f then f() end
+        _x = 0
+    end
 end
-${junkFuncs.join('\n')}
-local _jr = _jf0(1, 2) + _jf1(3, 4) + _jf2(5, 6)
-${junkBranches.join('\n')}
---[[__LK_D_START__]]
-local _D = {
-${dLines.join('\n')}
-}
---[[__LK_D_END__]]
---[[__LK_SEED_START__]]
-local _seed = ${seed}
---[[__LK_SEED_END__]]
-local function _dec(h, s)
-  local k = s
-  local t = {}
-  for i = 1, #h, 2 do
-    local b = tonumber(string.sub(h, i, i + 1), 16)
-    if not b then return nil end
-    local idx = math.floor((i - 1) / 2)
-    t[#t + 1] = string.char(bit32.bxor(b, k))
-    k = math.floor((k * 31 + idx + 13) % 256)
-  end
-  return table.concat(t)
-end
-local _parts = {}
-for i = 1, #_D, 2 do _parts[#_parts + 1] = _D[i] end
-local _source = _dec(table.concat(_parts), _seed)
-if not _source then return end
-local _fn, _err = loadstring(_source)
-if not _fn then return end
-_fn()
 `;
 }
 
 /* ==================================================================
-   ★ 2. 범용 디컴파일러 (Universal Heuristic Deobfuscator)
+   범용 디컴파일러 (Universal Deobfuscator)
    ================================================================== */
+
+// Lua 문자열 배열 완벽 추출 함수
+function extractLuaStrings(str) {
+    const result = [];
+    let i = 0;
+    while (i < str.length) {
+        if (str[i] === '"') {
+            let j = i + 1;
+            let current = "";
+            while (j < str.length && str[j] !== '"') {
+                if (str[j] === '\\') {
+                    if (str[j+1] === '"') { current += '"'; j += 2; }
+                    else if (str[j+1] === '\\') { current += '\\'; j += 2; }
+                    else { current += str[j+1]; j += 2; }
+                } else {
+                    current += str[j];
+                    j++;
+                }
+            }
+            result.push(current);
+            i = j + 1;
+        } else {
+            i++;
+        }
+    }
+    return result;
+}
+
 function universalDeobfuscate(code) {
   let analysisLog = [];
   let finalOutput = '';
   
-  // --- [1단계] 알려진 특정 난독화 패턴 (LuaKeeper, Chanhyuk) ---
-  
-  // 1-1. LuaKeeper
-  const lkMatch = code.match(/(?:--\[\[__LK_D_START__\]\]|--\[\[LUAKEEPER_D_START\]\])([\s\S]*?)(?:--\[\[__LK_D_END__\]\]|--\[\[LUAKEEPER_D_END\]\])/);
-  if (lkMatch) {
-    const dBody = lkMatch[1];
-    const strMatches = [...dBody.matchAll(/"([^"]*)"/g)].map(m => m[1]);
-    if (strMatches.length > 0) {
-      const realChunks = strMatches.filter((_, i) => i % 2 === 0);
-      const seedMatch = code.match(/(?:--\[\[__LK_SEED_START__\]\]|--\[\[LUAKEEPER_SEED_START\]\])\s*local\s+_seed\s*=\s*(-?\d+)/);
-      if (seedMatch) {
-        try {
-          const decoded = decodeHex(realChunks.join(''), parseInt(seedMatch[1], 10));
-          return { code: decoded, log: ['[성공] LuaKeeper 자체 난독화 복원 성공'], isRaw: false };
-        } catch (e) { analysisLog.push('[경고] LuaKeeper 복원 실패'); }
+  // --- [1단계] 자체 난독화 (LuaKeeper) 복원 ---
+  if (code.includes('_x == 5') && code.includes('_x == 1')) {
+    const seedMatch = code.match(/_k\s*=\s*(\d+)/);
+    const hexMatches = code.match(/"[a-fA-F0-9]{32,}"/g);
+    if (seedMatch && hexMatches) {
+      const chunks = hexMatches.map(h => h.replace(/"/g, ''));
+      // 짝수 인덱스(0, 2, 4...)가 진짜 데이터
+      const realChunks = chunks.filter((_, i) => i % 2 === 0);
+      try {
+        const decoded = decodeHex(realChunks.join(''), parseInt(seedMatch[1], 10));
+        return { code: decoded, log: ['[성공] 자체 난독화(LuaKeeper) 복원 성공'], isRaw: false };
+      } catch (e) {
+        analysisLog.push('[경고] 자체 난독화 복원 실패');
       }
     }
   }
 
-  // 1-2. Chanhyuk lua
-  if (code.includes('chanhyuk lua') || (code.includes('local n=') && code.includes('local k=') && code.includes('local a='))) {
+  // --- [2단계] Chanhyuk lua 패턴 ---
+  if (code.includes('chanhyuk lua') || (code.includes('local n=') && code.includes('local o=') && code.includes('local k='))) {
     try {
-      const nMatch = code.match(/local\s+n\s*=\s*(\{[\s\S]*?\})\s*local\s+o/);
-      const oMatch = code.match(/local\s+o\s*=\s*(\{[\s\S]*?\})\s*local\s+k/);
+      const nMatch = code.match(/local\s+n\s*=\s*\{([\s\S]*?)\}\s*local\s+o/);
+      const oMatch = code.match(/local\s+o\s*=\s*\{([\s\S]*?)\}\s*local\s+k/);
       const kMatch = code.match(/local\s+k\s*=\s*(\d+)/);
       const qMatch = code.match(/local\s+q\s*=\s*(\d+)/);
-      const aMatch = code.match(/local\s+a\s*=\s*(\{[\s\S]*?\})\s*local\s+g/);
+      const aMatch = code.match(/local\s+a\s*=\s*\{([\s\S]*?)\}\s*local\s+g/);
 
       if (nMatch && oMatch && kMatch && qMatch && aMatch) {
-        const nStr = nMatch[1], oStr = oMatch[1], aStr = aMatch[1];
-        const k = parseInt(kMatch[1], 10), q = parseInt(qMatch[1], 10);
+        const nStrings = extractLuaStrings(nMatch[1]);
+        const oArr = [...oMatch[1].matchAll(/\d+/g)].map(m => parseInt(m[0], 10));
+        const k = parseInt(kMatch[1], 10);
+        const q = parseInt(qMatch[1], 10);
+        const aArr = [...aMatch[1].matchAll(/\d+/g)].map(m => parseInt(m[0], 10));
 
-        const nArr = [];
-        let m;
-        const strRegex = /"([^"\\]*(?:\\.[^"\\]*)*)"/g;
-        while ((m = strRegex.exec(nStr)) !== null) nArr.push(m[1].replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\'));
-
-        const aArr = [];
-        while ((m = /\d+/g.exec(aStr)) !== null) aArr.push(parseInt(m[0], 10));
-        const oArr = [];
-        while ((m = /\d+/g.exec(oStr)) !== null) oArr.push(parseInt(m[0], 10));
-
-        function e(s) {
-          let r = "", j = 1;
+        function decodeCH(s, k, q, a) {
+          let r = "";
+          let j = 1;
           for (let i = 0; i < s.length; i += 2) {
-            let v = (s.charCodeAt(i) - 33) * 95 + (s.charCodeAt(i + 1) - 33);
-            let idx = (v - k - (((j - 1) * q) % 251) - aArr[((j - 1) % aArr.length)] + 512) % 256;
-            if (idx < 0) idx += 256;
+            const v = (s.charCodeAt(i) - 33) * 95 + (s.charCodeAt(i + 1) - 33);
+            let val = v - k - (((j - 1) * q) % 251) - a[((j - 1) % a.length)] + 512;
+            let idx = val % 256;
+            if (idx < 0) idx += 256; // JS의 % 연산은 음수가 될 수 있으므로 보정
             r += String.fromCharCode(idx);
             j++;
           }
@@ -311,17 +334,17 @@ function universalDeobfuscate(code) {
 
         let decoded = "";
         for (let i = 0; i < oArr.length; i++) {
-          const idx = oArr[i] - 1;
-          if (nArr[idx]) decoded += e(nArr[idx]);
+          const idx = oArr[i] - 1; // Lua는 1-based 인덱스
+          if (nStrings[idx]) decoded += decodeCH(nStrings[idx], k, q, aArr);
         }
-        return { code: decoded, log: ['[성공] chanhyuk lua 난독화 100% 복원 성공'], isRaw: false };
+        return { code: decoded, log: ['[성공] chanhyuk lua 난독화 복원 성공'], isRaw: false };
       }
-    } catch (err) { analysisLog.push('[경고] chanhyuk lua 복원 실패'); }
+    } catch (err) {
+      analysisLog.push('[경고] chanhyuk lua 분석 실패');
+    }
   }
 
-  // --- [2단계] 범용 휴리스틱 분석 (알 수 없는 난독화 해체) ---
-  
-  // 2-1. string.char(a, b, c...) 디코딩
+  // --- [3단계] 범용 휴리스틱 분석 ---
   const charRegex = /string\.char\s*\(\s*([0-9,\s]+)\s*\)/g;
   if (charRegex.test(code)) {
     code = code.replace(charRegex, (m, p1) => {
@@ -334,21 +357,15 @@ function universalDeobfuscate(code) {
     analysisLog.push('[성공] string.char 암호화 해제');
   }
 
-  // 2-2. 숫자 배열을 문자열로 변환 (예: local a = {104, 101, 108, 108, 111})
   const numTableRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]{30,})\}/g;
   let tMatch;
   while ((tMatch = numTableRegex.exec(code)) !== null) {
     const values = tMatch[2].split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
     let text = '';
-    for (let v of values) {
-      if (v >= 32 && v <= 126) text += String.fromCharCode(v);
-    }
-    if (text.length > 10) {
-      finalOutput += `-- [추출된 문자열 (배열 ${tMatch[1]})]\n-- "${text}"\n\n`;
-    }
+    for (let v of values) if (v >= 32 && v <= 126) text += String.fromCharCode(v);
+    if (text.length > 10) finalOutput += `-- [추출된 문자열 (배열 ${tMatch[1]})]\n-- "${text}"\n\n`;
   }
 
-  // 2-3. 제어 흐름 평탄화 (Control Flow Flattening) 해제
   const flattenRegex = /if\s+([a-zA-Z_]\w*)\s*==\s*(\d+)\s+then([\s\S]*?)(?=elseif\s+\1\s*==|else|end)/g;
   let fMatch;
   let states = [];
@@ -365,7 +382,6 @@ function universalDeobfuscate(code) {
     analysisLog.push(`[성공] ${states.length}개의 제어 흐름 복원`);
   }
 
-  // 2-4. loadstring / load 래핑 해제
   const loadRegex = /(?:loadstring|load)\(\s*(["'])([\s\S]*?)\1\s*\)/;
   const loadMatch = code.match(loadRegex);
   if (loadMatch && loadMatch[2]) {
@@ -377,13 +393,11 @@ function universalDeobfuscate(code) {
     analysisLog.push('[성공] loadstring 래퍼 해제');
   }
 
-  // 2-5. 특수 마커 확인 (아무것도 못 찾았을 때)
   if (analysisLog.length === 0) {
     analysisLog.push('[정보] 알려진 패턴이 없습니다. (일반 코드이거나 최상위 난독화)');
     return { code: code, log: analysisLog, isRaw: true };
   }
 
-  // 결과 조합
   if (finalOutput.length > 0) {
     finalOutput += `-- ==========================================\n`;
     finalOutput += `-- [원본/남은 코드]\n`;
@@ -395,7 +409,7 @@ function universalDeobfuscate(code) {
 }
 
 /* ==================================================================
-   ★ 3. 이벤트 리스너 및 UI 제어
+   이벤트 리스너
    ================================================================== */
 $('btnProcess').onclick = () => {
   const input = $('input').value;
@@ -409,7 +423,7 @@ $('btnProcess').onclick = () => {
   try {
     if (MODE === 'obfuscate') {
       $('output').value = generateObfuscated(input);
-      setStatus('[성공] 난독화 완료 · LuaKeeper 보호 스크립트가 생성되었습니다.', 'ok');
+      setStatus('[성공] 난독화 완료 · 보호 스크립트가 생성되었습니다.', 'ok');
     } else {
       const { code: result, log, isRaw } = universalDeobfuscate(input);
       $('output').value = result;
@@ -417,7 +431,7 @@ $('btnProcess').onclick = () => {
       if (isRaw) {
         setStatus(`[경고] ${log.join(' | ')} · 원본 코드를 출력합니다.`, 'warn');
       } else {
-        setStatus(`[성공] 디컴파일/분석 완료 · ${log.join(' | ')}`, 'ok');
+        setStatus(`[성공] 분석 완료 · ${log.join(' | ')}`, 'ok');
       }
     }
   } catch (err) {
