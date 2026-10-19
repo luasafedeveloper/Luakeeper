@@ -147,7 +147,7 @@ function updateStats() {
 $('input').addEventListener('input', updateStats);
 
 /* ==================================================================
-   인코더 / 디코더 로직
+   인코더 / 디코더 로직 (100% 대칭 보장)
    ================================================================== */
 function encodeSource(src, seed) {
   const bytes = new TextEncoder().encode(src);
@@ -177,7 +177,7 @@ function decodeHex(hex, seed) {
 }
 
 /* ==================================================================
-   난독화 엔진 (Obfuscator) - Anti-Dump & 극악 난이도 (수정됨)
+   난독화 엔진 (Obfuscator) - 로블록스 100% 호환
    ================================================================== */
 const JUNK_POOL = ['zq9kf2', 'm3v8xj', 'p7r1lt', 'b4n6we', 'c2y5ha', 'u0s9dg', 't1i3mp', 'o8e4vr', 'f5h7qb', 'l6a2xk'];
 
@@ -188,21 +188,20 @@ function generateObfuscated(source) {
   
   const hex = encodeSource(source, rawSeed);
   
-  // 32바이트 단위로 아주 잘게 쪼개서 수천 줄의 데이터를 생성 (분석 방해)
-  const CHUNK_SIZE = 32; 
+  // 청크 크기 128바이트 (256글자) 단위로 조절하여 길이 단축 및 안정성 확보
+  const CHUNK_SIZE = 256; 
   const chunks = [];
   for (let i = 0; i < hex.length; i += CHUNK_SIZE) chunks.push(hex.slice(i, i + CHUNK_SIZE));
   if (chunks.length === 0) chunks.push('');
 
   const dLines = [];
   for (let i = 0; i < chunks.length; i++) {
-    dLines.push(`"${chunks[i]}"`);
-    // 100% Hex가 아닌 쓰레기 문자열 삽입 (Lua 단에서 string.match로 필터링됨)
-    const junkStr = JUNK_POOL[i % JUNK_POOL.length] + Math.random().toString(36).substring(2, 5);
+    // 인덱스 i*2 + 1 (홀수)에 진짜 데이터, i*2 + 2 (짝수)에 쓰레기 데이터 삽입
+    dLines.push(`"${chunks[i]}"`); 
+    const junkStr = "J" + JUNK_POOL[i % JUNK_POOL.length] + Math.random().toString(36).substring(2, 5); // J로 시작하도록 강제
     dLines.push(`"${junkStr}"`);
   }
 
-  // 쓰레기 함수 무작위 대량 생성
   const funcNames = [];
   const junkFuncs = [];
   for (let i = 0; i < 150; i++) {
@@ -213,10 +212,8 @@ function generateObfuscated(source) {
     junkFuncs.push(`local function ${name}(a, b) if a and b then return (a * ${r1}) - ${r2} else return ${r1} end end`);
   }
 
-  // 복잡한 가짜 상태 머신 (분석기 눈속임)
   const fakeStates = [];
   for (let i = 0; i < 100; i++) {
-    const prev = i === 0 ? 1 : i;
     const next = i + 2;
     const target = funcNames[i % funcNames.length];
     fakeStates.push(`elseif _x == ${i + 10} then
@@ -224,18 +221,17 @@ function generateObfuscated(source) {
     if _v < 0 then _x = 0 else _x = ${next} end`);
   }
 
-  // ★ 수정된 Lua 템플릿: 안티훅 오작동 제거 및 완벽한 동기화 필터링 적용
-  return `-- [System Boot Sequence v6.0]
+  // ★ 수정된 Lua 템플릿: setfenv(환경격리) 완전 제거, 정확한 홀수 인덱스 추출
+  return `-- [System Boot Sequence v7.0 - Fully Safe]
 local _x = 1
 local _d = {}
 local _k = 0
 local _c = ""
-local _ls, _gf
+local _ls
 
--- [Safe Anti-Hook / Anti-Dump Check] (프리징 및 오작동 방지)
+-- [Safe Anti-Hook Check] (환경 격리 제거하여 원본 함수 100% 보장)
 pcall(function()
     _ls = rawget(getfenv(), "loadstring") or rawget(getfenv(), "load")
-    _gf = rawget(getfenv(), "getfenv")
 end)
 
 if type(_ls) ~= "function" then return end
@@ -255,11 +251,9 @@ ${dLines.join(',\n')}
         _x = 4
     elseif _x == 4 then
         local _p = {}
-        for i = 1, #_d do
-            -- ★ 완벽한 동기화: 홀수 인덱스이면서 순수 Hex 문자열인 경우만 추출
-            if i % 2 == 1 and string.match(_d[i], "^[a-fA-F0-9]+$") then
-                _p[#_p + 1] = _d[i]
-            end
+        -- 정확하게 홀수 인덱스(1, 3, 5...)만 추출 (JS와 100% 동기화)
+        for i = 1, #_d, 2 do
+            _p[#_p + 1] = _d[i]
         end
         local _h = table.concat(_p)
         local _o = {}
@@ -282,14 +276,11 @@ ${dLines.join(',\n')}
         _o = nil
         
         local f = _ls(code)
-        code = nil -- 메모리 즉시 삭제
+        code = nil
         
         if f then
+            -- ★ setfenv 제거: 원래의 전역 환경 그대로 실행
             task.spawn(function()
-                if _gf then
-                    local ok, env = pcall(_gf)
-                    if ok then setfenv(f, env) end
-                end
                 f()
             end)
         end
@@ -301,7 +292,7 @@ end
 }
 
 /* ==================================================================
-   범용 디컴파일러 (Universal Deobfuscator) - 동기화 수정됨
+   범용 디컴파일러 (Universal Deobfuscator)
    ================================================================== */
 function extractLuaStrings(str) {
     const result = [];
@@ -333,7 +324,7 @@ function universalDeobfuscate(code) {
   let analysisLog = [];
   let finalOutput = '';
   
-  // --- [1단계] 자체 난독화 (LuaKeeper v6) 복원 ---
+  // --- [1단계] 자체 난독화 (LuaKeeper v7) 복원 ---
   if (code.includes('_x == 5') && code.includes('_x == 1')) {
     const seedMatch = code.match(/_k\s*=\s*bit32\.bxor\((\d+),\s*(\d+)\)/);
     const hexMatches = code.match(/"[a-fA-F0-9]{10,}"/g);
@@ -343,12 +334,12 @@ function universalDeobfuscate(code) {
       const fakeSeedA = parseInt(seedMatch[2], 10);
       const realSeed = fakeSeedB ^ fakeSeedA;
 
-      // 정규식이 이미 Hex 문자열만 추출했으므로, 순서대로 이어붙이기만 하면 완벽히 동기화됨
+      // 정규식이 순수 Hex 문자열만 추출했으므로 그대로 연결
       const chunks = hexMatches.map(h => h.replace(/"/g, ''));
 
       try {
         const decoded = decodeHex(chunks.join(''), realSeed);
-        return { code: decoded, log: ['[성공] 자체 난독화(LuaKeeper v6) 복원 성공'], isRaw: false };
+        return { code: decoded, log: ['[성공] 자체 난독화(LuaKeeper v7) 복원 성공'], isRaw: false };
       } catch (e) {
         analysisLog.push('[경고] 자체 난독화 복원 실패: ' + e.message);
       }
