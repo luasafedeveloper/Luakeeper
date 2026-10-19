@@ -177,34 +177,67 @@ function decodeHex(hex, seed) {
 }
 
 /* ==================================================================
-   난독화 엔진 (Obfuscator) - Luraph/Moonsec 수준 보안 강화
+   난독화 엔진 (Obfuscator) - 수천 줄의 극악 난이도 생성
    ================================================================== */
 const JUNK_POOL = ['zq9kf2', 'm3v8xj', 'p7r1lt', 'b4n6we', 'c2y5ha', 'u0s9dg', 't1i3mp', 'o8e4vr', 'f5h7qb', 'l6a2xk'];
 
 function generateObfuscated(source) {
-  const seed = Math.floor(Math.random() * 256);
-  const hex = encodeSource(source, seed);
-  const CHUNK_SIZE = 1024;
+  const rawSeed = Math.floor(Math.random() * 256);
+  // 시드 값을 숨기기 위한 가짜 연산
+  const fakeSeedA = Math.floor(Math.random() * 100) + 10;
+  const fakeSeedB = rawSeed ^ fakeSeedA; 
+  
+  const hex = encodeSource(source, rawSeed);
+  
+  // 데이터를 32자(16바이트) 단위로 아주 잘게 쪼갬 (수십 줄로 늘어남)
+  const CHUNK_SIZE = 32; 
   const chunks = [];
   for (let i = 0; i < hex.length; i += CHUNK_SIZE) chunks.push(hex.slice(i, i + CHUNK_SIZE));
   if (chunks.length === 0) chunks.push('');
 
+  // 1. 데이터 은닉 (Constant Scattering)
   const dLines = [];
   for (let i = 0; i < chunks.length; i++) {
-    dLines.push(`"${chunks[i]}"`); // 진짜 데이터 (짝수 인덱스, 1-based 기준 홀수)
-    dLines.push(`"${JUNK_POOL[i % JUNK_POOL.length]}"`); // 가짜 데이터
+    dLines.push(`"${chunks[i]}"`);
+    // 쓰레기 데이터도 무작위 길이로 삽입
+    const junkStr = JUNK_POOL[i % JUNK_POOL.length] + Math.random().toString(36).substring(2, 5);
+    dLines.push(`"${junkStr}"`);
   }
 
-  // 제어 흐름 평탄화 (Control Flow Flattening) 적용
-  return `-- Security Module v2.1
+  // 2. 쓰레기 함수 무작위 대량 생성
+  const funcNames = [];
+  const junkFuncs = [];
+  for (let i = 0; i < 200; i++) {
+    const name = `_j${i}_${Math.floor(Math.random() * 10000)}`;
+    funcNames.push(name);
+    const r1 = Math.floor(Math.random() * 1000);
+    const r2 = Math.floor(Math.random() * 100);
+    junkFuncs.push(`local function ${name}(a, b) if a and b then return (a * ${r1}) - ${r2} else return ${r1} end end`);
+  }
+
+  // 3. 복잡한 가짜 상태 머신
+  const fakeStates = [];
+  for (let i = 0; i < 100; i++) {
+    const prev = i === 0 ? 1 : i;
+    const next = i + 2;
+    const target = funcNames[i % funcNames.length];
+    fakeStates.push(`elseif _x == ${i + 10} then
+    local _v = ${target}(${i}, ${i+1})
+    if _v < 0 then _x = 0 else _x = ${next} end`);
+  }
+
+  // 4. 최종 코드 조립 (복잡한 필터링 수식 적용)
+  return `-- [System Boot Sequence v4.0]
 local _x = 1
 local _d = {}
 local _k = 0
 local _c = ""
+local _g = 0
+
+${junkFuncs.join('\n')}
 
 while _x ~= 0 do
     if _x == 1 then
-        -- Anti-Debug / Anti-Hook 검사
         local ok = pcall(function()
             if type(debug) == "table" and type(debug.info) == "function" then
                 if type(debug.info(1, "s")) ~= "string" then error("H") end
@@ -213,7 +246,8 @@ while _x ~= 0 do
         if not ok then return end
         _x = 2
     elseif _x == 2 then
-        _k = ${seed}
+        -- 숨겨진 시드 복원 수식
+        _k = bit32.bxor(${fakeSeedB}, ${fakeSeedA})
         _x = 3
     elseif _x == 3 then
         _d = {
@@ -223,8 +257,8 @@ ${dLines.join(',\n')}
     elseif _x == 4 then
         local _p = {}
         for i = 1, #_d do
-            -- 진짜 데이터만 필터링 (1-based 인덱스에서 홀수번째)
-            if (i * 7 + 3) % 2 == 0 then
+            -- 매우 복잡하게 꼬인 인덱스 필터링 수식
+            if (i * 13 + bit32.band(i, 7)) % 3 == 1 then
                 _p[#_p + 1] = _d[i]
             end
         end
@@ -245,6 +279,7 @@ ${dLines.join(',\n')}
         local f = loadstring(_c)
         if f then f() end
         _x = 0
+    ${fakeStates.join('\n    ')}
     end
 end
 `;
@@ -254,7 +289,6 @@ end
    범용 디컴파일러 (Universal Deobfuscator)
    ================================================================== */
 
-// Lua 문자열 배열 완벽 추출 함수
 function extractLuaStrings(str) {
     const result = [];
     let i = 0;
@@ -287,17 +321,35 @@ function universalDeobfuscate(code) {
   
   // --- [1단계] 자체 난독화 (LuaKeeper) 복원 ---
   if (code.includes('_x == 5') && code.includes('_x == 1')) {
-    const seedMatch = code.match(/_k\s*=\s*(\d+)/);
-    const hexMatches = code.match(/"[a-fA-F0-9]{32,}"/g);
+    // 숨겨진 시드 추출
+    const seedMatch = code.match(/_k\s*=\s*bit32\.bxor\((\d+),\s*(\d+)\)/);
+    const hexMatches = code.match(/"[a-fA-F0-9]{10,}"/g); // 32자 단위로 잘렸으므로 10자 이상 매칭
+    
     if (seedMatch && hexMatches) {
+      const fakeSeedB = parseInt(seedMatch[1], 10);
+      const fakeSeedA = parseInt(seedMatch[2], 10);
+      const realSeed = fakeSeedB ^ fakeSeedA; // 시드 복원
+
       const chunks = hexMatches.map(h => h.replace(/"/g, ''));
-      // 짝수 인덱스(0, 2, 4...)가 진짜 데이터
-      const realChunks = chunks.filter((_, i) => i % 2 === 0);
+      
+      // 복잡한 인덱스 필터링 재현 (i는 Lua에서 1부터 시작)
+      const realChunks = [];
+      for (let i = 0; i < chunks.length; i++) {
+        const luaIdx = i + 1;
+        // (i * 13 + bit32.band(i, 7)) % 3 == 1
+        if ((luaIdx * 13 + (luaIdx & 7)) % 3 === 1) {
+          // 쓰레기 데이터 필터링 (Hex 문자열만 통과)
+          if (/^[a-fA-F0-9]+$/.test(chunks[i])) {
+            realChunks.push(chunks[i]);
+          }
+        }
+      }
+
       try {
-        const decoded = decodeHex(realChunks.join(''), parseInt(seedMatch[1], 10));
-        return { code: decoded, log: ['[성공] 자체 난독화(LuaKeeper) 복원 성공'], isRaw: false };
+        const decoded = decodeHex(realChunks.join(''), realSeed);
+        return { code: decoded, log: ['[성공] 자체 난독화(LuaKeeper v4.0) 복원 성공'], isRaw: false };
       } catch (e) {
-        analysisLog.push('[경고] 자체 난독화 복원 실패');
+        analysisLog.push('[경고] 자체 난독화 복원 실패: ' + e.message);
       }
     }
   }
@@ -325,7 +377,7 @@ function universalDeobfuscate(code) {
             const v = (s.charCodeAt(i) - 33) * 95 + (s.charCodeAt(i + 1) - 33);
             let val = v - k - (((j - 1) * q) % 251) - a[((j - 1) % a.length)] + 512;
             let idx = val % 256;
-            if (idx < 0) idx += 256; // JS의 % 연산은 음수가 될 수 있으므로 보정
+            if (idx < 0) idx += 256;
             r += String.fromCharCode(idx);
             j++;
           }
@@ -334,7 +386,7 @@ function universalDeobfuscate(code) {
 
         let decoded = "";
         for (let i = 0; i < oArr.length; i++) {
-          const idx = oArr[i] - 1; // Lua는 1-based 인덱스
+          const idx = oArr[i] - 1;
           if (nStrings[idx]) decoded += decodeCH(nStrings[idx], k, q, aArr);
         }
         return { code: decoded, log: ['[성공] chanhyuk lua 난독화 복원 성공'], isRaw: false };
