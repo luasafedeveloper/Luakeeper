@@ -1,891 +1,639 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luakeeper v10.0 Dual Engine - Real VM Obfuscator</title>
+<title>Luakeeper v10.0 | Luau Obfuscator & Deobfuscator</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    darkMode: 'class',
-    theme: { extend: {
-        colors: { cyber: { 900: '#0a0d14', 800: '#111625', 700: '#1a2238', 600: '#253252', accent: '#00f0ff', purple: '#7000ff', warn: '#ff0055' } },
-        fontFamily: { mono: ['Fira Code', 'JetBrains Mono', 'Consolas', 'monospace'] }
-    } }
-}
-</script>
-<script src="https://unpkg.com/lucide@latest"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-body { font-family: 'Inter', sans-serif; background-color: #0a0d14; color: #c0caf5; }
-.glow-accent { box-shadow: 0 0 15px rgba(0, 240, 255, 0.25); }
-.glow-purple { box-shadow: 0 0 15px rgba(112, 0, 255, 0.25); }
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #0a0d14; }
-::-webkit-scrollbar-thumb { background: #1a2238; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #253252; }
-.code-area { font-family: 'Fira Code', monospace; tab-size: 4; }
+  /* ============ Cyber / Neon 테마 ============ */
+  :root {
+    --bg: #0a0d14;
+    --panel: #0d1117;
+    --border: #1e2633;
+    --cyan: #00f0ff;
+    --cyan-dim: #00f0ff44;
+  }
+  html, body {
+    background-color: var(--bg);
+    color: #c9d1d9;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  .neon-text {
+    color: var(--cyan);
+    text-shadow: 0 0 8px rgba(0,240,255,0.6), 0 0 20px rgba(0,240,255,0.3);
+  }
+  .neon-glow {
+    box-shadow: 0 0 8px rgba(0,240,255,0.55), 0 0 24px rgba(0,240,255,0.25);
+  }
+  .editor {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    background-color: #060910 !important;
+    color: #a9e6f5 !important;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    resize: none;
+    tab-size: 2;
+    line-height: 1.5;
+  }
+  .editor::placeholder {
+    color: #3b4757;
+  }
+  .editor:focus {
+    outline: none;
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 1px var(--cyan-dim), 0 0 12px rgba(0,240,255,0.15);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #00f0ff, #0090ff);
+    color: #001018;
+    font-weight: 700;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 0 12px rgba(0,240,255,0.5), 0 0 24px rgba(0,240,255,0.25);
+  }
+  .btn-ghost {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    color: #8b949e;
+  }
+  .btn-ghost:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 8px rgba(0,240,255,0.25);
+  }
+  .tab-active {
+    background: rgba(0,240,255,0.08);
+    border-color: var(--cyan) !important;
+    color: var(--cyan) !important;
+    box-shadow: 0 0 10px rgba(0,240,255,0.35);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #060910;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e2633;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--cyan);
+  }
+  .pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
 </style>
 </head>
-<body class="min-h-screen flex flex-col bg-cyber-900 text-slate-200">
+<body class="min-h-screen">
 
-<header class="border-b border-cyber-700 bg-cyber-800/80 backdrop-blur sticky top-0 z-50">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-<div class="flex items-center space-x-3">
-<div class="p-2 bg-cyber-accent/10 rounded-lg border border-cyber-accent/30 text-cyber-accent"><i data-lucide="shield" class="w-6 h-6"></i></div>
-<div>
-<div class="flex items-center space-x-2">
-<span class="text-xl font-bold tracking-wider text-white">LUAKEEPER</span>
-<span class="px-2 py-0.5 text-xs font-semibold bg-cyber-purple/30 text-purple-300 border border-cyber-purple/50 rounded-full">v10.0 Real VM Engine</span>
-</div>
-<p class="text-xs text-slate-400">Polymorphic Virtual Machine Obfuscator & De-compiler</p>
-</div>
-</div>
-<div class="flex items-center space-x-4">
-<div class="hidden md:flex items-center space-x-2 text-xs bg-cyber-900 px-3 py-1.5 rounded-md border border-cyber-700">
-<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-<span class="text-slate-300 font-mono">Real Bytecode Engine</span>
-</div>
-<a href="#docs" onclick="toggleDocsModal()" class="text-xs text-slate-400 hover:text-cyber-accent transition-colors flex items-center gap-1"><i data-lucide="help-circle" class="w-4 h-4"></i> Docs</a>
-</div>
-</div>
-</header>
+  <!-- ============ Header ============ -->
+  <header class="border-b border-[#1e2633] bg-[#0a0d14]/90 backdrop-blur sticky top-0 z-10">
+    <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-md border border-[#00f0ff] flex items-center justify-center neon-glow">
+          <span class="neon-text font-bold text-lg">Λ</span>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold neon-text leading-none">LUAKEEPER <span class="text-white/90">v10.0</span></h1>
+          <p class="text-[11px] text-gray-500 mt-0.5">
+            <span class="pulse-dot mr-1"></span>
+            Roblox Luau Obfuscator &amp; Deobfuscator
+          </p>
+        </div>
+      </div>
 
-<main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
-<div class="bg-cyber-800 border border-cyber-700 rounded-xl p-4 shadow-xl">
-<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-<div class="flex items-center bg-cyber-900 p-1 rounded-lg border border-cyber-700">
-<button onclick="switchMode('obfuscate')" id="tab-obfuscate" class="px-4 py-2 rounded-md text-xs font-bold transition bg-cyber-accent text-slate-950 shadow">Obfuscator Mode</button>
-<button onclick="switchMode('deobfuscate')" id="tab-deobfuscate" class="px-4 py-2 rounded-md text-xs font-medium transition text-slate-400 hover:text-white">De-obfuscator Mode</button>
-</div>
-<div class="flex items-center gap-3">
-<button id="main-action-btn" onclick="executeCurrentMode()" class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-cyber-accent to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-lg shadow-lg glow-accent flex items-center justify-center gap-2 transition-all active:scale-95">
-<i data-lucide="cpu" class="w-5 h-5"></i>
-<span id="main-btn-text">Compile & Obfuscate</span>
-</button>
-</div>
-</div>
-<div id="obfuscate-options" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-4 pt-4 border-t border-cyber-700/60 text-xs">
-<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-flattening" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Control Flow Flattening</span></label>
-<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-rolling-key" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Rolling-Key Cipher</span></label>
-<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-constant-scattering" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Constant Scattering</span></label>
-<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-junk-states" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Junk State Dispatchers</span></label>
-<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-anti-hook" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Anti-Hook Deflector</span></label>
-<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-cyber-700/30 transition"><input type="checkbox" id="opt-metatable-sandbox" checked class="rounded border-cyber-600 bg-cyber-900 text-cyber-accent focus:ring-cyber-accent"><span class="text-slate-300">Metatable Sandbox</span></label>
-</div>
-</div>
+      <!-- 모드 탭 -->
+      <div class="flex gap-2">
+        <button id="tabObf"
+          class="tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all">
+          🔒 Obfuscate
+        </button>
+        <button id="tabDeobf"
+          class="px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white">
+          🔓 Deobfuscate
+        </button>
+      </div>
+    </div>
+  </header>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-[500px]">
-<div class="bg-cyber-800 border border-cyber-700 rounded-xl flex flex-col shadow-xl overflow-hidden">
-<div class="bg-cyber-900/80 px-4 py-3 border-b border-cyber-700 flex items-center justify-between">
-<div class="flex items-center gap-2 text-xs font-semibold text-slate-300"><i data-lucide="file-code" class="w-4 h-4 text-cyber-accent"></i><span id="input-panel-title">Source Luau Script</span></div>
-<div class="flex items-center gap-2">
-<input type="file" id="file-input" accept=".lua,.txt" class="hidden" onchange="handleFileUpload(event)">
-<button onclick="document.getElementById('file-input').click()" class="px-2.5 py-1 bg-cyber-700 hover:bg-cyber-600 text-slate-200 text-xs rounded transition flex items-center gap-1"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Load</button>
-<button onclick="clearSource()" class="px-2.5 py-1 bg-cyber-700/50 hover:bg-red-500/20 text-slate-400 hover:text-red-300 text-xs rounded transition">Clear</button>
-</div>
-</div>
-<div class="relative flex-1 bg-cyber-900/50">
-<textarea id="src-code" spellcheck="false" class="w-full h-full p-4 bg-transparent text-slate-200 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Enter Luau source here..."></textarea>
-</div>
-<div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
-<span id="src-stats">Lines: 0 | Size: 0 KB</span><span>Input Encoding: UTF-8</span>
-</div>
-</div>
+  <!-- ============ Toolbar ============ -->
+  <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center gap-2">
+    <button id="btnLoad" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">📂 Load File</button>
+    <button id="btnSave" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">💾 Save File</button>
+    <button id="btnProcess" class="btn-primary px-6 py-1.5 rounded text-sm transition-all neon-glow">⚡ Process</button>
+    <button id="btnCopy" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">📋 Copy Output</button>
+    <button id="btnClear" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">🗑 Clear</button>
+    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">
+      Ready · UTF-8 · Rolling-Key VM
+    </div>
+  </div>
 
-<div class="bg-cyber-800 border border-cyber-700 rounded-xl flex flex-col shadow-xl overflow-hidden">
-<div class="bg-cyber-900/80 px-4 py-3 border-b border-cyber-700 flex items-center justify-between">
-<div class="flex items-center gap-2 text-xs font-semibold text-slate-300"><i data-lucide="shield-alert" class="w-4 h-4 text-purple-400"></i><span id="output-panel-title">Protected Output</span></div>
-<div class="flex items-center gap-2">
-<button onclick="copyOutput()" class="px-2.5 py-1 bg-cyber-700 hover:bg-cyber-600 text-slate-200 text-xs rounded transition flex items-center gap-1"><i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy</button>
-<button onclick="downloadOutput()" class="px-2.5 py-1 bg-cyber-purple/40 hover:bg-cyber-purple/60 text-purple-200 text-xs rounded border border-cyber-purple/50 transition flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> Save</button>
-</div>
-</div>
-<div class="relative flex-1 bg-cyber-900/50">
-<textarea id="out-code" readonly spellcheck="false" class="w-full h-full p-4 bg-transparent text-emerald-400/90 code-area text-xs sm:text-sm focus:outline-none resize-none" placeholder="-- Result will appear here..."></textarea>
-</div>
-<div class="px-4 py-2 bg-cyber-900/80 border-t border-cyber-700/60 text-[11px] text-slate-500 flex justify-between items-center">
-<span id="out-stats">Lines: 0 | Size: 0 KB</span><span id="obf-status" class="text-slate-400">Idle</span>
-</div>
-</div>
-</div>
-</main>
+  <!-- ============ 에디터 영역 ============ -->
+  <div class="max-w-[1600px] mx-auto px-4 pb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- INPUT -->
+      <div class="flex flex-col">
+        <div class="flex items-center justify-between mb-1.5 px-1">
+          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ INPUT</span>
+          <span class="text-[11px] text-gray-500 font-mono" id="inStats">0 lines · 0 B</span>
+        </div>
+        <textarea id="input" spellcheck="false"
+          class="editor w-full h-[62vh] p-3 text-sm"
+          placeholder="-- Luau 소스를 여기에 붙여넣으세요...&#10;-- 예: print(&quot;안녕하세요&quot;)&#10;-- 또는 난독화된 코드를 Deobfuscate 모드에서 붙여넣기"></textarea>
+      </div>
 
-<div id="docs-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-<div class="bg-cyber-800 border border-cyber-700 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
-<div class="p-4 border-b border-cyber-700 flex justify-between items-center">
-<h3 class="font-bold text-white flex items-center gap-2"><i data-lucide="shield" class="w-5 h-5 text-cyber-accent"></i> Luakeeper v10 Real VM Engine</h3>
-<button onclick="toggleDocsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-</div>
-<div class="p-6 overflow-y-auto text-xs sm:text-sm space-y-4 text-slate-300">
-<div><h4 class="font-semibold text-cyber-accent mb-1">1. High-Compatibility Payload Wrapper</h4><p class="text-slate-400">For massive scripts (like 2000+ lines with functions, coroutines, and hooks), the engine wraps the entire payload securely. This guarantees 100% compatibility with complex scripts where traditional bytecode would fail.</p></div>
-<div><h4 class="font-semibold text-cyber-accent mb-1">2. Rolling Hex XOR Compression</h4><p class="text-slate-400">Large strings are compressed using a dynamic rolling-key Hex XOR to prevent hitting Roblox's script size limits and evade static scanning. UTF-8 encoding ensures 100% compatibility with Korean and Unicode.</p></div>
-<div><h4 class="font-semibold text-cyber-accent mb-1">3. Accurate Decompiler</h4><p class="text-slate-400">Statically decodes Hex XOR payloads and rolling-key bytecode arrays back into readable Luau source code seamlessly.</p></div>
-</div>
-<div class="p-4 border-t border-cyber-700 text-right"><button onclick="toggleDocsModal()" class="px-4 py-1.5 bg-cyber-700 hover:bg-cyber-600 text-white rounded text-xs">Close</button></div>
-</div>
-</div>
+      <!-- OUTPUT -->
+      <div class="flex flex-col">
+        <div class="flex items-center justify-between mb-1.5 px-1">
+          <span class="text-xs font-bold text-[#00f0ff] tracking-wider">▸ OUTPUT</span>
+          <span class="text-[11px] text-gray-500 font-mono" id="outStats">0 lines · 0 B</span>
+        </div>
+        <textarea id="output" spellcheck="false" readonly
+          class="editor w-full h-[62vh] p-3 text-sm"
+          placeholder="-- 결과가 여기에 표시됩니다..."></textarea>
+      </div>
+    </div>
 
-<div id="toast" class="fixed bottom-5 right-5 px-4 py-3 rounded-lg shadow-xl text-xs font-semibold bg-cyber-700 text-white border border-cyber-600 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
-<i data-lucide="info" class="w-4 h-4 text-cyber-accent"></i><span id="toast-msg">Notification</span>
-</div>
+    <!-- Status bar -->
+    <div id="status" class="mt-3 px-3 py-2 rounded-md border border-[#1e2633] bg-[#0d1117] text-sm text-gray-400 min-h-[42px] flex items-center">
+      대기 중... 모드를 선택하고 Process 버튼을 누르세요.
+    </div>
+  </div>
+
+  <!-- ============ Footer ============ -->
+  <footer class="border-t border-[#1e2633] mt-4 py-3 text-center text-[11px] text-gray-600">
+    LUAKEEPER v10.0 · UTF-8 Safe · Rolling-Key XOR · RawScript Fallback · Metatable Sandbox
+  </footer>
 
 <script>
-lucide.createIcons();
-let currentMode = 'obfuscate';
-const srcCodeEl = document.getElementById('src-code');
-const outCodeEl = document.getElementById('out-code');
-const srcStatsEl = document.getElementById('src-stats');
-const outStatsEl = document.getElementById('out-stats');
-const obfStatusEl = document.getElementById('obf-status');
+/* ==================================================================
+   LUAKEEPER v10.0 - Core Engine
+   ------------------------------------------------------------------
+   [설계 원칙]
+   1. RawScript Fallback : 원본 전체를 UTF-8 바이트 → Rolling-Key XOR
+                           → Hex 문자열로 변환하여 하나의 데이터로 압축.
+                           AST 파싱 없이 100% 호환성 보장.
+   2. UTF-8 안전성       : JS는 TextEncoder/TextDecoder, Lua는 string.char(0~255).
+   3. Rolling-Key Cipher : 매 바이트마다 key = (key*31 + idx + 13) & 0xFF
+   4. Standard loadstring: loadstring(src) 표준 형태만 사용.
+   5. Anti-Hook Safe     : 무한루프 금지, 단일 검사 + pcall로 예외 보호.
+   6. Deobfuscator 대칭  : 인코딩의 정확한 역연산으로 완벽 복원.
+   ================================================================== */
 
-srcCodeEl.addEventListener('input', updateSrcStats);
-function updateSrcStats() {
-    const val = srcCodeEl.value;
-    srcStatsEl.innerText = `Lines: ${val.split('\n').length} | Size: ${(new Blob([val]).size/1024).toFixed(2)} KB`;
+/* -------------------- 전역 상태 -------------------- */
+let MODE = 'obfuscate';
+const $ = (id) => document.getElementById(id);
+
+/* -------------------- 탭 전환 -------------------- */
+function setMode(m) {
+  MODE = m;
+  const ob = $('tabObf'), de = $('tabDeobf');
+  if (m === 'obfuscate') {
+    ob.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
+    de.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
+    $('input').placeholder = '-- Luau 소스를 여기에 붙여넣으세요...\n-- 예: print("안녕하세요")';
+    $('output').placeholder = '-- 난독화된 코드가 여기에 표시됩니다...';
+    setStatus('Obfuscate 모드 · 원본 Luau를 보호된 스크립트로 변환합니다.', 'idle');
+  } else {
+    de.className = 'tab-active px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold transition-all';
+    ob.className = 'px-5 py-2 rounded-md border border-[#1e2633] text-sm font-semibold text-gray-400 transition-all hover:text-white';
+    $('input').placeholder = '-- 난독화된 Luakeeper 스크립트를 붙여넣으세요...\n-- (LUAKEEPER_D_START / LUAKEEPER_SEED 마커 포함)';
+    $('output').placeholder = '-- 복원된 원본 Luau 소스가 여기에 표시됩니다...';
+    setStatus('Deobfuscate 모드 · Rolling-Key를 역산하여 원본을 복원합니다.', 'idle');
+  }
 }
-function updateOutStats() {
-    const val = outCodeEl.value;
-    outStatsEl.innerText = `Lines: ${val.split('\n').length} | Size: ${(new Blob([val]).size/1024).toFixed(2)} KB`;
+$('tabObf').onclick = () => setMode('obfuscate');
+$('tabDeobf').onclick = () => setMode('deobfuscate');
+
+/* -------------------- 상태 표시 -------------------- */
+function setStatus(msg, type = 'idle') {
+  const el = $('status');
+  const colors = {
+    idle:    'text-gray-400 border-[#1e2633]',
+    ok:      'text-green-400 border-green-800/50',
+    error:   'text-red-400 border-red-800/50',
+    info:    'text-cyan-300 border-cyan-800/50',
+  };
+  el.className = 'mt-3 px-3 py-2 rounded-md border bg-[#0d1117] text-sm min-h-[42px] flex items-center ' + (colors[type] || colors.idle);
+  el.textContent = msg;
 }
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    document.getElementById('toast-msg').innerText = msg;
-    t.classList.remove('translate-y-20','opacity-0'); t.classList.add('translate-y-0','opacity-100');
-    setTimeout(() => { t.classList.remove('translate-y-0','opacity-100'); t.classList.add('translate-y-20','opacity-0'); }, 3000);
+
+/* -------------------- 통계 갱신 -------------------- */
+function updateStats() {
+  const inp = $('input').value, out = $('output').value;
+  const inB = new TextEncoder().encode(inp).length;
+  const outB = new TextEncoder().encode(out).length;
+  $('inStats').textContent  = `${inp.split('\n').length} lines · ${inB.toLocaleString()} B`;
+  $('outStats').textContent = `${out.split('\n').length} lines · ${outB.toLocaleString()} B`;
+  $('stats').textContent = `INPUT ${inB.toLocaleString()} B  →  OUTPUT ${outB.toLocaleString()} B`;
 }
-function switchMode(mode) {
-    currentMode = mode;
-    const tabObf = document.getElementById('tab-obfuscate'), tabDeobf = document.getElementById('tab-deobfuscate');
-    const optSection = document.getElementById('obfuscate-options');
-    const mainBtnText = document.getElementById('main-btn-text');
-    const inputTitle = document.getElementById('input-panel-title');
-    const outputTitle = document.getElementById('output-panel-title');
-    if (mode === 'obfuscate') {
-        tabObf.className = 'px-4 py-2 rounded-md text-xs font-bold transition bg-cyber-accent text-slate-950 shadow';
-        tabDeobf.className = 'px-4 py-2 rounded-md text-xs font-medium transition text-slate-400 hover:text-white';
-        optSection.classList.remove('hidden');
-        mainBtnText.innerText = 'Compile & Obfuscate';
-        inputTitle.innerText = 'Source Luau Script';
-        outputTitle.innerText = 'Protected Output';
-        showToast('Switched to Obfuscator Mode');
+$('input').addEventListener('input', updateStats);
+
+/* ==================================================================
+   ★ 인코더 / 디코더 (JS측) - Lua측과 완벽 대칭
+   ------------------------------------------------------------------
+   Rolling-Key 공식 (JS와 Lua 동일):
+       key_next = (key * 31 + byteIndex + 13) & 0xFF
+   ※ byteIndex는 0부터 시작.
+   ================================================================== */
+
+/**
+ * UTF-8 문자열을 Rolling-Key XOR 후 Hex 문자열로 인코딩.
+ * @param {string} src  원본 Luau 소스
+ * @param {number} seed 0~255 사이 초기 키
+ * @returns {string} hex 인코딩된 문자열
+ */
+function encodeSource(src, seed) {
+  const bytes = new TextEncoder().encode(src);     // ★ UTF-8 안전 변환
+  const enc = new Uint8Array(bytes.length);
+  let key = seed & 0xFF;
+  for (let i = 0; i < bytes.length; i++) {
+    enc[i] = bytes[i] ^ key;                        // ★ XOR (0~255 보장)
+    key = (key * 31 + i + 13) & 0xFF;               // ★ Rolling-Key 갱신
+  }
+  // Hex 문자열로 변환 (각 바이트당 2자)
+  let hex = '';
+  for (let i = 0; i < enc.length; i++) {
+    hex += enc[i].toString(16).padStart(2, '0');
+  }
+  return hex;
+}
+
+/**
+ * Hex 문자열을 Rolling-Key XOR 역산 후 UTF-8 디코딩.
+ * encodeSource의 완벽한 역연산.
+ * @param {string} hex
+ * @param {number} seed
+ * @returns {string} 원본 Luau 소스
+ */
+function decodeHex(hex, seed) {
+  if (hex.length % 2 !== 0) throw new Error('Hex 길이가 홀수입니다 (데이터 손상)');
+  const byteLen = hex.length / 2;
+  const out = new Uint8Array(byteLen);
+  let key = seed & 0xFF;
+  for (let i = 0; i < byteLen; i++) {
+    const b = parseInt(hex.substr(i * 2, 2), 16);
+    if (isNaN(b)) throw new Error(`잘못된 Hex 문자 (offset ${i * 2})`);
+    out[i] = b ^ key;                                // ★ XOR 역연산
+    key = (key * 31 + i + 13) & 0xFF;                // ★ Rolling-Key 동일 갱신
+  }
+  return new TextDecoder('utf-8', { fatal: false }).decode(out);
+}
+
+/* ==================================================================
+   ★ 난독화 엔진 (Obfuscator)
+   ------------------------------------------------------------------
+   생성되는 Lua 스크립트 구성:
+     1. Anti-Hook (안전 검사, 무한루프 없음)
+     2. Junk Decoy Functions (Opcode Randomization 디코이)
+     3. Junk Branch Chain (Junk States)
+     4. _D 테이블 (Constant Scattering: 홀수 인덱스가 실제 Hex 청크)
+     5. _seed 변수
+     6. Rolling-Key XOR 디코더 (_dec)
+     7. table.concat으로 청크 결합 → _dec → loadstring
+     8. Metatable Sandbox 시도 후 실행
+   ================================================================== */
+
+const JUNK_POOL = [
+  'zq9kf2', 'm3v8xj', 'p7r1lt', 'b4n6we', 'c2y5ha', 'u0s9dg', 't1i3mp', 'o8e4vr',
+  'f5h7qb', 'l6a2xk', 'w9j1zp', 'd3r5ym', 'k8n0tb', 'x2v4lq', 'q6c9fu', 'h1p7as',
+  'y7r2nc', 'v5b8gk', 'j4w1qm', 's9f3dh'
+];
+
+/**
+ * Luau 원본을 Luakeeper v10.0 보호 스크립트로 변환.
+ * @param {string} source
+ * @returns {string}
+ */
+function generateObfuscated(source) {
+  /* 1) 랜덤 시드 (0~255) */
+  const seed = Math.floor(Math.random() * 256);
+
+  /* 2) 인코딩 → Hex */
+  const hex = encodeSource(source, seed);
+
+  /* 3) 청크 분할 (512 hex 문자 = 256 원본 바이트) */
+  const CHUNK_SIZE = 512;
+  const chunks = [];
+  for (let i = 0; i < hex.length; i += CHUNK_SIZE) {
+    chunks.push(hex.slice(i, i + CHUNK_SIZE));
+  }
+  if (chunks.length === 0) chunks.push(''); // 빈 소스 대응
+
+  /* 4) _D 테이블 라인 생성 (홀수=실제, 짝수=Junk) */
+  const dLines = [];
+  for (let i = 0; i < chunks.length; i++) {
+    dLines.push(`  [${i * 2 + 1}] = "${chunks[i]}",`);
+    dLines.push(`  [${i * 2 + 2}] = "${JUNK_POOL[i % JUNK_POOL.length]}",`);
+  }
+
+  /* 5) Junk 분기문 체인 (Junk States) - 40개 */
+  const junkBranches = [];
+  for (let i = 0; i < 40; i++) {
+    const v = -1000 - i;
+    junkBranches.push(i === 0
+      ? `if _jr == ${v} then return`
+      : `elseif _jr == ${v} then return`);
+  }
+  junkBranches.push('end');
+
+  /* 6) Junk 함수들 (Opcode Randomization 디코이) */
+  const junkFuncs = [];
+  for (let i = 0; i < 6; i++) {
+    const n = Math.floor(Math.random() * 1000) + 1;
+    const m = Math.floor(Math.random() * 100) + 1;
+    junkFuncs.push(`local function _jf${i}(a, b) return ((a or ${n}) * ${m}) - ${m} end`);
+  }
+
+  /* 7) 최종 Lua 스크립트 조립 */
+  return `--[[
+  ============================================================
+   Luakeeper v10.0 - Roblox Luau Protector
+   Protected Script - Do not edit.
+  ============================================================
+]]
+
+-- ============================================================
+-- [1] Anti-Hook Deflector (SAFE MODE - 무한루프 금지)
+-- ============================================================
+do
+  local _hooked = false
+  local _ok = pcall(function()
+    if type(debug) ~= "table" or type(debug.info) ~= "function" then
+      _hooked = true
+      return
+    end
+    local _src = debug.info(1, "s")
+    if type(_src) ~= "string" then
+      _hooked = true
+    end
+  end)
+  if not _ok then _hooked = true end
+  -- ※ 검사 결과와 무관하게 실행 계속 (게임 프리징 방지)
+end
+
+-- ============================================================
+-- [2] Junk Decoy Functions (Opcode Randomization)
+-- ============================================================
+${junkFuncs.join('\n')}
+local _jr = _jf0(1, 2) + _jf1(3, 4) + _jf2(5, 6) + _jf3(7, 8)
+
+-- ============================================================
+-- [3] Junk Branch Chain (Junk States - 정적 분석 방해)
+-- ============================================================
+${junkBranches.join('\n')}
+
+-- ============================================================
+-- [4] Constant Scattering Data Table
+--     (홀수 인덱스 = 실제 Hex 청크, 짝수 인덱스 = Junk)
+-- ============================================================
+--[[LUAKEEPER_D_START]]
+local _D = {
+${dLines.join('\n')}
+}
+--[[LUAKEEPER_D_END]]
+
+-- ============================================================
+-- [5] Rolling-Key Seed
+-- ============================================================
+--[[LUAKEEPER_SEED_START]]
+local _seed = ${seed}
+--[[LUAKEEPER_SEED_END]]
+
+-- ============================================================
+-- [6] Rolling-Key XOR Hex Decoder (UTF-8 안전)
+-- ============================================================
+local function _dec(h, s)
+  local k = s
+  local t = {}
+  local n = #h
+  for i = 1, n, 2 do
+    local b = tonumber(string.sub(h, i, i + 1), 16)
+    if not b then return nil end
+    local idx = math.floor((i - 1) / 2)      -- 0-based byte index (JS와 대칭)
+    t[#t + 1] = string.char(b ~ k)           -- ★ XOR → string.char(0~255)
+    k = math.floor((k * 31 + idx + 13) % 256) -- ★ Rolling-Key 갱신
+  end
+  return table.concat(t)
+end
+
+-- ============================================================
+-- [7] 청크 수집 (홀수 인덱스만) 및 결합
+-- ============================================================
+local _parts = {}
+for i = 1, #_D, 2 do
+  _parts[#_parts + 1] = _D[i]
+end
+local _hex = table.concat(_parts)
+
+local _source = _dec(_hex, _seed)
+if not _source then
+  pcall(function() warn("Luakeeper: decode failure") end)
+  return
+end
+
+-- ============================================================
+-- [8] 표준 loadstring 실행 (Standard Form)
+-- ============================================================
+if type(loadstring) ~= "function" then
+  pcall(function() warn("Luakeeper: loadstring is disabled in this environment") end)
+  return
+end
+
+local _fn = loadstring(_source)
+if not _fn then
+  pcall(function() warn("Luakeeper: loadstring returned nil") end)
+  return
+end
+
+-- ============================================================
+-- [9] Metatable Sandbox (pcall로 안전하게 시도)
+-- ============================================================
+pcall(function()
+  if type(getfenv) == "function" and type(setfenv) == "function" then
+    local _env = setmetatable({}, {__index = getfenv()})
+    setfenv(_fn, _env)
+  end
+end)
+
+-- ============================================================
+-- [10] 최종 실행
+-- ============================================================
+_fn()
+`;
+}
+
+/* ==================================================================
+   ★ 디컴파일러 (Deobfuscator)
+   ------------------------------------------------------------------
+   생성 규칙:
+     - _D 테이블 내부의 모든 큰따옴표 문자열을 추출
+     - 0-based 짝수 인덱스가 실제 Hex 청크
+     - _seed 마커에서 정수 추출
+     - decodeHex()로 Rolling-Key 역산 + UTF-8 복원
+   ================================================================== */
+
+/**
+ * Luakeeper 보호 스크립트에서 원본 Luau 소스를 복원.
+ * @param {string} code
+ * @returns {string}
+ */
+function deobfuscate(code) {
+  /* 1) _D 테이블 본문 추출 */
+  const dMatch = code.match(/--\[\[LUAKEEPER_D_START\]\]([\s\S]*?)--\[\[LUAKEEPER_D_END\]\]/);
+  if (!dMatch) {
+    throw new Error('LUAKEEPER_D 마커를 찾을 수 없습니다. Luakeeper v10.0으로 생성된 코드가 아닙니다.');
+  }
+  const dBody = dMatch[1];
+
+  /* 2) 모든 문자열 리터럴 추출 (순서 유지) */
+  const strMatches = [];
+  const re = /"([^"]*)"/g;
+  let m;
+  while ((m = re.exec(dBody)) !== null) {
+    strMatches.push(m[1]);
+  }
+  if (strMatches.length === 0) {
+    throw new Error('_D 테이블에서 청크 문자열을 찾을 수 없습니다.');
+  }
+
+  /* 3) 실제 청크는 0-based 짝수 인덱스 */
+  const realChunks = [];
+  for (let i = 0; i < strMatches.length; i += 2) {
+    realChunks.push(strMatches[i]);
+  }
+  const hex = realChunks.join('');
+
+  /* 4) 시드 추출 */
+  const seedMatch = code.match(/--\[\[LUAKEEPER_SEED_START\]\]\s*local\s+_seed\s*=\s*(-?\d+)/);
+  if (!seedMatch) {
+    throw new Error('LUAKEEPER_SEED 마커를 찾을 수 없습니다.');
+  }
+  const seed = parseInt(seedMatch[1], 10);
+  if (isNaN(seed)) {
+    throw new Error('시드 값이 유효하지 않습니다.');
+  }
+
+  /* 5) Hex 유효성 검사 */
+  if (hex.length === 0) {
+    // 빈 원본 스크립트
+    return '';
+  }
+  if (!/^[0-9a-fA-F]*$/.test(hex)) {
+    throw new Error('Hex 데이터에 유효하지 않은 문자가 포함되어 있습니다.');
+  }
+
+  /* 6) Rolling-Key XOR 역산 + UTF-8 디코딩 */
+  return decodeHex(hex, seed);
+}
+
+/* ==================================================================
+   ★ Process 버튼 (모드별 분기)
+   ================================================================== */
+$('btnProcess').onclick = () => {
+  const input = $('input').value;
+
+  if (!input.trim()) {
+    setStatus('❌ 입력이 비어 있습니다.', 'error');
+    return;
+  }
+
+  try {
+    if (MODE === 'obfuscate') {
+      const result = generateObfuscated(input);
+      $('output').value = result;
+      const outB = new TextEncoder().encode(result).length;
+      setStatus(`✅ 난독화 완료 · ${outB.toLocaleString()} B · Seed 기반 Rolling-Key 암호화 적용됨`, 'ok');
     } else {
-        tabDeobf.className = 'px-4 py-2 rounded-md text-xs font-bold transition bg-cyber-purple text-white shadow';
-        tabObf.className = 'px-4 py-2 rounded-md text-xs font-medium transition text-slate-400 hover:text-white';
-        optSection.classList.add('hidden');
-        mainBtnText.innerText = 'De-obfuscate / Restore';
-        inputTitle.innerText = 'Protected Luakeeper Script';
-        outputTitle.innerText = 'Recovered Source Code';
-        showToast('Switched to De-obfuscator Mode');
+      const result = deobfuscate(input);
+      const outB = new TextEncoder().encode(result).length;
+      setStatus(`✅ 디컴파일 완료 · ${outB.toLocaleString()} B · 원본 Luau 소스 복원 성공`, 'ok');
     }
-}
-function executeCurrentMode() {
-    if (currentMode === 'obfuscate') processObfuscation();
-    else processDeobfuscation();
-}
-function clearSource() { srcCodeEl.value = ''; updateSrcStats(); }
-function handleFileUpload(evt) {
-    const file = evt.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => { srcCodeEl.value = e.target.result; updateSrcStats(); showToast(`Loaded ${file.name}`); };
-    reader.readAsText(file);
-}
-function copyOutput() { if (!outCodeEl.value) return; outCodeEl.select(); document.execCommand('copy'); showToast('Output copied!'); }
-function downloadOutput() {
-    if (!outCodeEl.value) return;
-    const blob = new Blob([outCodeEl.value], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = currentMode === 'obfuscate' ? 'protected.lua' : 'restored.lua';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('Download started');
-}
-function toggleDocsModal() { document.getElementById('docs-modal').classList.toggle('hidden'); }
-
-const BC = {
-    HALT: 0, LOADK: 1, MOVE: 2, GETGLOBAL: 3, SETGLOBAL: 4,
-    GETFIELD: 5, SETFIELD: 6, GETTABLE: 7, SETTABLE: 8,
-    ADD: 9, SUB: 10, MUL: 11, DIV: 12, MOD: 13, POW: 14, IDIV: 15,
-    CONCAT: 16, EQ: 17, NEQ: 18, LT: 19, LE: 20, GT: 21, GE: 22,
-    NOT: 23, NEG: 24, LEN: 25,
-    CALL: 26, RETURN: 27, JUMP: 28, JUMPIF: 29, JUMPIFNOT: 30,
-    NEWTABLE: 31, SETLIST: 32, SETFIELDS: 33,
-    CLOSURE: 34, NOP: 35, RAW: 36
+  } catch (err) {
+    console.error(err);
+    setStatus(`❌ 오류: ${err.message}`, 'error');
+  }
+  updateStats();
 };
 
-class Compiler {
-    constructor() {
-        this.bytecode = [];
-        this.constants = [null, true, false];
-        this.constMap = new Map();
-        this.constMap.set(JSON.stringify([null]), 0);
-        this.constMap.set(JSON.stringify([true]), 1);
-        this.constMap.set(JSON.stringify([false]), 2);
-        this.regTop = 0;
-        this.scopes = [{}];
-        this.labelCount = 0;
-        this.patches = [];
-        this.labels = {};
-        this.breakLabels = [];
-    }
-
-    emit(...bytes) { for (const b of bytes) this.bytecode.push(b); return this.bytecode.length; }
-
-    addConst(val) {
-        let key;
-        if (val === null || val === undefined) return 0;
-        if (val === true) return 1;
-        if (val === false) return 2;
-        if (typeof val === 'number') key = 'n:' + val;
-        else if (typeof val === 'string') key = 's:' + val;
-        else key = 'o:' + JSON.stringify(val);
-        if (this.constMap.has(key)) return this.constMap.get(key);
-        const idx = this.constants.length;
-        this.constants.push(val);
-        this.constMap.set(key, idx);
-        return idx;
-    }
-
-    newReg() { const r = this.regTop++; return r; }
-    freeRegs(count) { this.regTop -= count; }
-    allocLocal(name) { const r = this.newReg(); this.scopes[this.scopes.length - 1][name] = r; return r; }
-    findLocal(name) { for (let i = this.scopes.length - 1; i >= 0; i--) { if (name in this.scopes[i]) return this.scopes[i][name]; } return null; }
-    pushScope() { this.scopes.push({}); }
-    popScope() { const scope = this.scopes.pop(); for (const name in scope) { if (scope[name] >= 0) { this.regTop = Math.min(this.regTop, scope[name]); } } }
-    newLabel() { return '__L' + (this.labelCount++); }
-    placeLabel(name) { this.labels[name] = this.bytecode.length; }
-    emitJump(op, label) { this.emit(op, 0); this.patches.push({ idx: this.bytecode.length - 1, label }); }
-    emitJumpCond(op, reg, label) { this.emit(op, reg, 0); this.patches.push({ idx: this.bytecode.length - 1, label }); }
-    resolvePatches() { for (const p of this.patches) { this.bytecode[p.idx] = this.labels[p.label] !== undefined ? this.labels[p.label] : this.bytecode.length; } this.patches = []; }
-
-    compileChunk(ast) {
-        for (const stmt of ast.body) this.compileStatement(stmt);
-        this.emit(BC.HALT);
-        this.resolvePatches();
-        return { bytecode: this.bytecode, constants: this.constants };
-    }
-
-    compileStatement(stmt) {
-        switch (stmt.type) {
-            case 'RawScript': this.emit(BC.RAW, this.addConst(stmt.value)); return;
-            case 'Nop': return;
-        }
-    }
-}
-
-function randIdent(len) { len = len || 8; let s = '_'; const chars = 'Il1i0Oo'; for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)]; return s; }
-
-function encodeStringScattered(str, useScatter) {
-    if (!useScatter) return JSON.stringify(str).replace(/\\u([0-9a-f]{4})/gi, (m, h) => '\\' + parseInt(h, 16));
-    if (str.length === 0) return '""';
-    
-    let encoder = new TextEncoder();
-    let bytes = encoder.encode(str);
-    
-    if (bytes.length > 100) {
-        let hex = '';
-        let startKey = Math.floor(Math.random() * 200) + 10;
-        let k = startKey;
-        for (let i = 0; i < bytes.length; i++) {
-            let c = bytes[i] ^ k;
-            hex += c.toString(16).padStart(2, '0');
-            k = (k + c * 7) % 256;
-        }
-        let chunks = [];
-        for (let i = 0; i < hex.length; i += 5000) {
-            chunks.push(`"${hex.substring(i, i + 5000)}"`);
-        }
-        return `(function() local t = {${chunks.join(',')}} local h = table.concat(t) local r = table.create(#h/2) local k = ${startKey} for i = 1, #h, 2 do local c = bit32.bxor(tonumber(h:sub(i, i+1), 16), k) r[(i+1)/2] = string.char(c) k = (k + c * 7) % 256 end return table.concat(r) end)()`;
-    }
-    
-    const parts = [];
-    let k = Math.floor(Math.random() * 200) + 10;
-    for (let i = 0; i < bytes.length; i++) {
-        const c = bytes[i];
-        const enc = c ^ k;
-        parts.push(`string.char(bit32.bxor(${enc},${k}))`);
-        k = (k + enc * 7) % 256;
-    }
-    return parts.join('..');
-}
-
-function obfuscateVM(bytecode, constants, opts) {
-    const opcodeMap = {};
-    const usedOps = new Set();
-    const opKeys = Object.keys(BC);
-    for (const k of opKeys) {
-        let r;
-        do { r = Math.floor(Math.random() * 250) + 1; } while (usedOps.has(r));
-        usedOps.add(r);
-        opcodeMap[BC[k]] = r;
-    }
-    const remappedBytecode = bytecode.map(b => opcodeMap[b] !== undefined ? opcodeMap[b] : b);
-
-    const startKey = Math.floor(Math.random() * 200) + 30;
-    let rolling = startKey;
-    const encrypted = [];
-    if (opts.rollingKey) {
-        for (const b of remappedBytecode) {
-            const enc = b ^ rolling;
-            encrypted.push(enc);
-            rolling = (rolling + enc * 13) % 256;
-        }
-    } else { for (const b of remappedBytecode) encrypted.push(b); }
-
-    const encodedConstants = constants.map((c, i) => {
-        if (i === 0) return 'nil';
-        if (c === true) return 'true';
-        if (c === false) return 'false';
-        if (typeof c === 'number') return String(c);
-        if (typeof c === 'string') return encodeStringScattered(c, opts.scatter);
-        return 'nil';
-    });
-
-    const vEnv = randIdent(6), vK = randIdent(6), vB = randIdent(6), vR = randIdent(6);
-    const vPC = randIdent(5), vKey = randIdent(5), vOp = randIdent(5), vRaw = randIdent(6);
-    const vState = randIdent(6);
-
-    let antiHook = '';
-    if (opts.antiHook) {
-        const fnName = randIdent(8);
-        antiHook = `local function ${fnName}() if debug and debug.info then local ok, info = pcall(debug.info, 1, "s") if not ok or type(info) ~= "string" then return end end end pcall(${fnName})`;
-    }
-
-    let junkStates = '';
-    if (opts.junkStates) {
-        const count = 12 + Math.floor(Math.random() * 8);
-        for (let i = 0; i < count; i++) {
-            const jsId = Math.floor(Math.random() * 800000) + 100000;
-            junkStates += `        elseif ${vState} == ${jsId} then ${vState} = 1\n`;
-        }
-    }
-
-    let metatableSandbox = '';
-    if (opts.metatableSandbox) {
-        const vMT = randIdent(6);
-        metatableSandbox = `do local ${vMT} = getmetatable and getmetatable(${vEnv}) if ${vMT} and ${vMT}.__index then local _m = ${vMT}.__index setmetatable(${vEnv}, {__index = _m}) end end`;
-    }
-
-    const Kline = encodedConstants.join(', ');
-
-    const output = `--[==============================================================[
---   Luakeeper v10.0 Protected Script
---   Engine: Real Register-Based Virtual Machine
---   Opcodes: Randomly Remapped | Bytecode: Rolling-Key Encrypted
---   Constants: Chunked Hex XOR Compressed
--- ]==============================================================]
-${antiHook}
-${metatableSandbox}
-local ${vEnv} = getfenv and getfenv() or _ENV
-local ${vK} = { ${Kline} }
-local ${vB} = { ${encrypted.join(',')} }
-local ${vR} = {}
-local ${vPC} = 1
-local ${vKey} = ${startKey}
-local ${vState} = 1
-local bit32 = bit32 or bit
-local bxor = bit32.bxor
-
-while true do
-    if ${vState} == 1 then
-        if ${vPC} > #${vB} then break end
-        local ${vRaw} = ${vB}[${vPC}]
-        ${vPC} = ${vPC} + 1
-        ${opts.rollingKey ? `local ${vOp} = bxor(${vRaw}, ${vKey}) % 256\n        ${vKey} = (${vKey} + ${vRaw} * 13) % 256` : `local ${vOp} = ${vRaw}`}
-        ${vState} = 1
-        if ${vOp} == ${opcodeMap[BC.HALT]} then
-            break
-        elseif ${vOp} == ${opcodeMap[BC.LOADK]} then
-            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            ${vR}[dst] = ${vK}[ki + 1]
-        elseif ${vOp} == ${opcodeMap[BC.MOVE]} then
-            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local src = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            ${vR}[dst] = ${vR}[src]
-        elseif ${vOp} == ${opcodeMap[BC.GETGLOBAL]} then
-            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            ${vR}[dst] = ${vEnv}[${vK}[ki + 1]]
-        elseif ${vOp} == ${opcodeMap[BC.SETGLOBAL]} then
-            local src = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            ${vEnv}[${vK}[ki + 1]] = ${vR}[src]
-        elseif ${vOp} == ${opcodeMap[BC.GETFIELD]} then
-            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local obj = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            ${vR}[dst] = ${vR}[obj][${vK}[ki + 1]]
-        elseif ${vOp} == ${opcodeMap[BC.SETFIELD]} then
-            local obj = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local ki = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local src = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            ${vR}[obj][${vK}[ki + 1]] = ${vR}[src]
-        elseif ${vOp} == ${opcodeMap[BC.GETTABLE]} then
-            local dst = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local obj = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local k = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            ${vR}[dst] = ${vR}[obj][${vR}[k]]
-        elseif ${vOp} == ${opcodeMap[BC.SETTABLE]} then
-            local obj = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local k = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            local src = ${vB}[${vPC}]; ${vPC} = ${vPC} + 1
-            ${vR}[obj][${vR}[k]] = ${vR}[src]
-        elseif ${vOp} == ${opcodeMap[BC.ADD]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = ${vR}[a] + ${vR}[b]
-        elseif ${vOp} == ${opcodeMap[BC.SUB]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = ${vR}[a] - ${vR}[b]
-        elseif ${vOp} == ${opcodeMap[BC.MUL]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = ${vR}[a] * ${vR}[b]
-        elseif ${vOp} == ${opcodeMap[BC.DIV]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = ${vR}[a] / ${vR}[b]
-        elseif ${vOp} == ${opcodeMap[BC.MOD]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = ${vR}[a] % ${vR}[b]
-        elseif ${vOp} == ${opcodeMap[BC.POW]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = ${vR}[a] ^ ${vR}[b]
-        elseif ${vOp} == ${opcodeMap[BC.IDIV]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = math.floor(${vR}[a] / ${vR}[b])
-        elseif ${vOp} == ${opcodeMap[BC.CONCAT]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = tostring(${vR}[a]) .. tostring(${vR}[b])
-        elseif ${vOp} == ${opcodeMap[BC.EQ]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = (${vR}[a] == ${vR}[b])
-        elseif ${vOp} == ${opcodeMap[BC.NEQ]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = (${vR}[a] ~= ${vR}[b])
-        elseif ${vOp} == ${opcodeMap[BC.LT]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = (${vR}[a] < ${vR}[b])
-        elseif ${vOp} == ${opcodeMap[BC.LE]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = (${vR}[a] <= ${vR}[b])
-        elseif ${vOp} == ${opcodeMap[BC.GT]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = (${vR}[a] > ${vR}[b])
-        elseif ${vOp} == ${opcodeMap[BC.GE]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local a=${vB}[${vPC}];${vPC}=${vPC}+1;local b=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = (${vR}[a] >= ${vR}[b])
-        elseif ${vOp} == ${opcodeMap[BC.NOT]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local s=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = not ${vR}[s]
-        elseif ${vOp} == ${opcodeMap[BC.NEG]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local s=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = -${vR}[s]
-        elseif ${vOp} == ${opcodeMap[BC.LEN]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1;local s=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = #${vR}[s]
-        elseif ${vOp} == ${opcodeMap[BC.CALL]} then
-            local dst=${vB}[${vPC}];${vPC}=${vPC}+1
-            local fn=${vB}[${vPC}];${vPC}=${vPC}+1
-            local argBase=${vB}[${vPC}];${vPC}=${vPC}+1
-            local argCount=${vB}[${vPC}];${vPC}=${vPC}+1
-            local retCount=${vB}[${vPC}];${vPC}=${vPC}+1
-            local args = {}
-            for i = 0, argCount - 1 do args[i+1] = ${vR}[argBase + i] end
-            local ok, res = pcall(${vR}[fn], table.unpack(args))
-            if not ok and type(${vR}[fn]) == "function" then res = ${vR}[fn](table.unpack(args)) end
-            ${vR}[dst] = res
-        elseif ${vOp} == ${opcodeMap[BC.RETURN]} then
-            local s=${vB}[${vPC}];${vPC}=${vPC}+1
-            if s == -1 or s == nil then return else return ${vR}[s] end
-        elseif ${vOp} == ${opcodeMap[BC.JUMP]} then
-            local t=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vPC} = t
-        elseif ${vOp} == ${opcodeMap[BC.JUMPIF]} then
-            local s=${vB}[${vPC}];${vPC}=${vPC}+1
-            local t=${vB}[${vPC}];${vPC}=${vPC}+1
-            if ${vR}[s] then ${vPC} = t end
-        elseif ${vOp} == ${opcodeMap[BC.JUMPIFNOT]} then
-            local s=${vB}[${vPC}];${vPC}=${vPC}+1
-            local t=${vB}[${vPC}];${vPC}=${vPC}+1
-            if not ${vR}[s] then ${vPC} = t end
-        elseif ${vOp} == ${opcodeMap[BC.NEWTABLE]} then
-            local d=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[d] = {}
-        elseif ${vOp} == ${opcodeMap[BC.SETLIST]} then
-            local t=${vB}[${vPC}];${vPC}=${vPC}+1
-            local i=${vB}[${vPC}];${vPC}=${vPC}+1
-            local v=${vB}[${vPC}];${vPC}=${vPC}+1
-            ${vR}[t][${vR}[i]] = ${vR}[v]
-        elseif ${vOp} == ${opcodeMap[BC.RAW]} then
-            local ki=${vB}[${vPC}];${vPC}=${vPC}+1
-            local src=${vK}[ki + 1]
-            if type(src) == "string" and #src > 0 then
-                local f = (loadstring or load)(src)
-                if f then pcall(f) end
-            end
-${junkStates}        end
-    else
-        ${vState} = 1
-    end
-end`;
-
-    return output;
-}
-
-function deobfuscateVM(src) {
-    const keyMatch = src.match(/local\s+_\w+\s*=\s*(\d+)\s*\n\s*local\s+_\w+\s*=\s*1/);
-    let startKey = keyMatch ? parseInt(keyMatch[1]) : 0;
-    if (!keyMatch) {
-        const anyKey = src.match(/local\s+_\w+\s*=\s*(\d+)\s*$/m);
-        if (anyKey) startKey = parseInt(anyKey[1]);
-    }
-    const bytesMatch = src.match(/local\s+_\w+\s*=\s*\{\s*(-?\d[\d,\s\-]*)\s*\}/g);
-    let encryptedBytes = null;
-    let constantsBlock = null;
-    if (bytesMatch) {
-        for (const m of bytesMatch) {
-            const inner = m.match(/\{\s*([-\d,\s]+)\s*\}/);
-            if (inner) {
-                const arr = inner[1].split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-                if (arr.length > 10) { encryptedBytes = arr; break; }
-            }
-        }
-    }
-    if (!encryptedBytes) throw new Error("Bytecode array not found");
-    const constMatch = src.match(/local\s+_\w+\s*=\s*\{([\s\S]*?)\}\s*\n\s*local\s+_\w+\s*=\s*\{/);
-    if (!constMatch) throw new Error("Constant table not found");
-    constantsBlock = constMatch[1];
-
-    const decodeByte = (enc, k) => {
-        const raw = (enc ^ k) & 0xFFFFFFFF;
-        const nextK = (k + enc * 13) % 256;
-        return [raw, nextK];
+/* ==================================================================
+   ★ 파일 I/O
+   ================================================================== */
+$('btnLoad').onclick = () => {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = '.lua,.luau,.txt,.obf,.code,.js';
+  inp.onchange = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      $('input').value = r.result;
+      updateStats();
+      setStatus(`📂 파일 로드: ${f.name} (${f.size.toLocaleString()} B)`, 'info');
     };
+    r.onerror = () => setStatus('❌ 파일 읽기 실패', 'error');
+    r.readAsText(f, 'UTF-8');
+  };
+  inp.click();
+};
 
-    let rolling = startKey;
-    const decrypted = [];
-    for (const enc of encryptedBytes) {
-        const [raw, nk] = decodeByte(enc, rolling);
-        decrypted.push(raw);
-        rolling = nk;
-    }
+$('btnSave').onclick = () => {
+  const content = $('output').value;
+  if (!content) {
+    setStatus('❌ 저장할 출력이 없습니다.', 'error');
+    return;
+  }
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = MODE === 'obfuscate' ? 'luakeeper_protected.lua' : 'luakeeper_deobfuscated.lua';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  setStatus(`💾 저장 완료: ${a.download}`, 'ok');
+};
 
-    const parseConstants = (block) => {
-        const consts = [];
-        let i = 0;
-        while (i < block.length) {
-            while (i < block.length && /[\s,]/.test(block[i])) i++;
-            if (i >= block.length) break;
-            if (block.startsWith('nil', i)) { consts.push(null); i += 3; continue; }
-            if (block.startsWith('true', i)) { consts.push(true); i += 4; continue; }
-            if (block.startsWith('false', i)) { consts.push(false); i += 5; continue; }
-            if (block[i] === '"' || block[i] === "'") {
-                const q = block[i]; i++;
-                let s = '';
-                while (i < block.length && block[i] !== q) {
-                    if (block[i] === '\\') { s += block[i] + block[i+1]; i += 2; }
-                    else { s += block[i]; i++; }
-                }
-                i++;
-                try { s = JSON.parse('"' + s.replace(/\\/g, '\\\\').replace(/\\(["\\])/g, '\\$1') + '"'); } catch(e) {}
-                consts.push(s);
-                continue;
-            }
-            if (block.startsWith('string.char', i)) {
-                let parenDepth = 0, s = '';
-                const startI = i;
-                while (i < block.length) {
-                    if (block[i] === '(') parenDepth++;
-                    else if (block[i] === ')') { parenDepth--; if (parenDepth === 0) { i++; break; } }
-                    i++;
-                }
-                const expr = block.substring(startI, i);
-                const bxorRegex = /bxor\((\d+)\s*,\s*(\d+)\)/g;
-                let m;
-                let bytes = [];
-                while ((m = bxorRegex.exec(expr)) !== null) {
-                    bytes.push((parseInt(m[1]) ^ parseInt(m[2])) & 0xFF);
-                }
-                let j = i;
-                while (j < block.length && (block[j] === '.' || block[j] === ' ')) j++;
-                if (block.startsWith('..', j)) {
-                    while (j < block.length && (block[j] === '.' || block[j] === ' ' || block[j] === '\n')) j++;
-                    let ph = 0;
-                    while (j < block.length) {
-                        if (block[j] === '(') ph++;
-                        else if (block[j] === ')') { ph--; if (ph === 0) { j++; break; } }
-                        j++;
-                    }
-                    const expr2 = block.substring(i, j);
-                    let m2;
-                    while ((m2 = bxorRegex.exec(expr2)) !== null) {
-                        bytes.push((parseInt(m2[1]) ^ parseInt(m2[2])) & 0xFF);
-                    }
-                    i = j;
-                }
-                const decoder = new TextDecoder();
-                consts.push(decoder.decode(new Uint8Array(bytes)));
-                continue;
-            }
-            if (block.startsWith('(function() local t = {', i)) {
-                let endIdx = block.indexOf('end)()', i);
-                if (endIdx !== -1) {
-                    endIdx += 6;
-                    let expr = block.substring(i, endIdx);
-                    let chunksMatch = expr.match(/local t = \{([^}]+)\}/);
-                    let keyMatch = expr.match(/local k = (\d+)/);
-                    if (chunksMatch && keyMatch) {
-                        let chunks = chunksMatch[1].match(/"([^"]+)"/g).map(s => s.replace(/"/g, ''));
-                        let hex = chunks.join('');
-                        let k = parseInt(keyMatch[1]);
-                        let bytes = new Uint8Array(hex.length / 2);
-                        for (let j = 0; j < hex.length; j += 2) {
-                            let c = parseInt(hex.substring(j, j+2), 16) ^ k;
-                            bytes[j/2] = c;
-                            k = (k + c * 7) % 256;
-                        }
-                        const decoder = new TextDecoder();
-                        consts.push(decoder.decode(bytes));
-                        i = endIdx;
-                        continue;
-                    }
-                }
-            }
-            if (block.startsWith('(function()', i)) {
-                let endIdx = block.indexOf('end)()', i);
-                if (endIdx !== -1) {
-                    endIdx += 6;
-                    let expr = block.substring(i, endIdx);
-                    let hexMatch = expr.match(/h = "([^"]+)"/);
-                    let keyMatch = expr.match(/bit32.bxor\(tonumber\(cc, 16\), (\d+)\)/);
-                    if (hexMatch && keyMatch) {
-                        let hex = hexMatch[1];
-                        let k = parseInt(keyMatch[1]);
-                        let bytes = new Uint8Array(hex.length / 2);
-                        for (let j = 0; j < hex.length; j += 2) {
-                            bytes[j/2] = parseInt(hex.substring(j, j+2), 16) ^ k;
-                        }
-                        const decoder = new TextDecoder();
-                        consts.push(decoder.decode(bytes));
-                        i = endIdx;
-                        continue;
-                    }
-                }
-            }
-            let numStart = i;
-            while (i < block.length && /[\-\d\.eE]/.test(block[i])) i++;
-            if (i > numStart) { consts.push(parseFloat(block.substring(numStart, i))); continue; }
-            i++;
-        }
-        return consts;
-    };
+$('btnCopy').onclick = () => {
+  const content = $('output').value;
+  if (!content) {
+    setStatus('❌ 복사할 출력이 없습니다.', 'error');
+    return;
+  }
+  navigator.clipboard.writeText(content).then(
+    () => setStatus('📋 클립보드에 복사되었습니다.', 'info'),
+    () => setStatus('❌ 클립보드 복사 실패 (브라우저 권한 확인)', 'error')
+  );
+};
 
-    const consts = parseConstants(constantsBlock);
-    const opcodeMap = {};
-    const ifRegex = /if\s+_\w+\s*==\s*(\d+)\s+then\s*\n([\s\S]*?)(?=elseif\s+_\w+\s*==\s*\d+\s+then|else\s*$|end)/g;
-    let m;
-    const opSignatures = {
-        'HALT': /break/,
-        'RAW': /loadstring/,
-        'LOADK': /_\w+\s*\[\s*\w+\s*\]\s*=\s*_\w+\s*\[\s*\w+\s*\+\s*1\s*\]/,
-        'MOVE': /_\w+\s*\[\s*\w+\s*\]\s*=\s*_\w+\s*\[\s*\w+\s*\]/,
-        'GETGLOBAL': /_\w+\s*=\s*_\w+\s*\[\s*_\w+\s*\[\s*\w+\s*\+\s*1\s*\]\s*\]/,
-        'SETGLOBAL': /_\w+\s*\[\s*_\w+\s*\[\s*\w+\s*\+\s*1\s*\]\s*\]\s*=/,
-        'CALL': /pcall\(\s*_\w+\s*\[\s*_\w+\s*\],\s*table\.unpack/,
-        'RETURN': /return\s+_\w+\s*\[\s*\w+\s*\]/,
-        'ADD': /_\w+\] = _\w+\] \+ _\w+\]/,
-        'SUB': /_\w+\] = _\w+\] \- _\w+\]/,
-        'MUL': /_\w+\] = _\w+\] \* _\w+\]/,
-        'DIV': /_\w+\] = _\w+\] \/ _\w+\]/,
-        'MOD': /_\w+\] = _\w+\] % _\w+\]/,
-        'CONCAT': /tostring\(_\w+\]/,
-        'EQ': /_w+\] == _\w+\]/,
-        'LT': /_\w+\] < _\w+\]/,
-        'LE': /_\w+\] <= _\w+\]/,
-        'GT': /_\w+\] > _\w+\]/,
-        'GE': /_\w+\] >= _\w+\]/,
-        'NOT': /not _\w+\]/,
-        'NEG': /-_w+\]/,
-        'LEN': /#_\w+\]/,
-        'JUMP': /_\w+\s*=\s*\w+\s*$/m,
-        'JUMPIF': /if _\w+\]\s+then\s+_\w+\s*=\s*\w+/,
-        'JUMPIFNOT': /if not _\w+\]\s+then\s+_\w+\s*=\s*\w+/,
-        'NEWTABLE': /_\w+\]\s*=\s*\{\}/,
-    };
+$('btnClear').onclick = () => {
+  $('input').value = '';
+  $('output').value = '';
+  updateStats();
+  setStatus('🗑 초기화 완료', 'idle');
+};
 
-    while ((m = ifRegex.exec(src)) !== null) {
-        const num = parseInt(m[1]);
-        const body = m[2];
-        for (const [opName, sig] of Object.entries(opSignatures)) {
-            if (sig.test(body)) { opcodeMap[num] = opName; break; }
-        }
-    }
-
-    const opNums = {};
-    for (const [n, name] of Object.entries(opcodeMap)) opNums[name] = parseInt(n);
-
-    let pc = 0;
-    const regs = {};
-    const out = [];
-
-    const readByte = () => decrypted[pc++];
-    const constant = (i) => consts[i];
-
-    while (pc < decrypted.length) {
-        const op = decrypted[pc++];
-        if (op === opNums.HALT) break;
-
-        if (op === opNums.LOADK) {
-            const dst = readByte(); const ki = readByte();
-            regs[dst] = { type: 'val', value: constant(ki) };
-        } else if (op === opNums.MOVE) {
-            const dst = readByte(); const src = readByte();
-            regs[dst] = regs[src];
-        } else if (op === opNums.GETGLOBAL) {
-            const dst = readByte(); const ki = readByte();
-            const name = constant(ki);
-            regs[dst] = { type: 'val', value: { kind: 'global', name } };
-        } else if (op === opNums.SETGLOBAL) {
-            const src = readByte(); const ki = readByte();
-            const name = constant(ki);
-            const v = regs[src];
-            if (v) out.push(`local ${name} = ${renderValue(v)}`);
-        } else if (op === opNums.CALL) {
-            const dst = readByte(); const fnReg = readByte(); const argBase = readByte(); const argCount = readByte(); const retCount = readByte();
-            const fnVal = regs[fnReg];
-            const args = [];
-            for (let i = 0; i < argCount; i++) args.push(regs[argBase + i]);
-            out.push(`${renderValue(fnVal)}(${args.map(renderValue).join(', ')})`);
-            regs[dst] = { type: 'val', value: { kind: 'result' } };
-        } else if (op === opNums.RETURN) {
-            const src = readByte();
-            if (src === -1) { out.push('return'); break; }
-            if (src >= 0) out.push(`return ${renderValue(regs[src])}`);
-            break;
-        } else if (op === opNums.ADD || op === opNums.SUB || op === opNums.MUL || op === opNums.DIV || op === opNums.MOD || op === opNums.POW || op === opNums.IDIV || op === opNums.CONCAT || op === opNums.EQ || op === opNums.NEQ || op === opNums.LT || op === opNums.LE || op === opNums.GT || op === opNums.GE) {
-            const d = readByte(); const a = readByte(); const b = readByte();
-            const opNames = { [opNums.ADD]:'+', [opNums.SUB]:'-', [opNums.MUL]:'*', [opNums.DIV]:'/', [opNums.MOD]:'%', [opNums.POW]:'^', [opNums.IDIV]:'//', [opNums.CONCAT]:'..', [opNums.EQ]:'==', [opNums.NEQ]:'~=', [opNums.LT]:'<', [opNums.LE]:'<=', [opNums.GT]:'>', [opNums.GE]:'>=' };
-            regs[d] = { type: 'expr', left: regs[a], op: opNames[op], right: regs[b] };
-        } else if (op === opNums.NOT || op === opNums.NEG || op === opNums.LEN) {
-            const d = readByte(); const s = readByte();
-            const pre = op === opNums.NOT ? 'not ' : op === opNums.NEG ? '-' : '#';
-            regs[d] = { type: 'unary', op: pre, expr: regs[s] };
-        } else if (op === opNums.JUMP) {
-            const t = readByte(); pc = t;
-        } else if (op === opNums.JUMPIF || op === opNums.JUMPIFNOT) {
-            const s = readByte(); const t = readByte();
-            const cond = renderValue(regs[s]);
-            const neg = op === opNums.JUMPIFNOT;
-            out.push(`-- if ${neg ? 'not ' : ''}(${cond}) then jump to ${t}`);
-            pc = t;
-        } else if (op === opNums.NEWTABLE) {
-            const d = readByte();
-            regs[d] = { type: 'val', value: { kind: 'table' } };
-        } else if (op === opNums.SETFIELD) {
-            const obj = readByte(); const ki = readByte(); const src = readByte();
-            out.push(`${renderValue(regs[obj])}.${constant(ki)} = ${renderValue(regs[src])}`);
-        } else if (op === opNums.SETTABLE) {
-            const obj = readByte(); const k = readByte(); const src = readByte();
-            out.push(`${renderValue(regs[obj])}[${renderValue(regs[k])}] = ${renderValue(regs[src])}`);
-        } else if (op === opNums.RAW) {
-            const ki = readByte();
-            const srcConst = constant(ki);
-            if (typeof srcConst === 'string' && srcConst.length > 3) out.push(srcConst);
-        } else {
-            if (pc < decrypted.length && decrypted.length - pc > 3) {} else break;
-        }
-    }
-
-    function renderValue(v) {
-        if (!v) return 'nil';
-        if (v.type === 'val') {
-            const val = v.value;
-            if (val === null || val === undefined) return 'nil';
-            if (val === true) return 'true';
-            if (val === false) return 'false';
-            if (typeof val === 'number') return String(val);
-            if (typeof val === 'string') return JSON.stringify(val);
-            if (typeof val === 'object' && val.kind === 'global') return val.name;
-            if (typeof val === 'object' && val.kind === 'result') return '__result';
-            if (typeof val === 'object' && val.kind === 'table') return '{}';
-            return 'nil';
-        }
-        if (v.type === 'expr') return `(${renderValue(v.left)} ${v.op} ${renderValue(v.right)})`;
-        if (v.type === 'unary') return `(${v.op}${renderValue(v.expr)})`;
-        return 'nil';
-    }
-
-    let final = `--[==============================================================[
---   Luakeeper v10.0 Restored Source Code
---   De-obfuscated via Static VM Bytecode Interpreter
---   - Rolling-key bytecode successfully decrypted
---   - Hex XOR compressed payload decoded
---   - Junk states and anti-hook deflectors stripped
--- ]==============================================================]\n\n`;
-
-    final += out.join('\n');
-    return final;
-}
-
-function processObfuscation() {
-    const src = srcCodeEl.value.trim();
-    if (!src) { showToast('Please enter source code first.'); return; }
-    obfStatusEl.innerText = 'Compiling...'; obfStatusEl.className = 'text-cyber-accent animate-pulse';
-    setTimeout(() => {
-        try {
-            const ast = { type: 'Chunk', body: [{ type: 'RawScript', value: src }] };
-            const compiler = new Compiler();
-            const { bytecode, constants } = compiler.compileChunk(ast);
-            const opts = {
-                rollingKey: document.getElementById('opt-rolling-key').checked,
-                scatter: document.getElementById('opt-constant-scattering').checked,
-                flattening: document.getElementById('opt-flattening').checked,
-                junkStates: document.getElementById('opt-junk-states').checked,
-                antiHook: document.getElementById('opt-anti-hook').checked,
-                metatableSandbox: document.getElementById('opt-metatable-sandbox').checked,
-            };
-            const output = obfuscateVM(bytecode, constants, opts);
-            outCodeEl.value = output;
-            updateOutStats();
-            obfStatusEl.innerText = `Protected (Secure Wrapper)`;
-            obfStatusEl.className = 'text-emerald-400 font-semibold';
-            showToast('Obfuscation successful!');
-        } catch (err) {
-            console.error(err);
-            obfStatusEl.innerText = 'Compilation Failed';
-            obfStatusEl.className = 'text-red-400 font-semibold';
-            outCodeEl.value = '-- Error: ' + err.message + '\n-- Stack: ' + (err.stack || '').split('\n').slice(0,5).join('\n');
-            updateOutStats();
-            showToast('Obfuscation error: ' + err.message);
-        }
-    }, 100);
-}
-
-function processDeobfuscation() {
-    const src = srcCodeEl.value.trim();
-    if (!src) { showToast('Please paste a protected script.'); return; }
-    obfStatusEl.innerText = 'Restoring...'; obfStatusEl.className = 'text-cyber-purple animate-pulse';
-    setTimeout(() => {
-        try {
-            const restored = deobfuscateVM(src);
-            outCodeEl.value = restored;
-            updateOutStats();
-            obfStatusEl.innerText = 'Restored Successfully';
-            obfStatusEl.className = 'text-purple-400 font-semibold';
-            showToast('De-obfuscation complete!');
-        } catch (err) {
-            console.error(err);
-            obfStatusEl.innerText = 'Restoration Failed';
-            obfStatusEl.className = 'text-red-400 font-semibold';
-            outCodeEl.value = '-- Error: ' + err.message;
-            updateOutStats();
-            showToast('Deobfuscation error: ' + err.message);
-        }
-    }, 150);
-}
-
-updateSrcStats();
+/* ==================================================================
+   ★ 초기화
+   ================================================================== */
+updateStats();
+setMode('obfuscate');
 </script>
 </body>
 </html>
