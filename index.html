@@ -72,7 +72,7 @@
     <button id="btnProcess" class="btn-primary px-6 py-1.5 rounded text-sm transition-all neon-glow">Process</button>
     <button id="btnCopy" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">Copy Output</button>
     <button id="btnClear" class="btn-ghost px-3 py-1.5 rounded text-sm transition-all">Clear</button>
-    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · Anti-Dump & Heuristics</div>
+    <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · Universal Heuristics</div>
   </div>
 
   <div class="max-w-[1600px] mx-auto px-4 pb-6">
@@ -177,32 +177,32 @@ function decodeHex(hex, seed) {
 }
 
 /* ==================================================================
-   난독화 엔진 (Obfuscator) - Anti-Dump & 극악 난이도
+   난독화 엔진 (Obfuscator) - Anti-Dump & 극악 난이도 (수정됨)
    ================================================================== */
 const JUNK_POOL = ['zq9kf2', 'm3v8xj', 'p7r1lt', 'b4n6we', 'c2y5ha', 'u0s9dg', 't1i3mp', 'o8e4vr', 'f5h7qb', 'l6a2xk'];
 
 function generateObfuscated(source) {
-  const rawSeed = Math.floor(Math.random() * 255) + 1; // 0 방지
+  const rawSeed = Math.floor(Math.random() * 255) + 1;
   const fakeSeedA = Math.floor(Math.random() * 100) + 10;
   const fakeSeedB = rawSeed ^ fakeSeedA; 
   
   const hex = encodeSource(source, rawSeed);
   
-  // 데이터를 16바이트(32글자) 단위로 아주 잘게 쪼갬
+  // 32바이트 단위로 아주 잘게 쪼개서 수천 줄의 데이터를 생성 (분석 방해)
   const CHUNK_SIZE = 32; 
   const chunks = [];
   for (let i = 0; i < hex.length; i += CHUNK_SIZE) chunks.push(hex.slice(i, i + CHUNK_SIZE));
   if (chunks.length === 0) chunks.push('');
 
-  // 1. 데이터 은닉 (Constant Scattering)
   const dLines = [];
   for (let i = 0; i < chunks.length; i++) {
     dLines.push(`"${chunks[i]}"`);
+    // 100% Hex가 아닌 쓰레기 문자열 삽입 (Lua 단에서 string.match로 필터링됨)
     const junkStr = JUNK_POOL[i % JUNK_POOL.length] + Math.random().toString(36).substring(2, 5);
     dLines.push(`"${junkStr}"`);
   }
 
-  // 2. 쓰레기 함수 무작위 대량 생성
+  // 쓰레기 함수 무작위 대량 생성
   const funcNames = [];
   const junkFuncs = [];
   for (let i = 0; i < 150; i++) {
@@ -213,9 +213,9 @@ function generateObfuscated(source) {
     junkFuncs.push(`local function ${name}(a, b) if a and b then return (a * ${r1}) - ${r2} else return ${r1} end end`);
   }
 
-  // 3. 복잡한 가짜 상태 머신
+  // 복잡한 가짜 상태 머신 (분석기 눈속임)
   const fakeStates = [];
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 100; i++) {
     const prev = i === 0 ? 1 : i;
     const next = i + 2;
     const target = funcNames[i % funcNames.length];
@@ -224,35 +224,21 @@ function generateObfuscated(source) {
     if _v < 0 then _x = 0 else _x = ${next} end`);
   }
 
-  // 4. 최종 코드 조립 (안티 덤프 & 안티 후킹 적용)
-  return `-- [System Boot Sequence v5.0]
+  // ★ 수정된 Lua 템플릿: 안티훅 오작동 제거 및 완벽한 동기화 필터링 적용
+  return `-- [System Boot Sequence v6.0]
 local _x = 1
 local _d = {}
 local _k = 0
 local _c = ""
-local _g = 0
-local _ls, _gf, _ncc
-local _hooked = false
+local _ls, _gf
 
--- [Anti-Hook / Anti-Dump Check]
+-- [Safe Anti-Hook / Anti-Dump Check] (프리징 및 오작동 방지)
 pcall(function()
     _ls = rawget(getfenv(), "loadstring") or rawget(getfenv(), "load")
     _gf = rawget(getfenv(), "getfenv")
-    _ncc = rawget(getfenv(), "newcclosure")
-    
-    if type(_ls) ~= "function" then return end
-    
-    -- loadstring이 후킹(덤퍼)되었는지 검사
-    if type(_ncc) == "function" and type(_ls) == "function" then
-        local ok, iscc = pcall(function() return tostring(_ls):find("C closure") end)
-        -- C closure가 아니거나, 디버그 정보가 조작된 경우 후킹으로 간주
-        if not ok or not iscc then
-            _hooked = true
-        end
-    end
 end)
 
-if _hooked then return end
+if type(_ls) ~= "function" then return end
 
 ${junkFuncs.join('\n')}
 
@@ -260,7 +246,6 @@ while _x ~= 0 do
     if _x == 1 then
         _x = 2
     elseif _x == 2 then
-        -- 숨겨진 시드 복원 수식
         _k = bit32.bxor(${fakeSeedB}, ${fakeSeedA})
         _x = 3
     elseif _x == 3 then
@@ -271,8 +256,8 @@ ${dLines.join(',\n')}
     elseif _x == 4 then
         local _p = {}
         for i = 1, #_d do
-            -- 매우 복잡하게 꼬인 인덱스 필터링 수식
-            if (i * 13 + bit32.band(i, 7)) % 3 == 1 then
+            -- ★ 완벽한 동기화: 홀수 인덱스이면서 순수 Hex 문자열인 경우만 추출
+            if i % 2 == 1 and string.match(_d[i], "^[a-fA-F0-9]+$") then
                 _p[#_p + 1] = _d[i]
             end
         end
@@ -290,7 +275,6 @@ ${dLines.join(',\n')}
         _c = table.concat(_o)
         _x = 5
     elseif _x == 5 then
-        -- [Anti-Dump] 실행 직후 변수 초기화 및 백그라운드 실행
         local code = _c
         _c = nil
         _d = nil
@@ -298,10 +282,9 @@ ${dLines.join(',\n')}
         _o = nil
         
         local f = _ls(code)
-        code = nil -- 덤퍼가 캐치하기 전에 메모리에서 삭제
+        code = nil -- 메모리 즉시 삭제
         
         if f then
-            -- [Anti-Dump] 실행 환경 격리 및 스레드 분리
             task.spawn(function()
                 if _gf then
                     local ok, env = pcall(_gf)
@@ -311,16 +294,15 @@ ${dLines.join(',\n')}
             end)
         end
         _x = 0
-    ${fakeStates.join('\n    ')}
+${fakeStates.join('\n    ')}
     end
 end
 `;
 }
 
 /* ==================================================================
-   범용 디컴파일러 (Universal Deobfuscator)
+   범용 디컴파일러 (Universal Deobfuscator) - 동기화 수정됨
    ================================================================== */
-
 function extractLuaStrings(str) {
     const result = [];
     let i = 0;
@@ -351,7 +333,7 @@ function universalDeobfuscate(code) {
   let analysisLog = [];
   let finalOutput = '';
   
-  // --- [1단계] 자체 난독화 (LuaKeeper v5) 복원 ---
+  // --- [1단계] 자체 난독화 (LuaKeeper v6) 복원 ---
   if (code.includes('_x == 5') && code.includes('_x == 1')) {
     const seedMatch = code.match(/_k\s*=\s*bit32\.bxor\((\d+),\s*(\d+)\)/);
     const hexMatches = code.match(/"[a-fA-F0-9]{10,}"/g);
@@ -361,18 +343,12 @@ function universalDeobfuscate(code) {
       const fakeSeedA = parseInt(seedMatch[2], 10);
       const realSeed = fakeSeedB ^ fakeSeedA;
 
+      // 정규식이 이미 Hex 문자열만 추출했으므로, 순서대로 이어붙이기만 하면 완벽히 동기화됨
       const chunks = hexMatches.map(h => h.replace(/"/g, ''));
-      const realChunks = [];
-      for (let i = 0; i < chunks.length; i++) {
-        const luaIdx = i + 1;
-        if ((luaIdx * 13 + (luaIdx & 7)) % 3 === 1) {
-          if (/^[a-fA-F0-9]+$/.test(chunks[i])) realChunks.push(chunks[i]);
-        }
-      }
 
       try {
-        const decoded = decodeHex(realChunks.join(''), realSeed);
-        return { code: decoded, log: ['[성공] 자체 난독화(LuaKeeper v5) 복원 성공'], isRaw: false };
+        const decoded = decodeHex(chunks.join(''), realSeed);
+        return { code: decoded, log: ['[성공] 자체 난독화(LuaKeeper v6) 복원 성공'], isRaw: false };
       } catch (e) {
         analysisLog.push('[경고] 자체 난독화 복원 실패: ' + e.message);
       }
