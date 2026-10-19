@@ -36,7 +36,7 @@
       </div>
       <div>
         <h1 class="text-xl font-bold neon-text leading-none">LUAKEEPER</h1>
-        <p class="text-[11px] text-gray-500 mt-0.5"><span class="pulse-dot mr-1"></span>True VM · Fetch-Decode-Execute</p>
+        <p class="text-[11px] text-gray-500 mt-0.5"><span class="pulse-dot mr-1"></span>v16 · True VM Fetch-Decode-Execute</p>
       </div>
     </div>
     <div class="flex gap-2">
@@ -52,7 +52,7 @@
   <button id="btnProcess" class="btn-primary px-6 py-1.5 rounded text-sm neon-glow">Process</button>
   <button id="btnCopy" class="btn-ghost px-3 py-1.5 rounded text-sm">Copy Output</button>
   <button id="btnClear" class="btn-ghost px-3 py-1.5 rounded text-sm">Clear</button>
-  <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · True VM</div>
+  <div class="ml-auto text-xs text-gray-500 font-mono" id="stats">Ready · VM v16</div>
 </div>
 
 <div class="max-w-[1600px] mx-auto px-4 pb-6">
@@ -122,11 +122,7 @@ function updateStats() {
 }
 $('input').addEventListener('input', updateStats);
 
-/* ============ 랜덤 헬퍼 ============ */
-function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-function randVar() { return "_" + Math.random().toString(36).substring(2, 6); }
-
-/* ============ Dual XOR 인코더 ============ */
+/* ============ Dual XOR (인코딩/디코딩 완벽 대칭) ============ */
 function encodeSource(src, seed1, seed2) {
   const bytes = new TextEncoder().encode(src);
   const enc = new Uint8Array(bytes.length);
@@ -156,334 +152,271 @@ function decodeDualXOR(hex, seed1, seed2) {
   return new TextDecoder('utf-8', { fatal: false }).decode(out);
 }
 
-/* ==================================================================
-   ★ 진짜 VM (Virtual Machine) 난독화 엔진
-   ------------------------------------------------------------------
-   구조:
-   - CONST 풀: 암호화된 Hex 조각들
-   - BYTECODE: 명령어 시퀀스 (opcode, operand1, operand2, ...)
-   - VM: fetch → decode → execute 루프
-   - 가상 레지스터: R[0], R[1], ... (스택)
-   
-   Opcode 정의 (랜덤화됨):
-   - LOAD_CONST  (R[a] = CONST[b])
-   - CONCAT      (R[a] = R[b] .. R[c])
-   - XOR_DEC     (R[a] = decode(R[b]))
-   - LOAD_FN     (R[a] = loadstring(R[b]))
-   - CALL        (R[a]())
-   - HALT        (종료)
-   - NOP         (아무것도 안 함, 쓰레기 명령어)
-   - JMP         (pc = a)
-   ================================================================== */
+/* ============ 랜덤 헬퍼 ============ */
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+const _usedVars = new Set();
+function randVar() {
+  while (true) {
+    const v = "_" + Math.random().toString(36).substring(2, 7).replace(/[0-9]/g, m => 'abcdefghij'[+m]);
+    if (!_usedVars.has(v) && /^_[a-z]+$/.test(v)) { _usedVars.add(v); return v; }
+  }
+}
 
+/* ==================================================================
+   ★ 진짜 VM 난독화 엔진 (v16)
+   ================================================================== */
 function generateObfuscated(source) {
+  _usedVars.clear();
+  
   const seed1 = randInt(1, 255);
   const seed2 = randInt(1, 255);
   const fakeA1 = randInt(10, 200), fakeB1 = seed1 ^ fakeA1;
   const fakeA2 = randInt(10, 200), fakeB2 = seed2 ^ fakeA2;
 
-  // 1) 소스 인코딩
+  // 1) Dual XOR 인코딩
   const hex = encodeSource(source, seed1, seed2);
 
-  // 2) Hex를 여러 조각으로 분할 (VM 레지스터에 로드할 단위)
-  const CHUNK_SIZE = 512;
-  const hexChunks = [];
-  for (let i = 0; i < hex.length; i += CHUNK_SIZE) hexChunks.push(hex.slice(i, i + CHUNK_SIZE));
-  if (hexChunks.length === 0) hexChunks.push('');
+  // 2) 청크 분할
+  const CHUNK = 1024;
+  const chunks = [];
+  for (let i = 0; i < hex.length; i += CHUNK) chunks.push(hex.slice(i, i + CHUNK));
+  if (chunks.length === 0) chunks.push('');
 
-  // 3) CONST 풀 (암호화됨)
-  const constPool = [];
-  for (let i = 0; i < hexChunks.length; i++) {
-    constPool.push(`"${hexChunks[i]}"`);
-  }
-  // 쓰레기 상수 추가 (정적 분석 방해)
+  // 3) CONST 풀 (chunks + 쓰레기)
+  const constAll = [...chunks];
   for (let i = 0; i < 20; i++) {
-    constPool.push(`"${Math.random().toString(36).substring(2, 20)}"`);
+    constAll.push("J" + i + "_" + Math.random().toString(36).substring(2, 8));
   }
 
-  // 4) Opcode 랜덤화 (0-7 번호를 매번 섞음)
-  const opcodes = [0, 1, 2, 3, 4, 5, 6, 7];
-  const shuffled = [...opcodes].sort(() => Math.random() - 0.5);
-  const OP_LOAD  = shuffled[0];
-  const OP_CONCAT = shuffled[1];
-  const OP_XOR   = shuffled[2];
-  const OP_LOADFN = shuffled[3];
-  const OP_CALL  = shuffled[4];
-  const OP_HALT  = shuffled[5];
-  const OP_NOP   = shuffled[6];
-  const OP_JMP   = shuffled[7];
-
-  // 5) 바이트코드 생성
-  const bytecode = [];
-  
-  // 진짜 청크 로드 (R[0], R[1], ...)
-  for (let i = 0; i < hexChunks.length; i++) {
-    bytecode.push([OP_LOAD, i, i]); // R[i] = CONST[i]
-    // 쓰레기 명령어 삽입
-    if (i % 3 === 0) bytecode.push([OP_NOP, 0, 0]);
+  // 4) 진짜 바이트코드 생성
+  const BC = [];
+  // LOAD: R[i] = CONST[i]
+  for (let i = 0; i < chunks.length; i++) {
+    BC.push([0, i, i]);
   }
-  
-  // 모두 연결 (R[0] = R[0] .. R[1] .. R[2] ...)
-  for (let i = 1; i < hexChunks.length; i++) {
-    bytecode.push([OP_CONCAT, 0, 0, i]); // R[0] = R[0] .. R[i]
-    if (i % 2 === 0) bytecode.push([OP_NOP, 0, 0]);
+  // CONCAT: R[0] = R[0] .. R[i]
+  for (let i = 1; i < chunks.length; i++) {
+    BC.push([1, 0, 0, i]);
   }
-  
-  // XOR 디코딩 (R[0] = decode(R[0]))
-  bytecode.push([OP_XOR, 0, 0]);
-  
-  // loadstring (R[1] = loadstring(R[0]))
-  bytecode.push([OP_LOADFN, 1, 0]);
-  
-  // 실행 (R[1]())
-  bytecode.push([OP_CALL, 1]);
-  
-  // 종료
-  bytecode.push([OP_HALT, 0, 0]);
+  // DECODE: R[0] = decode(R[0])
+  BC.push([2, 0, 0]);
+  // LOADFN: R[1] = loadstring(R[0])
+  BC.push([3, 1, 0]);
+  // CALL: R[1]()
+  BC.push([4, 1]);
+  // HALT
+  BC.push([5]);
 
-  // 6) 바이트코드까지 암호화 (opcode 번호까지 obfuscate)
-  // 각 명령어를 숫자 배열로 변환 후 XOR 난독화
-  const bcFlat = [];
-  for (const ins of bytecode) {
-    for (const v of ins) bcFlat.push(v);
-    bcFlat.push(-1); // 명령어 구분자
-  }
-  
-  // 명령어 배열을 암호화된 숫자로
-  const bcEncoded = bcFlat.map(v => v === -1 ? ';' : v).join(',').replace(/,,/g, ',').split(';');
-
-  // 7) 최종 코드 조립
-  const vV = randVar();   // VM reg (스택)
-  const vP = randVar();   // pc
-  const vO = randVar();   // opcode
-  const vX = randVar();   // 임시
-  const vF = randVar();   // 함수
-  const vR = randVar();   // register value
-  const vH = randVar();   // halt flag
-  const vC = randVar();   // const
-  const vK1 = randVar();
-  const vK2 = randVar();
-  const vL = randVar();
-  const vB = randVar();   // bytecode
-  const vI = randVar();   // idx
-  const vA = randVar();   // keyA
-  const vBb = randVar();  // keyB
-  const vT = randVar();   // temp
-
-  const deadBranches = [];
+  // 5) 쓰레기 NOP 삽입
   for (let i = 0; i < 15; i++) {
-    deadBranches.push(`elseif ${vO}==${-randInt(100,999)}then ${vP}=${vP}+1`);
+    BC.splice(randInt(0, BC.length), 0, [6]);
   }
 
-  // ★ 진짜 VM 실행 코드
-  return `-- Obfuscated by LuaKeeper (True VM)
+  // 6) 직렬화 (★ 올바른 Lua 문법)
+  const constStr = constAll.map(s => `"${s}"`).join(',');
+  const bcStr = BC.map(ins => `{${ins.join(',')}}`).join(',');
+
+  // 7) 랜덤 변수명
+  const vL = randVar();    // loader
+  const vH = randVar();    // halt flag
+  const vC = randVar();    // const pool
+  const vB = randVar();    // bytecode
+  const vR = randVar();    // registers
+  const vP = randVar();    // pc
+  const vI = randVar();    // instruction
+  const vO = randVar();    // opcode
+  const vT = randVar();    // temp hex
+  const vT2 = randVar();   // temp output
+  const vK1 = randVar();   // seed1
+  const vK2 = randVar();   // seed2
+  const vA1 = randVar();   // local k1 in decode
+  const vA2 = randVar();   // local k2 in decode
+  const vF = randVar();    // function
+  const vX = randVar();    // temp byte
+  const vI2 = randVar();   // decode loop index
+  const vID = randVar();   // decode loop byte index
+
+  // 8) 최종 코드
+  return `-- Obfuscated by LuaKeeper
 local ${vL},${vH}=nil,false
 pcall(function()${vL}=rawget(getfenv(),"loadstring")or rawget(getfenv(),"load")end)
 if type(${vL})~="function"then return end
-if type(bit32)~="table"then return end
-
-local ${vC}={${constPool.join(',')}}
-local ${vB}={${bcEncoded.map(arr => `{${arr}}`).join(',')}}
-
-local ${vV}={}
+local ${vC}={${constStr}}
+local ${vB}={${bcStr}}
+local ${vR}={}
 local ${vP}=1
 local ${vK1}=bit32.bxor(${fakeA1},${fakeB1})
 local ${vK2}=bit32.bxor(${fakeA2},${fakeB2})
-local ${vA}=${vK1}
-local ${vBb}=${vK2}
-
 while not ${vH} do
-local ${vO}=${vB}[${vP}]
-if not ${vO} then break end
-local ${vX}=${vO}[1]
-if ${vX}==${OP_LOAD} then
-${vV}[${vO}[2]]=${vC}[${vO}[3]]
-elseif ${vX}==${OP_CONCAT} then
-${vV}[${vO}[2]]=${vV}[${vO}[3]]..${vV}[${vO}[4]]
-elseif ${vX}==${OP_XOR} then
-local ${vT}=${vV}[${vO}[3]]or ""
-local ${vI}=1
-local ${vR}={}
-local ${vA}=${vK1}
-local ${vBb}=${vK2}
-for ${vI}=1,#${vT},2 do
-local ${vX}=tonumber(string.sub(${vT},${vI},${vI}+1),16)or 0
-local ${vI}=${vI}
-${vR}[#${vR}+1]=string.char(bit32.bxor(bit32.bxor(${vX},${vBb}),${vA}))
-${vBb}=(${vBb}*17+math.floor((${vI}-1)/2)+7)%256
-${vA}=(${vA}*31+math.floor((${vI}-1)/2)+13)%256
+local ${vI}=${vB}[${vP}]
+if not ${vI} then ${vH}=true
+else
+${vO}=${vI}[1]
+if ${vO}==0 then
+${vR}[${vI}[2]]=${vC}[${vI}[3]+1]
+elseif ${vO}==1 then
+${vR}[${vI}[2]]=${vR}[${vI}[3]]..${vR}[${vI}[4]]
+elseif ${vO}==2 then
+local ${vT}=${vR}[${vI}[3]]or ""
+local ${vA1}=${vK1}
+local ${vA2}=${vK2}
+local ${vT2}={}
+for ${vI2}=1,#${vT},2 do
+local ${vX}=tonumber(string.sub(${vT},${vI2},${vI2}+1),16)or 0
+local ${vID}=math.floor((${vI2}-1)/2)
+${vT2}[#${vT2}+1]=string.char(bit32.bxor(bit32.bxor(${vX},${vA2}),${vA1}))
+${vA2}=(${vA2}*17+${vID}+7)%256
+${vA1}=(${vA1}*31+${vID}+13)%256
 end
-${vV}[${vO}[2]]=table.concat(${vR})
-elseif ${vX}==${OP_LOADFN} then
-local ${vF}=${vL}(${vV}[${vO}[3]])
-${vV}[${vO}[2]]=${vF}
-elseif ${vX}==${OP_CALL} then
-local ${vF}=${vV}[${vO}[2]]
+${vR}[${vI}[2]]=table.concat(${vT2})
+elseif ${vO}==3 then
+${vR}[${vI}[2]]=${vL}(${vR}[${vI}[3]])
+elseif ${vO}==4 then
+${vF}=${vR}[${vI}[2]]
 if ${vF} then pcall(function()task.spawn(${vF})end)end
-elseif ${vX}==${OP_HALT} then
+elseif ${vO}==5 then
 ${vH}=true
-elseif ${vX}==${OP_JMP} then
-${vP}=${vO}[2]
-elseif ${vX}==${OP_NOP} then
--- 쓰레기 명령어, 무시
-${deadBranches.join('\n')}
+end
 end
 ${vP}=${vP}+1
 end
 `;
 }
 
-/* ============ VM 디컴파일러 ============ */
-function devirtualizeVM(code) {
-  let log = [];
+/* ==================================================================
+   ★ True VM 디컴파일러 (v16)
+   ================================================================== */
+function tryDevirtualize(code) {
+  const log = [];
+  try {
+    // 1) CONST 풀 추출
+    const constMatch = code.match(/local\s+([a-zA-Z_]\w*)\s*=\s*\{((?:"[^"\\]*(?:\\.[^"\\]*)*"\s*,?\s*)+)\}/);
+    if (!constMatch) { log.push('CONST 풀 못 찾음'); return { success: false, log }; }
+    const constStrs = [...constMatch[2].matchAll(/"([^"\\]*(?:\\.[^"\\]*)*)"/g)].map(m => m[1]);
+    log.push(`CONST: ${constStrs.length}개`);
 
-  // 1) CONST 풀 추출
-  const constMatch = code.match(/local\s+([a-zA-Z_]\w*)\s*=\s*\{((?:\s*"[^"]*"\s*,?\s*)+)\}/);
-  if (!constMatch) return { success: false, log };
-  const constStrs = [...constMatch[2].matchAll(/"([^"]*)"/g)].map(m => m[1]);
-  log.push(`[VM] CONST 풀 추출: ${constStrs.length}개`);
+    // 2) BYTECODE 추출
+    const bcMatch = code.match(/local\s+([a-zA-Z_]\w*)\s*=\s*\{(\s*\{[^{}]*\}\s*(?:,\s*\{[^{}]*\}\s*)*)\}/);
+    if (!bcMatch) { log.push('BYTECODE 못 찾음'); return { success: false, log }; }
+    const bcArr = [...bcMatch[2].matchAll(/\{([^{}]*)\}/g)].map(m => 
+      m[1].split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v))
+    );
+    log.push(`BYTECODE: ${bcArr.length}개 명령어`);
 
-  // 2) BYTECODE 추출
-  const bcMatch = code.match(/local\s+([a-zA-Z_]\w*)\s*=\s*\{((?:\s*\{[^}]*\}\s*,?\s*)+)\}/);
-  if (!bcMatch) return { success: false, log };
-  const bcArr = [...bcMatch[2].matchAll(/\{([^}]*)\}/g)].map(m => m[1].split(',').map(v => parseInt(v.trim(), 10)));
-  log.push(`[VM] BYTECODE 추출: ${bcArr.length}개 명령어`);
+    // 3) Seeds 추출 (bit32.bxor(숫자, 숫자) 패턴만)
+    const seedMatches = [...code.matchAll(/bit32\.bxor\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/g)];
+    if (seedMatches.length < 2) { log.push(`Seed 못 찾음 (${seedMatches.length}개)`); return { success: false, log }; }
+    const seed1 = parseInt(seedMatches[0][1], 10) ^ parseInt(seedMatches[0][2], 10);
+    const seed2 = parseInt(seedMatches[1][1], 10) ^ parseInt(seedMatches[1][2], 10);
+    log.push(`Seeds: (${seed1}, ${seed2})`);
 
-  // 3) seed 추출 (bit32.bxor 패턴)
-  const seedMatches = [...code.matchAll(/bit32\.bxor\((\d+),(\d+)\)/g)].map(m => parseInt(m[1],10) ^ parseInt(m[2],10));
-  if (seedMatches.length < 2) return { success: false, log };
-  const seed1 = seedMatches[0], seed2 = seedMatches[1];
-  log.push(`[VM] SEED 추출: (${seed1}, ${seed2})`);
-
-  // 4) Opcode 해석: 첫 LOAD 명령어를 찾아 opcode 번호 식별
-  // 각 명령어는 [op, a, b, c...] 형태
-  // LOAD는 3개, CONCAT은 4개, XOR/LOADFN은 3개, CALL/JMP는 2-3개, HALT/NOP은 3개
-  
-  // PC 시뮬레이션으로 어떤 명령어가 LOAD인지 찾기
-  // 대신 정적: 첫 명령어는 LOAD이고, R[a] = CONST[b]로 할당됨
-  let opLoad, opConcat, opXor, opLoadFn, opCall, opHalt;
-  
-  // 명령어 길이로 opcode 그룹화
-  const byLen = {};
-  bcArr.forEach(ins => {
-    const len = ins.length;
-    if (!byLen[len]) byLen[len] = [];
-    byLen[len].push(ins[0]);
-  });
-  
-  // 3개짜리: LOAD, XOR, LOADFN, HALT, NOP (가장 많음)
-  // 4개짜리: CONCAT
-  // 2개짜리: CALL, JMP
-  
-  const len3 = byLen[3] || [];
-  const len4 = byLen[4] || [];
-  const len2 = byLen[2] || [];
-  
-  // 추측: LOAD는 세 번째 인자가 const 인덱스
-  // XOR은 세 번째 인자가 register (자기 자신), LOADFN은 3개
-  
-  // 가장 흔한 opcode가 LOAD일 확률 높음 (청크 수만큼 반복)
-  const counts = {};
-  len3.forEach(op => counts[op] = (counts[op] || 0) + 1);
-  const sortedOps = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  
-  if (sortedOps.length === 0) return { success: false, log };
-  
-  opLoad = parseInt(sortedOps[0][0], 10);
-  log.push(`[VM] LOAD opcode 추정: ${opLoad}`);
-  
-  // 5) PC 시뮬레이션으로 실제 소스 재구성
-  // LOAD 명령어들로 청크 수집 → 순서대로 연결 → XOR 디코딩
-  const chunks = [];
-  for (const ins of bcArr) {
-    if (ins[0] === opLoad && ins.length === 3) {
-      const regIdx = ins[1];
-      const constIdx = ins[2];
-      if (constStrs[constIdx] !== undefined) {
-        chunks.push(constStrs[constIdx]);
+    // 4) LOAD 명령어(opcode 0)에서 진짜 chunk 추출
+    const chunks = [];
+    for (const ins of bcArr) {
+      if (ins[0] === 0 && ins.length >= 3) {
+        const chunk = constStrs[ins[2]];
+        // Hex 문자열만 (빈 문자열도 허용하되, "J..." 쓰레기는 제외)
+        if (chunk !== undefined && /^[a-fA-F0-9]*$/.test(chunk)) {
+          chunks.push(chunk);
+        }
       }
     }
-  }
-  
-  log.push(`[VM] LOAD된 청크: ${chunks.length}개`);
-  
-  if (chunks.length === 0) return { success: false, log };
-  
-  // 6) Hex 합치고 XOR 디코딩
-  const fullHex = chunks.join('');
-  log.push(`[VM] Hex 총 길이: ${fullHex.length}`);
-  
-  try {
+    if (chunks.length === 0) { log.push('LOAD된 청크 없음'); return { success: false, log }; }
+    log.push(`LOAD된 청크: ${chunks.length}개`);
+
+    // 5) 디코딩
+    const fullHex = chunks.join('');
+    log.push(`Hex 총 길이: ${fullHex.length}`);
+    if (fullHex.length === 0) {
+      log.push('Hex 비어있음');
+      return { success: true, code: '', log };
+    }
     const decoded = decodeDualXOR(fullHex, seed1, seed2);
-    log.push(`[VM] 디코딩 성공: ${decoded.length} bytes`);
+    log.push(`디코딩 완료: ${decoded.length} bytes`);
     return { success: true, code: decoded, log };
   } catch (e) {
-    log.push(`[VM] 디코딩 실패: ${e.message}`);
+    log.push('예외: ' + e.message);
     return { success: false, log };
   }
 }
 
+/* ============ 다중 패턴 디컴파일러 ============ */
 function universalDeobfuscate(code) {
-  let log = [], out = '';
+  const log = [];
 
-  // ===== [1] LuaKeeper True VM =====
-  if (code.includes('Obfuscated by LuaKeeper (True VM)') || 
-      (code.includes('while not') && code.includes('bit32.bxor') && 
-       code.includes('==') && code.includes('CONST'))) {
-    log.push('[VM] LuaKeeper True VM 감지');
-    const result = devirtualizeVM(code);
-    if (result.log) log.push(...result.log);
-    if (result.success) {
-      return { code: result.code, log: log, isRaw: false };
+  // [1] LuaKeeper True VM
+  if (code.includes('Obfuscated by LuaKeeper') && code.includes('bit32.bxor')) {
+    log.push('[VM v16] 시그니처 감지');
+    const r = tryDevirtualize(code);
+    log.push(...r.log);
+    if (r.success) {
+      return { code: r.code, log, isRaw: false };
     }
+    // VM 감지했지만 디코딩 실패 → 사용자에게 알림
+    log.push('[실패] VM 구조는 찾았으나 디코딩 실패');
+    return { code: code, log, isRaw: true };
   }
 
-  // ===== [2] MoonVeil / Luraph / Moonsec =====
-  if (code.includes('MoonVeil') || code.includes('moonveil') || 
-      code.includes('Luraph') || code.includes('Moonsec') ||
+  // [2] MoonVeil / Luraph / Moonsec 패턴 (시그니처 감지 + 구조 분석)
+  if (code.includes('MoonVeil') || code.includes('Luraph') || code.includes('Moonsec') ||
       (code.includes('return({function') && code.includes('a.ia['))) {
-    log.push('[VM] MoonVeil/Luraph/Moonsec 감지');
+    log.push('[MoonVeil/Luraph/Moonsec] 시그니처 감지');
     
-    // 컨테이너 추출
-    const containerRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*["']([A-Za-z0-9+\/=\\x]{500,})["']/g;
-    let m;
-    while ((m = containerRegex.exec(code)) !== null) {
-      log.push(`[VM] 컨테이너 ${m[1]} 추출 시도`);
-      try {
-        const dec = atob(m[2]);
-        if (dec.includes('function')) {
-          out += `-- [컨테이너 ${m[1]} Base64 디코딩]\n${dec}\n\n`;
+    // VM 상수 풀 추출 시도
+    const bigNumRegex = /\{((?:-?\d+\s*,\s*){50,}-?\d+)\}/g;
+    let m, poolCount = 0;
+    while ((m = bigNumRegex.exec(code)) !== null) {
+      poolCount++;
+    }
+    if (poolCount > 0) log.push(`[VM] 숫자 상수 풀: ${poolCount}개 감지`);
+    
+    // 컨테이너 문자열 추출
+    const containerRegex = /["']([A-Za-z0-9+\/=\\x]{500,})["']/g;
+    let c, containerCount = 0;
+    while ((c = containerRegex.exec(code)) !== null) {
+      containerCount++;
+      log.push(`[VM] 대용량 문자열: ${c[1].length} chars`);
+    }
+    
+    log.push(`[결론] MoonVeil/Luraph VM은 전용 인터프리터 없이 100% 복원 불가`);
+    log.push(`[안내] 상수 풀 및 컨테이너 추출만 가능 - 수동 분석 필요`);
+    return { code: code, log, isRaw: true };
+  }
+
+  // [3] Chanhyuk lua
+  if (code.includes('chanhyuk lua') || (code.includes('local n=') && code.includes('local o='))) {
+    try {
+      const nMatch = code.match(/local\s+n\s*=\s*\{([\s\S]*?)\}\s*local\s+o/);
+      const oMatch = code.match(/local\s+o\s*=\s*\{([\s\S]*?)\}\s*local\s+k/);
+      const kMatch = code.match(/local\s+k\s*=\s*(\d+)/);
+      const qMatch = code.match(/local\s+q\s*=\s*(\d+)/);
+      const aMatch = code.match(/local\s+a\s*=\s*\{([\s\S]*?)\}\s*local\s+g/);
+      if (nMatch && oMatch && kMatch && qMatch && aMatch) {
+        const nStrings = [...nMatch[1].matchAll(/"([^"\\]*(?:\\.[^"\\]*)*)"/g)].map(m => m[1]);
+        const oArr = [...oMatch[1].matchAll(/\d+/g)].map(mm => parseInt(mm[0], 10));
+        const k = parseInt(kMatch[1], 10), q = parseInt(qMatch[1], 10);
+        const aArr = [...aMatch[1].matchAll(/\d+/g)].map(mm => parseInt(mm[0], 10));
+        function decCH(s, k, q, a) {
+          let r = "", j = 1;
+          for (let i = 0; i < s.length; i += 2) {
+            const v = (s.charCodeAt(i) - 33) * 95 + (s.charCodeAt(i + 1) - 33);
+            let idx = (v - k - (((j - 1) * q) % 251) - a[((j - 1) % a.length)] + 512) % 256;
+            if (idx < 0) idx += 256;
+            r += String.fromCharCode(idx); j++;
+          }
+          return r;
         }
-      } catch (e) {}
-    }
-    
-    // opcode 테이블 추출
-    const opcodeRegex = /local\s+([a-zA-Z_]\w*)\s*=\s*\{([\d,\s]{20,})\}/g;
-    while ((m = opcodeRegex.exec(code)) !== null) {
-      const arr = m[2].split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
-      if (arr.length > 10 && arr.length < 100) {
-        log.push(`[VM] opcode ${m[1]}: [${arr.slice(0, 20).join(', ')}...]`);
+        let decoded = "";
+        for (let i = 0; i < oArr.length; i++) {
+          const idx = oArr[i] - 1;
+          if (nStrings[idx]) decoded += decCH(nStrings[idx], k, q, aArr);
+        }
+        return { code: decoded, log: ['[성공] Chanhyuk lua 복원'], isRaw: false };
       }
-    }
-    
-    // 디스패처
-    const dispRegex = /while\s+([a-zA-Z_]\w*)\s*~\=\s*0\s+do([\s\S]*?)\bend\b/g;
-    let dm;
-    while ((dm = dispRegex.exec(code)) !== null) {
-      const sv = dm[1];
-      const branches = [...dm[2].matchAll(new RegExp(`if\\s+${sv}\\s*==\\s*(\\d+)\\s+then`,'g'))];
-      if (branches.length > 5) {
-        log.push(`[VM] 디스패처 ${sv}: ${branches.length}개 상태`);
-      }
-    }
+    } catch (e) { log.push('[실패] Chanhyuk: ' + e.message); }
   }
 
-  // ===== [3] Chanhyuk lua =====
-  if (code.includes('chanhyuk lua')) {
-    log.push('[V] Chanhyuk 감지');
-  }
-
-  // ===== [4] 다중 loadstring =====
+  // [4] 다중 loadstring
   let iter = 0;
   const loadRegex = /(?:loadstring|load)\s*\(\s*(["'])([\s\S]*?)\1\s*\)/;
   let lm;
@@ -493,9 +426,12 @@ function universalDeobfuscate(code) {
     if (inner === lm[2]) break;
     code = inner; iter++;
   }
-  if (iter > 0) log.push(`[성공] loadstring x${iter}`);
+  if (iter > 0) {
+    log.push(`[성공] loadstring x${iter}`);
+    return { code: code, log, isRaw: false };
+  }
 
-  // ===== [5] base64 =====
+  // [5] base64
   const b64Regex = /base64,([A-Za-z0-9+\/=]{20,})/g;
   if (b64Regex.test(code)) {
     code = code.replace(b64Regex, (m, b64) => {
@@ -503,9 +439,10 @@ function universalDeobfuscate(code) {
       catch { return m; }
     });
     log.push('[성공] base64');
+    return { code: code, log, isRaw: false };
   }
 
-  // ===== [6] string.char =====
+  // [6] string.char
   const charRegex = /string\.char\s*\(\s*([0-9,\s]+)\s*\)/g;
   if (charRegex.test(code)) {
     code = code.replace(charRegex, (m, p1) => {
@@ -515,19 +452,12 @@ function universalDeobfuscate(code) {
       } catch { return m; }
     });
     log.push('[성공] string.char');
+    return { code: code, log, isRaw: false };
   }
 
-  // 결과
-  if (log.length === 0) {
-    log.push('[정보] 알려진 패턴 없음');
-    return { code: code, log, isRaw: true };
-  }
-  if (out.length > 0) {
-    out += code;
-    return { code: out, log, isRaw: false };
-  }
-  if (iter > 0) return { code: code, log, isRaw: false };
-  return { code: code, log, isRaw: false };
+  // 아무것도 매칭 안 됨
+  log.push('[정보] 알려진 패턴 없음');
+  return { code: code, log, isRaw: true };
 }
 
 /* ============ 이벤트 ============ */
@@ -537,7 +467,7 @@ $('btnProcess').onclick = () => {
   try {
     if (MODE === 'obfuscate') {
       $('output').value = generateObfuscated(input);
-      setStatus('[성공] True VM 난독화 완료 · 바이트코드 + 가상 레지스터 + 랜덤 opcode', 'ok');
+      setStatus('[성공] 진짜 VM v16 난독화 완료 · fetch-decode-execute + 가상 레지스터', 'ok');
     } else {
       const { code: r, log, isRaw } = universalDeobfuscate(input);
       $('output').value = r;
